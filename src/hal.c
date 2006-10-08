@@ -16,14 +16,12 @@
  */
 
 #include <string.h>
+#include <stdarg.h>
 #include <dbus/dbus.h>
-#include <libhal.h>
 #include <libhal-storage.h>
-#include "conf.h"
 #include "log.h"
-#include "otp.h"
 
-static DBusConnection	*pusb_hal_dbus_connect(void)
+DBusConnection		*pusb_hal_dbus_connect(void)
 {
   DBusConnection	*dbus = NULL;
   DBusError		error;
@@ -39,14 +37,14 @@ static DBusConnection	*pusb_hal_dbus_connect(void)
   return (dbus);
 }
 
-static void	pusb_hal_dbus_disconnect(DBusConnection *dbus)
+void			pusb_hal_dbus_disconnect(DBusConnection *dbus)
 {
   dbus_connection_close(dbus);
   dbus_connection_unref(dbus);
   dbus_shutdown();
 }
 
-static LibHalContext	*pusb_hal_init(DBusConnection *dbus)
+LibHalContext		*pusb_hal_init(DBusConnection *dbus)
 {
   DBusError		error;
   LibHalContext		*ctx = NULL;
@@ -72,83 +70,123 @@ static LibHalContext	*pusb_hal_init(DBusConnection *dbus)
   return (ctx);
 }
 
-static int	pusb_hal_verify_model(LibHalDrive *drive,
-				      t_pusb_options *opts)
+void			pusb_hal_destroy(LibHalContext *ctx)
 {
-  if (strcmp(libhal_drive_get_vendor(drive),
-	     opts->device.vendor) != 0)
-    {
-      log_error("Vendor mismatch\n");
-      return (0);
-    }
-  if (strcmp(libhal_drive_get_model(drive),
-	     opts->device.model) != 0)
-    {
-      log_error("Model mismatch\n");
-      return (0);
-    }
-  return (1);
+  libhal_ctx_free(ctx);
 }
 
-LibHalDrive	*pusb_hal_find_drive(LibHalContext *ctx,
-				     t_pusb_options *opts)
+char			*pusb_hal_get_property(LibHalContext *ctx,
+					       const char *udi,
+					       const char *name)
+{
+  DBusError		error;
+  char			*data;
+
+  dbus_error_init(&error);
+  data = libhal_device_get_property_string(ctx, udi,
+					   name, &error);
+  if (!data)
+    {
+      log_error("Cannot retrieve device property %s for udi %s: %s\n",
+		name, udi, error.message);
+      dbus_error_free(&error);
+      return (NULL);
+    }
+  return (data);
+}
+
+int		pusb_hal_check_property(LibHalContext *ctx,
+					const char *udi,
+					const char *name,
+					const char *value)
+{
+  char		*data;
+  int		retval;
+
+  data = pusb_hal_get_property(ctx, udi, name);
+  if (!data)
+    return (0);
+  retval = (strcmp(data, value) == 0);
+  libhal_free_string(data);
+  return (retval);
+}
+
+char		**pusb_hal_find_all_items(LibHalContext *ctx,
+					  const char *property,
+					  const char *value,
+					  int *count)
+
 {
   DBusError	error;
-  LibHalDrive	*retval = NULL;
   char		**devices;
   int		n_devices;
 
   dbus_error_init(&error);
-  if (!(devices = libhal_manager_find_device_string_match(ctx,
-							  "storage.serial",
-							  opts->device.serial,
-							  &n_devices,
-							  &error)))
+  *count = 0;
+  devices = libhal_manager_find_device_string_match(ctx,
+						    property,
+						    value,
+						    &n_devices,
+						    &error);
+  if (!devices)
     {
-      log_error("Unable to find device \"%s\": %s\n", opts->device.name,
+      log_error("Unable to find item \"%s\": %s\n", property,
 		error.message);
       dbus_error_free(&error);
       return (NULL);
     }
   if (!n_devices)
     {
-      log_error("Device \"%s\" not connected\n", opts->device.name);
       libhal_free_string_array(devices);
       return (NULL);
     }
-  log_debug("Device \"%s\" connected (S/N: %s)\n", opts->device.name,
-	    opts->device.serial);
-  retval = libhal_drive_from_udi(ctx, devices[0]);
-  libhal_free_string_array(devices);
-  if (!pusb_hal_verify_model(retval, opts))
-    {
-      libhal_drive_free(retval);
-      return (NULL);
-    }
-  return (retval);
+  *count = n_devices;
+  return (devices);
 }
 
-int		pusb_hal_device_check(t_pusb_options *opts)
+char		*pusb_hal_find_item(LibHalContext *ctx,
+				    const char *property,
+				    const char *value,
+				    ...)
 {
-  DBusConnection	*dbus;
-  LibHalContext		*ctx;
-  LibHalDrive		*drive;
-  int			retval;
+  char		**devices;
+  int		n_devices;
+  char		*udi = NULL;
+  va_list	ap;
+  int		i;
 
-  if (!(dbus = pusb_hal_dbus_connect()))
-    return (0);
-  if (!(ctx = pusb_hal_init(dbus)))
-    return (0);
-  drive = pusb_hal_find_drive(ctx, opts);
-  if (!drive)
+  devices = pusb_hal_find_all_items(ctx, property, value, &n_devices);
+  if (!devices)
+    return (NULL);
+  if (!n_devices)
+    return (NULL);
+
+  for (i = 0; i < n_devices; ++i)
     {
-      pusb_hal_dbus_disconnect(dbus);
-      libhal_ctx_free(ctx);
-      return (0);
+      char	*key = NULL;
+      int	match = 0;
+
+      va_start(ap, value);
+      while ((key = va_arg(ap, char *)))
+	{
+	  char	*value = NULL;
+
+	  value = va_arg(ap, char *);
+	  if (!pusb_hal_check_property(ctx, devices[i],
+				       key, value))
+	    {
+	      match = 0;
+	      break;
+	    }
+	  match = 1;
+	}
+      if (match)
+	{
+	  udi = strdup(devices[i]);
+	  break;
+	}
+      va_end(ap);
     }
-  retval = pusb_otp_check(opts, ctx, drive);
-  libhal_drive_free(drive);
-  pusb_hal_dbus_disconnect(dbus);
-  libhal_ctx_free(ctx);
-  return (retval);
+  libhal_free_string_array(devices);
+  return (udi);
 }
