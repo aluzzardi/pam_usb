@@ -1,0 +1,42 @@
+<configuration>
+	<defaults>
+		<option name="hostname">foobar</option>
+		<option name="debug">true</option>
+		<option name="try_otp">true</option>
+		<option name="enforce_otp">false</option>
+	</defaults>
+
+	<devices>
+		<device id="foobar">
+			<vendor>SanDisk Corp.</vendor>
+			<model>Cruzer Titanium</model>
+			<serial>SNDKB882652FC4A03701</serial>
+		</device>
+	</devices>
+
+	<users>
+		<user id="scox">
+			<device>foobar</device>
+		</user>
+
+		<user id="root">
+			<device>foobar</device>
+			<option name="enforce_otp">true</option>
+		</user>
+	</users>
+
+	<services>
+		<!-- Disable pam_usb for sshd (nonsense) -->
+		<service id="ssh">
+			<option name="enable">false</option>
+		</service>
+
+		<!-- Speed up 'login' authentication by disabling one time pads.
+		     This setting will not affect user 'root' as he/she is
+		     enforcing one time pads (enforce_otp).
+		-->
+		<service id="login">
+			<option name="try_otp">false</option>
+		</service>
+	</services>
+</configuration>
