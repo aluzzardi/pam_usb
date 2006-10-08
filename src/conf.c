@@ -103,7 +103,6 @@ static int	pusb_conf_device_get_property(t_pusb_options *opts,
 
 static int	pusb_conf_parse_device(t_pusb_options *opts, xmlDoc *doc)
 {
-  log_debug("Parsing settings...\n");
   if (!pusb_conf_device_get_property(opts, doc, "vendor", opts->device.vendor,
 				      sizeof(opts->device.vendor)))
     return (0);
@@ -134,6 +133,20 @@ int	pusb_conf_init(t_pusb_options *opts)
   return (1);
 }
 
+static void	pusb_conf_dump(t_pusb_options *opts)
+{
+  log_debug("Configuration dump:\n");
+  log_debug("enable:\t\t\t%d\n", opts->enable);
+  log_debug("probe_timeout:\t\t%d\n", opts->probe_timeout);
+  log_debug("try_otp:\t\t\t%d\n", opts->try_otp);
+  log_debug("enforce_otp:\t\t%d\n", opts->enforce_otp);
+  log_debug("debug:\t\t\t%d\n", opts->debug);
+  log_debug("hostname:\t\t%s\n", opts->hostname);
+  log_debug("system_otp_directory:\t%s\n", opts->system_otp_directory);
+  log_debug("device_otp_directory:\t%s\n", opts->device_otp_directory);
+}
+
+
 int		pusb_conf_parse(const char *file, t_pusb_options *opts,
 				const char *user, const char *service)
 {
@@ -142,15 +155,17 @@ int		pusb_conf_parse(const char *file, t_pusb_options *opts,
   char		device_xpath[sizeof(CONF_USER_XPATH) + CONF_USER_MAXLEN + \
 			     sizeof("device")];
 
+  log_debug("Parsing settings...\n",
+	    user, service);
   if (strlen(user) > CONF_USER_MAXLEN)
     {
-      log_error("Username \"%s\" is too long (max: %d)\n", user,
+      log_error("Username \"%s\" is too long (max: %d).\n", user,
 		CONF_USER_MAXLEN);
       return (0);
     }
   if (!(doc = xmlReadFile(file, NULL, 0)))
     {
-      log_error("Unable to parse \"%s\"\n", file);
+      log_error("Unable to parse \"%s\".\n", file);
       return (0);
     }
   snprintf(device_xpath, sizeof(device_xpath), CONF_USER_XPATH, user,
@@ -161,7 +176,7 @@ int		pusb_conf_parse(const char *file, t_pusb_options *opts,
 				 sizeof(opts->device.name));
   if (!retval || !pusb_conf_parse_device(opts, doc))
     {
-      log_error("No device found for user \"%s\"\n", user);
+      log_error("No device configured for user \"%s\".\n", user);
       xmlFreeDoc(doc);
       xmlCleanupParser();
       return (0);
@@ -174,5 +189,6 @@ int		pusb_conf_parse(const char *file, t_pusb_options *opts,
     }
   xmlFreeDoc(doc);
   xmlCleanupParser();
+  pusb_conf_dump(opts);
   return (1);
 }

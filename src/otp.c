@@ -38,7 +38,7 @@ static LibHalVolume	*pusb_otp_find_volume(t_pusb_options *opts, LibHalContext *c
   if (!n_volumes)
     {
       libhal_free_string_array(volumes);
-      log_error("No volumes found\n");
+      log_debug("No volumes found\n");
       return (NULL);
     }
   for (i = 0; i < n_volumes; ++i)
@@ -90,7 +90,7 @@ static FILE		*pusb_otp_open_device(t_pusb_options *opts, LibHalVolume *volume,
   free(path);
   if (!f)
     {
-      log_error("Cannot open device file: %s\n", strerror(errno));
+      log_debug("Cannot open device file: %s\n", strerror(errno));
       return (NULL);
     }
   return (f);
@@ -116,7 +116,7 @@ static FILE		*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
   free(path);
   if (!f)
     {
-      log_error("Cannot open system file: %s\n", strerror(errno));
+      log_debug("Cannot open system file: %s\n", strerror(errno));
       return (NULL);
     }
   return (f);
@@ -129,27 +129,30 @@ static void		pusb_otp_update(t_pusb_options *opts, LibHalVolume *volume)
   int	magic[1024];
   int	i;
 
-  log_debug("Updating one time pad... ");
   if (!(f_device = pusb_otp_open_device(opts, volume, "w+")))
     {
-      log_error("Unable to update pads\n");
+      log_error("Unable to update pads.\n");
       return ;
     }
   if (!(f_system = pusb_otp_open_system(opts, "w+")))
     {
-      log_error("Unable to update pads\n");
+      log_error("Unable to update pads.\n");
       fclose(f_device);
       return ;
     }
+  log_debug("Generating %d bytes unique pad...\n", sizeof(magic));
   srand(getpid() * time(NULL));
   for (i = 0; i < (sizeof(magic) / sizeof(int)); ++i)
     magic[i] = rand();
+  log_debug("Writing pad to the device...\n");
   fwrite(magic, sizeof(int), sizeof(magic) / sizeof(int), f_system);
+  log_debug("Writing pad to the system...\n");
   fwrite(magic, sizeof(int), sizeof(magic) / sizeof(int), f_device);
+  log_debug("Synchronizing filesystems...\n");
   fclose(f_system);
   fclose(f_device);
   sync();
-  log_debug("done.\n");
+  log_debug("One time pads updated.\n");
 }
 
 static int		pusb_otp_compare(t_pusb_options *opts, LibHalVolume *volume)
@@ -167,7 +170,9 @@ static int		pusb_otp_compare(t_pusb_options *opts, LibHalVolume *volume)
       fclose(f_system);
       return (0);
     }
+  log_debug("Loading device pad...\n");
   fread(magic_device, sizeof(int), sizeof(magic_device) / sizeof(int), f_device);
+  log_debug("Loading system pad...\n");
   fread(magic_system, sizeof(int), sizeof(magic_system) / sizeof(int), f_system);
   retval = memcmp(magic_system, magic_device, sizeof(magic_system));
   fclose(f_system);
@@ -186,7 +191,7 @@ int	pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx,
   maxtries = ((opts->probe_timeout * 1000000) / 250000);
   for (i = 0; i < maxtries; ++i)
     {
-      log_debug("Waiting volumes...\n");
+      log_debug("Waiting for volumes to come up...\n");
       volume = pusb_otp_find_volume(opts, ctx, drive);
       if (volume)
 	break;
@@ -194,15 +199,14 @@ int	pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx,
     }
   if (!volume)
     return (!opts->enforce_otp);
-  log_debug("Checking one time pads... ");
   retval = pusb_otp_compare(opts, volume);
   if (retval)
     {
-      log_debug("okay.\n");
+      log_info("Verification match, updating one time pads...\n");
       pusb_otp_update(opts, volume);
     }
   else
-    log_debug("mismatch !\n");
+    log_error("Pad checking failed !\n");
   libhal_volume_free(volume);
   return (retval);
 }

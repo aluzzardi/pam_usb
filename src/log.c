@@ -19,10 +19,12 @@
 #include <stdarg.h>
 #include "log.h"
 
-void		log_debug(const char *fmt, ...)
+void		__log_debug(const char *file, int line, const char *fmt, ...)
 {
   va_list	ap;
 
+  return ;
+  fprintf(stderr, "\033[01;34m*\033[00m [%s:%03d] ", file, line);
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   va_end(ap);
@@ -32,15 +34,17 @@ void		log_error(const char *fmt, ...)
 {
   va_list	ap;
 
+  fprintf(stderr, "\033[01;31m*\033[00m ");
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   va_end(ap);
 }
 
-void		log_verbose(const char *fmt, ...)
+void		log_info(const char *fmt, ...)
 {
   va_list	ap;
 
+  fprintf(stderr, "\033[01;32m*\033[00m ");
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   va_end(ap);
