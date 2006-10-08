@@ -15,8 +15,8 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef HAL_H_
-# define HAL_H_
+#ifndef PUSB_HAL_H_
+# define PUSB_HAL_H_
 
 DBusConnection *pusb_hal_dbus_connect(void);
 void pusb_hal_dbus_disconnect(DBusConnection *dbus);
@@ -34,4 +34,4 @@ char *pusb_hal_find_item(LibHalContext *ctx,
 			 const char *value,
 			 ...);
 
-#endif /* !HAL_H_ */
+#endif /* !PUSB_HAL_H_ */

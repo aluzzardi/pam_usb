@@ -15,10 +15,10 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef OTP_H_
-# define OTP_H_
+#ifndef PUSB_OTP_H_
+# define PUSB_OTP_H_
 
 int	pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx,
 		       LibHalDrive *drive);
 
-#endif /* !OTP_H_ */
+#endif /* !PUSB_OTP_H_ */

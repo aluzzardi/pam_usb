@@ -15,11 +15,11 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef LOG_H_
-# define LOG_H_
+#ifndef PUSB_LOG_H_
+# define PUSB_LOG_H_
 
 void	log_debug(const char *fmt, ...);
 void	log_error(const char *fmt, ...);
 void	log_verbose(const char *fmt, ...);
 
-#endif /* !LOG_H_ */
+#endif /* !PUSB_LOG_H_ */
