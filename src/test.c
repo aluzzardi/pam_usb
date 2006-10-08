@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include "conf.h"
 #include "log.h"
+#include "device.h"
 
 static void	pusb_dump_conf(t_pusb_options *opts)
 {
