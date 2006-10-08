@@ -18,6 +18,7 @@
 #include <string.h>
 #include <dbus/dbus.h>
 #include <libhal.h>
+#include <libhal-storage.h>
 #include "conf.h"
 #include "log.h"
 
@@ -70,57 +71,35 @@ static LibHalContext	*pusb_hal_init(DBusConnection *dbus)
   return (ctx);
 }
 
-static int		pusb_hal_verify_model(LibHalContext *ctx,
-						     t_pusb_options *opts,
-						     const char *udi)
+static int	pusb_hal_verify_model(LibHalDrive *drive,
+				      t_pusb_options *opts)
 {
-  DBusError		error;
-  char			*data;
-  int			i;
-  struct s_opt_list	check_list[] = {
-    { "usb_device.vendor", opts->device.vendor },
-    { "info.product", opts->device.model },
-    { NULL, NULL }
-  };
-
-  log_debug("Verifying model...\n");
-  dbus_error_init(&error);
-  for (i = 0; check_list[i].name; ++i)
+  if (strcmp(libhal_drive_get_vendor(drive),
+	     opts->device.vendor) != 0)
     {
-      data = libhal_device_get_property_string(ctx, udi,
-					       check_list[i].name,
-					       &error);
-      if (!data)
-	{
-	  log_error("Cannot retrieve device %s: %s\n",
-		    check_list[i].name,
-		    error.message);
-	  dbus_error_free(&error);
-	  return (0);
-	}
-      if (strcmp(data, check_list[i].value) != 0)
-	{
-	  log_error("[KO]\t%s -> %s\n", check_list[i].name, data);
-	  libhal_free_string(data);
-	  return (0);
-	}
-      log_debug("[OK]\t%s -> %s \n", check_list[i].name, data);
-      libhal_free_string(data);
+      log_error("Vendor mismatch\n");
+      return (0);
+    }
+  if (strcmp(libhal_drive_get_model(drive),
+	     opts->device.model) != 0)
+    {
+      log_error("Model mismatch\n");
+      return (0);
     }
   return (1);
 }
 
-static int	pusb_hal_find_device(LibHalContext *ctx,
+LibHalDrive	*pusb_hal_find_drive(LibHalContext *ctx,
 				     t_pusb_options *opts)
 {
   DBusError	error;
+  LibHalDrive	*retval = NULL;
   char		**devices;
   int		n_devices;
-  int		retval = 0;
 
   dbus_error_init(&error);
   if (!(devices = libhal_manager_find_device_string_match(ctx,
-							  "usb_device.serial",
+							  "storage.serial",
 							  opts->device.serial,
 							  &n_devices,
 							  &error)))
@@ -128,17 +107,23 @@ static int	pusb_hal_find_device(LibHalContext *ctx,
       log_error("Unable to find device \"%s\": %s\n", opts->device.name,
 		error.message);
       dbus_error_free(&error);
-      return (0);
+      return (NULL);
     }
-  if (n_devices > 0)
+  if (!n_devices)
     {
-      log_debug("Device \"%s\" connected (S/N: %s)\n", opts->device.name,
-		opts->device.serial);
-      retval = pusb_hal_verify_model(ctx, opts, devices[0]);
+      log_error("Device \"%s\" not connected\n", opts->device.name);
+      libhal_free_string_array(devices);
+      return (NULL);
     }
-  else
-    log_error("Device \"%s\" not connected\n", opts->device.name);
+  log_debug("Device \"%s\" connected (S/N: %s)\n", opts->device.name,
+	    opts->device.serial);
+  retval = libhal_drive_from_udi(ctx, devices[0]);
   libhal_free_string_array(devices);
+  if (!pusb_hal_verify_model(retval, opts))
+    {
+      libhal_drive_free(retval);
+      return (NULL);
+    }
   return (retval);
 }
 
@@ -146,14 +131,28 @@ int		pusb_hal_device_check(t_pusb_options *opts)
 {
   DBusConnection	*dbus;
   LibHalContext		*ctx;
-  int			retval;
+  LibHalDrive		*drive;
 
   if (!(dbus = pusb_hal_dbus_connect()))
     return (0);
   if (!(ctx = pusb_hal_init(dbus)))
     return (0);
-  retval = pusb_hal_find_device(ctx, opts);
+  drive = pusb_hal_find_drive(ctx, opts);
+  if (!drive)
+    {
+      pusb_hal_dbus_disconnect(dbus);
+      libhal_ctx_free(ctx);
+      return (0);
+    }
+  if (!opts->try_otp || !opts->enforce_otp)
+    {
+      libhal_drive_free(drive);
+      pusb_hal_dbus_disconnect(dbus);
+      libhal_ctx_free(ctx);
+      return (1);
+    }
+  libhal_drive_free(drive);
   pusb_hal_dbus_disconnect(dbus);
   libhal_ctx_free(ctx);
-  return (retval);
+  return (1);
 }
