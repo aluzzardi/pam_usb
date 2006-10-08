@@ -114,7 +114,7 @@ static FILE		*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
   free(path);
   if (!f)
     {
-      log_error("Cannot open %s: %s\n", strerror(errno));
+      log_error("Cannot open system file: %s\n", strerror(errno));
       return (NULL);
     }
   return (f);
@@ -158,12 +158,12 @@ static int		pusb_otp_compare(t_pusb_options *opts, LibHalVolume *volume)
   int	magic_system[1024];
   int	retval;
 
-  if (!(f_device = pusb_otp_open_device(opts, volume, "r")))
-    return (!opts->enforce_otp);
   if (!(f_system = pusb_otp_open_system(opts, "r")))
+    return (1);
+  if (!(f_device = pusb_otp_open_device(opts, volume, "r")))
     {
-      fclose(f_device);
-      return (!opts->enforce_otp);
+      fclose(f_system);
+      return (0);
     }
   fread(magic_device, sizeof(int), sizeof(magic_device) / sizeof(int), f_device);
   fread(magic_system, sizeof(int), sizeof(magic_system) / sizeof(int), f_system);
@@ -178,10 +178,18 @@ int	pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx,
 {
   LibHalVolume	*volume = NULL;
   int		retval;
+  int		maxtries;
+  int		i;
 
-  if (!opts->try_otp && !opts->enforce_otp)
-    return (1);
-  volume = pusb_otp_find_volume(opts, ctx, drive);
+  maxtries = (10000000 / 250000);
+  for (i = 0; i < maxtries; ++i)
+    {
+      printf("Waiting for volumes...\n");
+      volume = pusb_otp_find_volume(opts, ctx, drive);
+      if (volume)
+	break;
+      usleep(250000);
+    }
   if (!volume)
     return (!opts->enforce_otp);
   log_debug("Checking one time pads... ");

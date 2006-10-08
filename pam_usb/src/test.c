@@ -17,7 +17,6 @@
 
 #include <stdio.h>
 #include "conf.h"
-#include "hal.h"
 #include "log.h"
 
 static void	pusb_dump_conf(t_pusb_options *opts)
@@ -49,6 +48,6 @@ int	main(int argc, char **argv)
       return (0);
     }
   printf("\n");
-  printf ("Access %s.\n", pusb_hal_device_check(&opts) ? "granted" : "denied");
+  printf ("Access %s.\n", pusb_device_check(&opts) ? "granted" : "denied");
   return (0);
 }
