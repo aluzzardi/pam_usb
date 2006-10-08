@@ -87,8 +87,7 @@ char			*pusb_hal_get_property(LibHalContext *ctx,
 					   name, &error);
   if (!data)
     {
-      log_error("Cannot retrieve device property %s for udi %s: %s\n",
-		name, udi, error.message);
+      log_debug("%s\n", error.message);
       dbus_error_free(&error);
       return (NULL);
     }
