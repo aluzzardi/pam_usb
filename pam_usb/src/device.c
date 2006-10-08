@@ -32,7 +32,7 @@ static LibHalDrive	*pusb_device_get_storage(t_pusb_options *opts, LibHalContext 
   int			maxloop = 0;
   LibHalDrive		*drive = NULL;
 
-  log_info("Waiting for storage device probing...\n");
+  log_info("Probing storage device (this could take a while)...\n");
   while (!(phy_udi = pusb_hal_find_item(ctx,
 					"info.parent", udi,
 					"info.bus", "usb",
