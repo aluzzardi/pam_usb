@@ -15,36 +15,11 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <stdio.h>
-#include <stdarg.h>
-#include "log.h"
+#ifndef VOLUME_H_
+# define VOLUME_H_
 
-void		__log_debug(const char *file, int line, const char *fmt, ...)
-{
-  va_list	ap;
+LibHalVolume *pusb_volume_find(t_pusb_options *opts, LibHalContext *ctx,
+			       LibHalDrive *drive);
+void pusb_volume_destroy(LibHalVolume *volume);
 
-  fprintf(stderr, "\033[01;34m*\033[00m [%s:%03d] ", file, line);
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  va_end(ap);
-}
-
-void		log_error(const char *fmt, ...)
-{
-  va_list	ap;
-
-  fprintf(stderr, "\033[01;31m*\033[00m ");
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  va_end(ap);
-}
-
-void		log_info(const char *fmt, ...)
-{
-  va_list	ap;
-
-  fprintf(stderr, "\033[01;32m*\033[00m ");
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  va_end(ap);
-}
+#endif /* !VOLUME_H_ */
