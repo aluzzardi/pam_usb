@@ -15,6 +15,8 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <unistd.h>
+#include <string.h>
 #include <libhal-storage.h>
 #include "conf.h"
 #include "hal.h"
@@ -34,12 +36,8 @@ LibHalDrive	*pusb_device_get_storage(t_pusb_options *opts, LibHalContext *ctx,
 					"info.parent", udi,
 					"info.bus", "usb",
 					NULL)))
-    {
-      printf("loop\n");
-      usleep(250000);
-    }
-  printf("phydev: %s\n", phy_udi);
-  maxloop = (10000000 / 250000);
+    usleep(250000);
+  maxloop = ((opts->probe_timeout * 1000000) / 250000);
   while (maxloop > 0 &&
 	 (!(storage_udi = pusb_hal_find_item(ctx,
 					     "storage.physical_device", phy_udi,
@@ -48,17 +46,13 @@ LibHalDrive	*pusb_device_get_storage(t_pusb_options *opts, LibHalContext *ctx,
     {
       if (storage_udi)
 	libhal_free_string(storage_udi);
-      printf("loop\n");
-      printf("maxloop: %d\n", maxloop);
       --maxloop;
       usleep(250000);
     }
-  printf("blockdev: %s\n", storage_udi);
   libhal_free_string(phy_udi);
   if (storage_udi)
     {
       drive = libhal_drive_from_udi(ctx, storage_udi);
-      printf("%s\n", storage_udi);
       libhal_free_string(storage_udi);
     }
   return (drive);

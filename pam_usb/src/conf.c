@@ -28,6 +28,10 @@ static void	pusb_conf_options_get_from(t_pusb_options *opts,
 {
   pusb_xpath_get_string_from(doc, from, "option[@name='hostname']",
 			     opts->hostname, sizeof(opts->hostname));
+  pusb_xpath_get_string_from(doc, from, "option[@name='system_otp_directory']",
+			     opts->system_otp_directory, sizeof(opts->system_otp_directory));
+  pusb_xpath_get_string_from(doc, from, "option[@name='device_otp_directory']",
+			     opts->device_otp_directory, sizeof(opts->device_otp_directory));
   pusb_xpath_get_bool_from(doc, from, "option[@name='debug']",
 			   &(opts->debug));
   pusb_xpath_get_bool_from(doc, from, "option[@name='enable']",
@@ -36,6 +40,8 @@ static void	pusb_conf_options_get_from(t_pusb_options *opts,
 			   &(opts->try_otp));
   pusb_xpath_get_bool_from(doc, from, "option[@name='enforce_otp']",
 			   &(opts->enforce_otp));
+  pusb_xpath_get_int_from(doc, from, "option[@name='probe_timeout']",
+			  &(opts->probe_timeout));
 }
 
 static int		pusb_conf_parse_options(t_pusb_options *opts,
@@ -118,6 +124,9 @@ int	pusb_conf_init(t_pusb_options *opts)
       log_error("gethostname: %s\n", strerror(errno));
       return (0);
     }
+  strcpy(opts->system_otp_directory, "./");
+  strcpy(opts->device_otp_directory, ".auth");
+  opts->probe_timeout = 10;
   opts->enable = 1;
   opts->try_otp = 1;
   opts->enforce_otp = 0;
