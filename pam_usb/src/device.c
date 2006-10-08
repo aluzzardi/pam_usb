@@ -22,14 +22,15 @@
 #include "hal.h"
 #include "log.h"
 #include "otp.h"
+#include "device.h"
 
-LibHalDrive	*pusb_device_get_storage(t_pusb_options *opts, LibHalContext *ctx,
-					 const char *udi)
+static LibHalDrive	*pusb_device_get_storage(t_pusb_options *opts, LibHalContext *ctx,
+						 const char *udi)
 {
-  char		*phy_udi = NULL;
-  char		*storage_udi = NULL;
-  int		maxloop = 0;
-  LibHalDrive	*drive = NULL;
+  char			*phy_udi = NULL;
+  char			*storage_udi = NULL;
+  int			maxloop = 0;
+  LibHalDrive		*drive = NULL;
 
   log_debug("Waiting for device to come up...\n");
   while (!(phy_udi = pusb_hal_find_item(ctx,
