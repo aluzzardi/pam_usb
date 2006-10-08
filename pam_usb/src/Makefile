@@ -2,7 +2,8 @@ SRC	= test.c \
 	  conf.c \
 	  log.c \
 	  xpath.c \
-	  hal.c
+	  hal.c \
+	  otp.c
 OBJ	= $(SRC:.c=.o)
 NAME	= test
 CC	= gcc

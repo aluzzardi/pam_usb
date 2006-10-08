@@ -21,6 +21,7 @@
 #include <libhal-storage.h>
 #include "conf.h"
 #include "log.h"
+#include "otp.h"
 
 static DBusConnection	*pusb_hal_dbus_connect(void)
 {
@@ -132,6 +133,7 @@ int		pusb_hal_device_check(t_pusb_options *opts)
   DBusConnection	*dbus;
   LibHalContext		*ctx;
   LibHalDrive		*drive;
+  int			retval;
 
   if (!(dbus = pusb_hal_dbus_connect()))
     return (0);
@@ -144,15 +146,9 @@ int		pusb_hal_device_check(t_pusb_options *opts)
       libhal_ctx_free(ctx);
       return (0);
     }
-  if (!opts->try_otp || !opts->enforce_otp)
-    {
-      libhal_drive_free(drive);
-      pusb_hal_dbus_disconnect(dbus);
-      libhal_ctx_free(ctx);
-      return (1);
-    }
+  retval = pusb_otp_check(opts, ctx, drive);
   libhal_drive_free(drive);
   pusb_hal_dbus_disconnect(dbus);
   libhal_ctx_free(ctx);
-  return (1);
+  return (retval);
 }
