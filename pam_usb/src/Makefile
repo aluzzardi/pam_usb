@@ -6,8 +6,8 @@ SRC	= test.c \
 OBJ	= $(SRC:.c=.o)
 NAME	= test
 CC	= gcc
-CFLAGS	= -Wall `pkg-config --cflags hal` `pkg-config --cflags libxml-2.0` 
-LDFLAGS	= `pkg-config --libs hal` `pkg-config --libs libxml-2.0`
+CFLAGS	= -Wall `pkg-config --cflags hal` `pkg-config --cflags libxml-2.0` -ggdb
+LDFLAGS	= `pkg-config --libs hal-storage` `pkg-config --libs libxml-2.0`
 
 all	: $(NAME)
 $(NAME)	: $(OBJ)
