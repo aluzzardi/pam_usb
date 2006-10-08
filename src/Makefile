@@ -4,6 +4,7 @@ SRC	= test.c \
 	  xpath.c \
 	  hal.c \
 	  otp.c \
+	  volume.c \
 	  device.c
 OBJ	= $(SRC:.c=.o)
 NAME	= test

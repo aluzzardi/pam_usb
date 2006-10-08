@@ -25,45 +25,8 @@
 #include <libhal-storage.h>
 #include "conf.h"
 #include "log.h"
+#include "volume.h"
 #include "otp.h"
-
-static LibHalVolume	*pusb_otp_find_volume(t_pusb_options *opts, LibHalContext *ctx,
-					      LibHalDrive *drive)
-{
-  char			**volumes;
-  int			n_volumes = 0;
-  int			i;
-
-  volumes = libhal_drive_find_all_volumes(ctx, drive, &n_volumes);
-  if (!n_volumes)
-    {
-      libhal_free_string_array(volumes);
-      log_debug("No volumes found\n");
-      return (NULL);
-    }
-  for (i = 0; i < n_volumes; ++i)
-    {
-      LibHalVolume	*volume;
-
-      volume = libhal_volume_from_udi(ctx,
-				      volumes[i]);
-      if (!volume)
-	continue;
-      if (libhal_volume_should_ignore(volume))
-	{
-	  libhal_volume_free(volume);
-	  continue;
-	}
-      if (libhal_volume_is_mounted(volume))
-	{
-	  libhal_free_string_array(volumes);
-	  return (volume);
-	}
-      libhal_volume_free(volume);
-    }
-  libhal_free_string_array(volumes);
-  return (NULL);
-}
 
 static FILE		*pusb_otp_open_device(t_pusb_options *opts, LibHalVolume *volume,
 					      const char *mode)
@@ -185,18 +148,8 @@ int	pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx,
 {
   LibHalVolume	*volume = NULL;
   int		retval;
-  int		maxtries;
-  int		i;
 
-  maxtries = ((opts->probe_timeout * 1000000) / 250000);
-  for (i = 0; i < maxtries; ++i)
-    {
-      log_debug("Waiting for volumes to come up...\n");
-      volume = pusb_otp_find_volume(opts, ctx, drive);
-      if (volume)
-	break;
-      usleep(250000);
-    }
+  volume = pusb_volume_find(opts, ctx, drive);
   if (!volume)
     return (!opts->enforce_otp);
   retval = pusb_otp_compare(opts, volume);
@@ -207,6 +160,6 @@ int	pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx,
     }
   else
     log_error("Pad checking failed !\n");
-  libhal_volume_free(volume);
+  pusb_volume_destroy(volume);
   return (retval);
 }
