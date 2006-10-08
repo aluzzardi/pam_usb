@@ -22,11 +22,14 @@
 static void	pusb_dump_conf(t_pusb_options *opts)
 {
   printf("\nConfiguration dump:\n");
-  printf("enable:\t\t%d\n", opts->enable);
-  printf("try_otp:\t%d\n", opts->try_otp);
-  printf("enforce_otp:\t%d\n", opts->enforce_otp);
-  printf("debug:\t\t%d\n", opts->debug);
-  printf("hostname:\t%s\n", opts->hostname);
+  printf("enable:\t\t\t%d\n", opts->enable);
+  printf("probe_timeout:\t\t%d\n", opts->probe_timeout);
+  printf("try_otp:\t\t%d\n", opts->try_otp);
+  printf("enforce_otp:\t\t%d\n", opts->enforce_otp);
+  printf("debug:\t\t\t%d\n", opts->debug);
+  printf("hostname:\t\t%s\n", opts->hostname);
+  printf("system_otp_directory:\t%s\n", opts->system_otp_directory);
+  printf("device_otp_directory:\t%s\n", opts->device_otp_directory);
 }
 
 int	main(int argc, char **argv)

@@ -66,7 +66,7 @@ static LibHalVolume	*pusb_otp_find_volume(t_pusb_options *opts, LibHalContext *c
 }
 
 static FILE		*pusb_otp_open_device(t_pusb_options *opts, LibHalVolume *volume,
-				      const char *mode)
+					      const char *mode)
 {
   FILE		*f;
   char		*path;
@@ -76,7 +76,7 @@ static FILE		*pusb_otp_open_device(t_pusb_options *opts, LibHalVolume *volume,
   mnt_point = (char *)libhal_volume_get_mount_point(volume);
   if (!mnt_point)
     return (NULL);
-  path_size = strlen(mnt_point) + 1 + strlen(".auth") + 1 + \
+  path_size = strlen(mnt_point) + 1 + strlen(opts->device_otp_directory) + 1 + \
     strlen(opts->hostname) + strlen(".otp") + 1;
   if (!(path = malloc(path_size)))
     {
@@ -84,8 +84,8 @@ static FILE		*pusb_otp_open_device(t_pusb_options *opts, LibHalVolume *volume,
       return (NULL);
     }
   memset(path, 0x00, path_size);
-  snprintf(path, path_size, "%s/.auth/%s.otp", mnt_point,
-	   opts->hostname);
+  snprintf(path, path_size, "%s/%s/%s.otp", mnt_point,
+	   opts->device_otp_directory, opts->hostname);
   f = fopen(path, mode);
   free(path);
   if (!f)
@@ -102,14 +102,16 @@ static FILE		*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
   char		*path;
   size_t	path_size;
 
-  path_size = strlen(".") + 1 + strlen(opts->device.serial) + strlen(".otp") + 1;
+  path_size = strlen(opts->system_otp_directory) + 1 +
+    strlen(opts->device.serial) + strlen(".otp") + 1;
   if (!(path = malloc(path_size)))
     {
       log_error("malloc error\n");
       return (NULL);
     }
   memset(path, 0x00, path_size);
-  snprintf(path, path_size, "%s/%s.otp", ".", opts->device.serial);
+  snprintf(path, path_size, "%s/%s.otp", opts->system_otp_directory,
+	   opts->device.serial);
   f = fopen(path, mode);
   free(path);
   if (!f)
@@ -181,10 +183,10 @@ int	pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx,
   int		maxtries;
   int		i;
 
-  maxtries = (10000000 / 250000);
+  maxtries = ((opts->probe_timeout * 1000000) / 250000);
   for (i = 0; i < maxtries; ++i)
     {
-      printf("Waiting for volumes...\n");
+      log_debug("Waiting volumes...\n");
       volume = pusb_otp_find_volume(opts, ctx, drive);
       if (volume)
 	break;
