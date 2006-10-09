@@ -28,7 +28,7 @@
 #include "volume.h"
 #include "otp.h"
 
-static FILE	*pusb_otp_open_device(t_pusb_options *opts,
+static FILE	*pusb_pad_open_device(t_pusb_options *opts,
 				      LibHalVolume *volume, const char *mode)
 {
   FILE		*f;
@@ -59,7 +59,7 @@ static FILE	*pusb_otp_open_device(t_pusb_options *opts,
   return (f);
 }
 
-static FILE	*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
+static FILE	*pusb_pad_open_system(t_pusb_options *opts, const char *mode)
 {
   FILE		*f;
   char		*path;
@@ -85,7 +85,7 @@ static FILE	*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
   return (f);
 }
 
-static void	pusb_otp_update(t_pusb_options *opts,
+static void	pusb_pad_update(t_pusb_options *opts,
 				LibHalVolume *volume)
 {
   FILE		*f_device = NULL;
@@ -93,12 +93,12 @@ static void	pusb_otp_update(t_pusb_options *opts,
   int		magic[1024];
   int		i;
 
-  if (!(f_device = pusb_otp_open_device(opts, volume, "w+")))
+  if (!(f_device = pusb_pad_open_device(opts, volume, "w+")))
     {
       log_error("Unable to update pads.\n");
       return ;
     }
-  if (!(f_system = pusb_otp_open_system(opts, "w+")))
+  if (!(f_system = pusb_pad_open_system(opts, "w+")))
     {
       log_error("Unable to update pads.\n");
       fclose(f_device);
@@ -119,7 +119,7 @@ static void	pusb_otp_update(t_pusb_options *opts,
   log_debug("One time pads updated.\n");
 }
 
-static int	pusb_otp_compare(t_pusb_options *opts, LibHalVolume *volume)
+static int	pusb_pad_compare(t_pusb_options *opts, LibHalVolume *volume)
 {
   FILE		*f_device = NULL;
   FILE		*f_system = NULL;
@@ -127,9 +127,9 @@ static int	pusb_otp_compare(t_pusb_options *opts, LibHalVolume *volume)
   int		magic_system[1024];
   int		retval;
 
-  if (!(f_system = pusb_otp_open_system(opts, "r")))
+  if (!(f_system = pusb_pad_open_system(opts, "r")))
     return (1);
-  if (!(f_device = pusb_otp_open_device(opts, volume, "r")))
+  if (!(f_device = pusb_pad_open_device(opts, volume, "r")))
     {
       fclose(f_system);
       return (0);
@@ -146,7 +146,7 @@ static int	pusb_otp_compare(t_pusb_options *opts, LibHalVolume *volume)
   return (retval == 0);
 }
 
-int		pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx)
+int		pusb_pad_check(t_pusb_options *opts, LibHalContext *ctx)
 {
   LibHalVolume	*volume = NULL;
   int		retval;
@@ -154,11 +154,11 @@ int		pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx)
   volume = pusb_volume_get(opts, ctx);
   if (!volume)
     return (0);
-  retval = pusb_otp_compare(opts, volume);
+  retval = pusb_pad_compare(opts, volume);
   if (retval)
     {
       log_info("Verification match, updating one time pads...\n");
-      pusb_otp_update(opts, volume);
+      pusb_pad_update(opts, volume);
     }
   else
     log_error("Pad checking failed !\n");
