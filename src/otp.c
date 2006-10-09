@@ -39,7 +39,7 @@ static FILE	*pusb_otp_open_device(t_pusb_options *opts,
   mnt_point = (char *)libhal_volume_get_mount_point(volume);
   if (!mnt_point)
     return (NULL);
-  path_size = strlen(mnt_point) + 1 + strlen(opts->device_otp_directory) + \
+  path_size = strlen(mnt_point) + 1 + strlen(opts->device_pad_directory) + \
     1 + strlen(opts->hostname) + strlen(".otp") + 1;
   if (!(path = malloc(path_size)))
     {
@@ -48,7 +48,7 @@ static FILE	*pusb_otp_open_device(t_pusb_options *opts,
     }
   memset(path, 0x00, path_size);
   snprintf(path, path_size, "%s/%s/%s.otp", mnt_point,
-	   opts->device_otp_directory, opts->hostname);
+	   opts->device_pad_directory, opts->hostname);
   f = fopen(path, mode);
   free(path);
   if (!f)
@@ -65,7 +65,7 @@ static FILE	*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
   char		*path;
   size_t	path_size;
 
-  path_size = strlen(opts->system_otp_directory) + 1 +
+  path_size = strlen(opts->system_pad_directory) + 1 +
     strlen(opts->device.serial) + strlen(".otp") + 1;
   if (!(path = malloc(path_size)))
     {
@@ -73,7 +73,7 @@ static FILE	*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
       return (NULL);
     }
   memset(path, 0x00, path_size);
-  snprintf(path, path_size, "%s/%s.otp", opts->system_otp_directory,
+  snprintf(path, path_size, "%s/%s.otp", opts->system_pad_directory,
 	   opts->device.serial);
   f = fopen(path, mode);
   free(path);
@@ -153,7 +153,7 @@ int		pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx)
 
   volume = pusb_volume_get(opts, ctx);
   if (!volume)
-    return (!opts->enforce_otp);
+    return (0);
   retval = pusb_otp_compare(opts, volume);
   if (retval)
     {

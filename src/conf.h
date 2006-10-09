@@ -35,12 +35,11 @@ typedef struct	pusb_options
 {
   int		probe_timeout;
   int		enable;
-  int		try_otp;
-  int		enforce_otp;
+  int		one_time_pad;
   int		debug;
   char		hostname[32];
-  char		system_otp_directory[128];
-  char		device_otp_directory[32];
+  char		system_pad_directory[128];
+  char		device_pad_directory[32];
   t_pusb_device	device;
 }		t_pusb_options;
 

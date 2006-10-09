@@ -70,15 +70,15 @@ int			pusb_device_check(t_pusb_options *opts)
       return (0);
     }
 
-  if (!opts->try_otp && !opts->enforce_otp)
-    {
-      log_debug("One time pad is disabled, no more verifications to do.\n");
-      retval = 1;
-    }
-  else
+  if (opts->one_time_pad)
     {
       log_info("Performing one time pad verification...\n");
       retval = pusb_otp_check(opts, ctx);
+    }
+  else
+    {
+      log_debug("One time pad is disabled, no more verifications to do.\n");
+      retval = 1;
     }
 
   pusb_hal_dbus_disconnect(dbus);
