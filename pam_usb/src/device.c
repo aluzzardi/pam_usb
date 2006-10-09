@@ -73,7 +73,7 @@ int			pusb_device_check(t_pusb_options *opts)
   if (opts->one_time_pad)
     {
       log_info("Performing one time pad verification...\n");
-      retval = pusb_otp_check(opts, ctx);
+      retval = pusb_pad_check(opts, ctx);
     }
   else
     {
