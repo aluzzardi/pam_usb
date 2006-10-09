@@ -3,7 +3,7 @@ SRC	= test.c \
 	  log.c \
 	  xpath.c \
 	  hal.c \
-	  otp.c \
+	  pad.c \
 	  volume.c \
 	  device.c
 OBJ	= $(SRC:.c=.o)
