@@ -27,8 +27,8 @@ typedef struct	pusb_device
   char		name[32];
   char		vendor[32];
   char		model[32];
-  char		serial[64];
-  char		volume_uuid[32];
+  char		serial[128];
+  char		volume_uuid[128];
 }		t_pusb_device;
 
 typedef struct	pusb_options
