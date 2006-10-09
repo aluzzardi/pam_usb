@@ -1,27 +1,20 @@
 <configuration>
 	<defaults>
 		<option name="hostname">foobar</option>
-		<option name="debug">true</option>
 		<option name="try_otp">true</option>
 		<option name="enforce_otp">false</option>
 		<option name="probe_timeout">10</option>
+		<option name="debug">false</option>
 		<!--		<option name="system_otp_directory">.</option>
 		<option name="device_otp_directory">.auth</option> -->
 	</defaults>
 
 	<devices>
 		<device id="foobar">
-			<vendor>SanDisk</vendor>
-			<model>Cruzer Titanium</model>
-			<serial>SanDisk_Cruzer_Titanium_SNDKB882652FC4A03701</serial>
-		</device>
-	</devices>
-
-	<devices>
-		<device id="foobar2">
 			<vendor>SanDisk Corp.</vendor>
 			<model>Cruzer Titanium</model>
 			<serial>SNDKB882652FC4A03701</serial>
+			<volume_uuid>3B69-1AFD</volume_uuid>
 		</device>
 	</devices>
 
@@ -32,7 +25,7 @@
 		</user>
 
 		<user id="root">
-			<device>foobar2</device>
+			<device>foobar</device>
 			<option name="enforce_otp">true</option>
 		</user>
 	</users>

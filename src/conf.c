@@ -29,9 +29,11 @@ static void	pusb_conf_options_get_from(t_pusb_options *opts,
   pusb_xpath_get_string_from(doc, from, "option[@name='hostname']",
 			     opts->hostname, sizeof(opts->hostname));
   pusb_xpath_get_string_from(doc, from, "option[@name='system_otp_directory']",
-			     opts->system_otp_directory, sizeof(opts->system_otp_directory));
+			     opts->system_otp_directory,
+			     sizeof(opts->system_otp_directory));
   pusb_xpath_get_string_from(doc, from, "option[@name='device_otp_directory']",
-			     opts->device_otp_directory, sizeof(opts->device_otp_directory));
+			     opts->device_otp_directory,
+			     sizeof(opts->device_otp_directory));
   pusb_xpath_get_bool_from(doc, from, "option[@name='debug']",
 			   &(opts->debug));
   pusb_xpath_get_bool_from(doc, from, "option[@name='enable']",
@@ -112,6 +114,9 @@ static int	pusb_conf_parse_device(t_pusb_options *opts, xmlDoc *doc)
   if (!pusb_conf_device_get_property(opts, doc, "serial", opts->device.serial,
 				     sizeof(opts->device.serial)))
     return (0);
+  pusb_conf_device_get_property(opts, doc, "volume_uuid",
+				opts->device.volume_uuid,
+				sizeof(opts->device.volume_uuid));
   return (1);
 }
 
@@ -136,14 +141,14 @@ int	pusb_conf_init(t_pusb_options *opts)
 static void	pusb_conf_dump(t_pusb_options *opts)
 {
   log_debug("Configuration dump:\n");
-  log_debug("enable:\t\t\t%d\n", opts->enable);
-  log_debug("probe_timeout:\t\t%d\n", opts->probe_timeout);
-  log_debug("try_otp:\t\t\t%d\n", opts->try_otp);
-  log_debug("enforce_otp:\t\t%d\n", opts->enforce_otp);
-  log_debug("debug:\t\t\t%d\n", opts->debug);
-  log_debug("hostname:\t\t%s\n", opts->hostname);
-  log_debug("system_otp_directory:\t%s\n", opts->system_otp_directory);
-  log_debug("device_otp_directory:\t%s\n", opts->device_otp_directory);
+  log_debug("enable\t\t\t: %s\n", opts->enable ? "true" : "false");
+  log_debug("debug\t\t\t: %s\n", opts->debug ? "true" : "false");
+  log_debug("try_otp\t\t\t: %s\n", opts->try_otp ? "true" : "false");
+  log_debug("enforce_otp\t\t: %s\n", opts->enforce_otp ? "true" : "false");
+  log_debug("probe_timeout\t\t: %d\n", opts->probe_timeout);
+  log_debug("hostname\t\t\t: %s\n", opts->hostname);
+  log_debug("system_otp_directory\t: %s\n", opts->system_otp_directory);
+  log_debug("device_otp_directory\t: %s\n", opts->device_otp_directory);
 }
 
 

@@ -18,8 +18,7 @@
 #ifndef VOLUME_H_
 # define VOLUME_H_
 
-LibHalVolume *pusb_volume_find(t_pusb_options *opts, LibHalContext *ctx,
-			       LibHalDrive *drive);
-void pusb_volume_destroy(LibHalVolume *volume);
+LibHalVolume	*pusb_volume_get(t_pusb_options *opts, LibHalContext *ctx);
+void		pusb_volume_destroy(LibHalVolume *volume);
 
 #endif /* !VOLUME_H_ */

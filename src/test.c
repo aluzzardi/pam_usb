@@ -20,7 +20,7 @@
 #include "log.h"
 #include "device.h"
 
-int	main(int argc, char **argv)
+int			main(int argc, char **argv)
 {
   t_pusb_options	opts;
   int			retval;

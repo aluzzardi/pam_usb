@@ -25,14 +25,16 @@
 #include <libhal-storage.h>
 #include "conf.h"
 #include "log.h"
+#include "hal.h"
 #include "volume.h"
 
-static int		pusb_volume_mount(t_pusb_options *opts, LibHalVolume **volume,
-					  LibHalContext *ctx)
+static int	pusb_volume_mount(t_pusb_options *opts, LibHalVolume **volume,
+				  LibHalContext *ctx)
 {
   char		command[1024];
   char		tempname[32];
   const char	*devname;
+  const char	*udi;
 
   snprintf(tempname, sizeof(tempname), "pam_usb%d", getpid());
   if (!(devname = libhal_volume_get_device_file(*volume)))
@@ -50,93 +52,74 @@ static int		pusb_volume_mount(t_pusb_options *opts, LibHalVolume **volume,
       log_error("Mount failed\n");
       return (0);
     }
-  else
+  udi = libhal_volume_get_udi(*volume);
+  if (!udi)
     {
-      const char	*udi;
-
-      udi = libhal_volume_get_udi(*volume);
-      if (!udi)
-	{
-	  log_error("Unable to retrieve volume UDI\n");
-	  return (0);
-	}
-      udi = strdup(udi);
-      libhal_volume_free(*volume);
-      *volume = libhal_volume_from_udi(ctx, udi);
-      free((char *)udi);
+      log_error("Unable to retrieve volume UDI\n");
+      return (0);
     }
+  udi = strdup(udi);
+  libhal_volume_free(*volume);
+  *volume = libhal_volume_from_udi(ctx, udi);
+  free((char *)udi);
   log_debug("Mount succeeded.\n");
   return (1);
 }
 
-static int	__pusb_volume_find(t_pusb_options *opts, LibHalContext *ctx,
-				   LibHalDrive *drive, LibHalVolume **out)
+static LibHalVolume	*pusb_volume_probe(t_pusb_options *opts,
+					   LibHalContext *ctx)
 {
-  char		**volumes;
-  int		n_volumes = 0;
-  int		i;
+  LibHalVolume		*volume = NULL;
+  int			maxtries = 0;
+  int			i;
 
-  *out = NULL;
-  volumes = libhal_drive_find_all_volumes(ctx, drive, &n_volumes);
-  if (!n_volumes)
+  log_debug("Searching for volume with uuid %s\n", opts->device.volume_uuid);
+  maxtries = ((opts->probe_timeout * 1000000) / 250000);
+  for (i = 0; i < maxtries; ++i)
     {
-      libhal_free_string_array(volumes);
-      log_debug("No volumes found\n");
-      return (1);
-    }
-  for (i = 0; i < n_volumes; ++i)
-    {
-      LibHalVolume	*volume;
+      char	*udi = NULL;
 
-      volume = libhal_volume_from_udi(ctx,
-				      volumes[i]);
-      if (!volume)
-	continue;
-      if (libhal_volume_should_ignore(volume))
+      if (i == 1)
+	log_info("Probing volume (this could take a while)...\n");
+      udi = pusb_hal_find_item(ctx,
+			       "volume.uuid", opts->device.volume_uuid,
+			       NULL);
+      if (!udi)
 	{
-	  libhal_volume_free(volume);
+	  usleep(250000);
 	  continue;
 	}
-      *out = volume;
-      libhal_free_string_array(volumes);
-      if (libhal_volume_is_mounted(volume))
-	{
-	  log_debug("Volume is already mounted\n");
-	  return (1);
-	}
-      else
-	{
-	  if (pusb_volume_mount(opts, &volume, ctx))
-	    return (1);
-	  return (0);
-	}
+      volume = libhal_volume_from_udi(ctx, udi);
+      libhal_free_string(udi);
+      if (!libhal_volume_should_ignore(volume))
+	return (volume);
       libhal_volume_free(volume);
+      usleep(250000);
     }
-  libhal_free_string_array(volumes);
-  return (1);
+  return (NULL);
 }
 
-LibHalVolume		*pusb_volume_find(t_pusb_options *opts, LibHalContext *ctx,
-					  LibHalDrive *drive)
+LibHalVolume	*pusb_volume_get(t_pusb_options *opts, LibHalContext *ctx)
 {
-    LibHalVolume	*volume = NULL;
-    int			maxtries = 0;
-    int			i;
+  LibHalVolume	*volume;
 
-    maxtries = ((opts->probe_timeout * 1000000) / 250000);
-    for (i = 0; i < maxtries; ++i)
-      {
-	log_debug("Waiting for volumes to come up...\n");
-	if (!__pusb_volume_find(opts, ctx, drive, &volume))
-	  return (NULL);
-	if (volume)
-	  break;
-	usleep(250000);
-      }
-    return (volume);
+  if (!(volume = pusb_volume_probe(opts, ctx)))
+    return (NULL);
+  log_debug("Found volume %s\n", opts->device.volume_uuid);
+  if (libhal_volume_is_mounted(volume))
+    {
+      log_debug("Volume is already mounted.\n");
+      return (volume);
+    }
+  if (!pusb_volume_mount(opts, &volume, ctx))
+    {
+      libhal_volume_free(volume);
+      return (NULL);
+    }
+  return (volume);
 }
 
-void			pusb_volume_destroy(LibHalVolume *volume)
+void		pusb_volume_destroy(LibHalVolume *volume)
 {
   const char	*mntpoint;
 

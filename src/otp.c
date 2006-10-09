@@ -28,8 +28,8 @@
 #include "volume.h"
 #include "otp.h"
 
-static FILE		*pusb_otp_open_device(t_pusb_options *opts, LibHalVolume *volume,
-					      const char *mode)
+static FILE	*pusb_otp_open_device(t_pusb_options *opts,
+				      LibHalVolume *volume, const char *mode)
 {
   FILE		*f;
   char		*path;
@@ -39,8 +39,8 @@ static FILE		*pusb_otp_open_device(t_pusb_options *opts, LibHalVolume *volume,
   mnt_point = (char *)libhal_volume_get_mount_point(volume);
   if (!mnt_point)
     return (NULL);
-  path_size = strlen(mnt_point) + 1 + strlen(opts->device_otp_directory) + 1 + \
-    strlen(opts->hostname) + strlen(".otp") + 1;
+  path_size = strlen(mnt_point) + 1 + strlen(opts->device_otp_directory) + \
+    1 + strlen(opts->hostname) + strlen(".otp") + 1;
   if (!(path = malloc(path_size)))
     {
       log_error("malloc error!\n");
@@ -59,7 +59,7 @@ static FILE		*pusb_otp_open_device(t_pusb_options *opts, LibHalVolume *volume,
   return (f);
 }
 
-static FILE		*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
+static FILE	*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
 {
   FILE		*f;
   char		*path;
@@ -85,12 +85,13 @@ static FILE		*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
   return (f);
 }
 
-static void		pusb_otp_update(t_pusb_options *opts, LibHalVolume *volume)
+static void	pusb_otp_update(t_pusb_options *opts,
+				LibHalVolume *volume)
 {
-  FILE	*f_device = NULL;
-  FILE	*f_system = NULL;
-  int	magic[1024];
-  int	i;
+  FILE		*f_device = NULL;
+  FILE		*f_system = NULL;
+  int		magic[1024];
+  int		i;
 
   if (!(f_device = pusb_otp_open_device(opts, volume, "w+")))
     {
@@ -118,13 +119,13 @@ static void		pusb_otp_update(t_pusb_options *opts, LibHalVolume *volume)
   log_debug("One time pads updated.\n");
 }
 
-static int		pusb_otp_compare(t_pusb_options *opts, LibHalVolume *volume)
+static int	pusb_otp_compare(t_pusb_options *opts, LibHalVolume *volume)
 {
-  FILE	*f_device = NULL;
-  FILE	*f_system = NULL;
-  int	magic_device[1024];
-  int	magic_system[1024];
-  int	retval;
+  FILE		*f_device = NULL;
+  FILE		*f_system = NULL;
+  int		magic_device[1024];
+  int		magic_system[1024];
+  int		retval;
 
   if (!(f_system = pusb_otp_open_system(opts, "r")))
     return (1);
@@ -134,22 +135,23 @@ static int		pusb_otp_compare(t_pusb_options *opts, LibHalVolume *volume)
       return (0);
     }
   log_debug("Loading device pad...\n");
-  fread(magic_device, sizeof(int), sizeof(magic_device) / sizeof(int), f_device);
+  fread(magic_device, sizeof(int), sizeof(magic_device) / sizeof(int),
+	f_device);
   log_debug("Loading system pad...\n");
-  fread(magic_system, sizeof(int), sizeof(magic_system) / sizeof(int), f_system);
+  fread(magic_system, sizeof(int), sizeof(magic_system) / sizeof(int),
+	f_system);
   retval = memcmp(magic_system, magic_device, sizeof(magic_system));
   fclose(f_system);
   fclose(f_device);
   return (retval == 0);
 }
 
-int	pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx,
-		       LibHalDrive *drive)
+int		pusb_otp_check(t_pusb_options *opts, LibHalContext *ctx)
 {
   LibHalVolume	*volume = NULL;
   int		retval;
 
-  volume = pusb_volume_find(opts, ctx, drive);
+  volume = pusb_volume_get(opts, ctx);
   if (!volume)
     return (!opts->enforce_otp);
   retval = pusb_otp_compare(opts, volume);

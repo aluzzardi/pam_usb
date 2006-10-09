@@ -17,6 +17,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <dbus/dbus.h>
 #include <libhal-storage.h>
 #include "conf.h"
 #include "hal.h"
@@ -24,57 +25,10 @@
 #include "otp.h"
 #include "device.h"
 
-static LibHalDrive	*pusb_device_get_storage(t_pusb_options *opts, LibHalContext *ctx,
-						 const char *udi)
+static int	pusb_device_connected(t_pusb_options *opts, LibHalContext *ctx)
 {
-  char			*phy_udi = NULL;
-  char			*storage_udi = NULL;
-  int			maxloop = 0;
-  LibHalDrive		*drive = NULL;
+  char		*udi = NULL;
 
-  log_info("Probing storage device (this could take a while)...\n");
-  while (!(phy_udi = pusb_hal_find_item(ctx,
-					"info.parent", udi,
-					"info.bus", "usb",
-					NULL)))
-    usleep(250000);
-  maxloop = ((opts->probe_timeout * 1000000) / 250000);
-  while (maxloop > 0 &&
-	 (!(storage_udi = pusb_hal_find_item(ctx,
-					     "storage.physical_device", phy_udi,
-					     "info.category", "storage",
-					     NULL)) || strstr(storage_udi, "temp")))
-    {
-      if (storage_udi)
-	libhal_free_string(storage_udi);
-      --maxloop;
-      usleep(250000);
-    }
-  libhal_free_string(phy_udi);
-  if (storage_udi)
-    {
-      drive = libhal_drive_from_udi(ctx, storage_udi);
-      libhal_free_string(storage_udi);
-    }
-  return (drive);
-}
-
-int			pusb_device_check(t_pusb_options *opts)
-{
-  DBusConnection	*dbus = NULL;
-  LibHalContext		*ctx = NULL;
-  LibHalDrive		*drive = NULL;
-  char			*udi = NULL;
-  int			retval = 0;
-
-  log_debug("Connecting to HAL...\n");
-  if (!(dbus = pusb_hal_dbus_connect()))
-    return (0);
-  if (!(ctx = pusb_hal_init(dbus)))
-    {
-      pusb_hal_dbus_disconnect(dbus);
-      return (0);
-    }
   log_debug("Searching for \"%s\" in the hardware database...\n",
 	    opts->device.name);
   udi = pusb_hal_find_item(ctx,
@@ -86,11 +40,36 @@ int			pusb_device_check(t_pusb_options *opts)
     {
       log_error("Device \"%s\" is not connected.\n",
 		opts->device.name);
+      return (0);
+    }
+  libhal_free_string(udi);
+  log_info("Device \"%s\" is connected (good).\n", opts->device.name);
+  return (1);
+}
+
+int			pusb_device_check(t_pusb_options *opts)
+{
+  DBusConnection	*dbus = NULL;
+  LibHalContext		*ctx = NULL;
+  int			retval = 0;
+
+  log_debug("Connecting to HAL...\n");
+  if (!(dbus = pusb_hal_dbus_connect()))
+    return (0);
+
+  if (!(ctx = pusb_hal_init(dbus)))
+    {
+      pusb_hal_dbus_disconnect(dbus);
+      return (0);
+    }
+
+  if (!pusb_device_connected(opts, ctx))
+    {
       pusb_hal_dbus_disconnect(dbus);
       libhal_ctx_free(ctx);
       return (0);
     }
-  log_info("Device \"%s\" is connected (good).\n", opts->device.name);
+
   if (!opts->try_otp && !opts->enforce_otp)
     {
       log_debug("One time pad is disabled, no more verifications to do.\n");
@@ -99,12 +78,9 @@ int			pusb_device_check(t_pusb_options *opts)
   else
     {
       log_info("Performing one time pad verification...\n");
-      if (!(drive = pusb_device_get_storage(opts, ctx, udi)))
-	retval = !opts->enforce_otp;
-      else
-	retval = pusb_otp_check(opts, ctx, drive);
+      retval = pusb_otp_check(opts, ctx);
     }
-  libhal_free_string(udi);
+
   pusb_hal_dbus_disconnect(dbus);
   libhal_ctx_free(ctx);
   return (retval);

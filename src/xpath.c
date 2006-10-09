@@ -80,14 +80,14 @@ int			pusb_xpath_get_string(xmlDocPtr doc, const char *path,
   return (1);
 }
 
-int			pusb_xpath_get_string_from(xmlDocPtr doc,
-						   const char *base,
-						   const char *path,
-						   char *value, size_t size)
+int		pusb_xpath_get_string_from(xmlDocPtr doc,
+					   const char *base,
+					   const char *path,
+					   char *value, size_t size)
 {
-  char			*xpath = NULL;
-  size_t		xpath_size;
-  int			retval;
+  char		*xpath = NULL;
+  size_t	xpath_size;
+  int		retval;
 
   xpath_size = strlen(base) + strlen(path) + 1;
   if (!(xpath = malloc(xpath_size)))
@@ -127,10 +127,10 @@ int	pusb_xpath_get_bool(xmlDocPtr doc, const char *path, int *value)
   return (0);
 }
 
-int			pusb_xpath_get_bool_from(xmlDocPtr doc,
-						 const char *base,
-						 const char *path,
-						 int *value)
+int		pusb_xpath_get_bool_from(xmlDocPtr doc,
+					 const char *base,
+					 const char *path,
+					 int *value)
 {
   char		*xpath = NULL;
   size_t	xpath_size;
@@ -151,9 +151,9 @@ int			pusb_xpath_get_bool_from(xmlDocPtr doc,
   return (retval);
 }
 
-int		pusb_xpath_get_int(xmlDocPtr doc, const char *path, int *value)
+int	pusb_xpath_get_int(xmlDocPtr doc, const char *path, int *value)
 {
-  char		ret[64]; /* strlen("false") + 1 */
+  char	ret[64]; /* strlen("false") + 1 */
 
   if (!pusb_xpath_get_string(doc, path, ret, sizeof(ret)))
     return (0);
@@ -161,10 +161,10 @@ int		pusb_xpath_get_int(xmlDocPtr doc, const char *path, int *value)
   return (1);
 }
 
-int			pusb_xpath_get_int_from(xmlDocPtr doc,
-						const char *base,
-						const char *path,
-						int *value)
+int		pusb_xpath_get_int_from(xmlDocPtr doc,
+					const char *base,
+					const char *path,
+					int *value)
 {
   char		*xpath = NULL;
   size_t	xpath_size;
