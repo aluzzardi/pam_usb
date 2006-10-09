@@ -1,12 +1,11 @@
 <configuration>
 	<defaults>
 		<option name="hostname">foobar</option>
-		<option name="try_otp">true</option>
-		<option name="enforce_otp">false</option>
+		<option name="one_time_pad">true</option>
 		<option name="probe_timeout">10</option>
 		<option name="debug">false</option>
-		<!--		<option name="system_otp_directory">.</option>
-		<option name="device_otp_directory">.auth</option> -->
+		<!--		<option name="system_pad_directory">.</option>
+		<option name="device_pad_directory">.auth</option> -->
 	</defaults>
 
 	<devices>
@@ -22,11 +21,11 @@
 	<users>
 		<user id="scox">
 			<device>foobar</device>
+			<option name="one_time_pad">false</option>
 		</user>
 
 		<user id="root">
 			<device>foobar</device>
-			<option name="enforce_otp">true</option>
 		</user>
 	</users>
 

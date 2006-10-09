@@ -28,20 +28,18 @@ static void	pusb_conf_options_get_from(t_pusb_options *opts,
 {
   pusb_xpath_get_string_from(doc, from, "option[@name='hostname']",
 			     opts->hostname, sizeof(opts->hostname));
-  pusb_xpath_get_string_from(doc, from, "option[@name='system_otp_directory']",
-			     opts->system_otp_directory,
-			     sizeof(opts->system_otp_directory));
-  pusb_xpath_get_string_from(doc, from, "option[@name='device_otp_directory']",
-			     opts->device_otp_directory,
-			     sizeof(opts->device_otp_directory));
+  pusb_xpath_get_string_from(doc, from, "option[@name='system_pad_directory']",
+			     opts->system_pad_directory,
+			     sizeof(opts->system_pad_directory));
+  pusb_xpath_get_string_from(doc, from, "option[@name='device_pad_directory']",
+			     opts->device_pad_directory,
+			     sizeof(opts->device_pad_directory));
   pusb_xpath_get_bool_from(doc, from, "option[@name='debug']",
 			   &(opts->debug));
   pusb_xpath_get_bool_from(doc, from, "option[@name='enable']",
 			   &(opts->enable));
-  pusb_xpath_get_bool_from(doc, from, "option[@name='try_otp']",
-			   &(opts->try_otp));
-  pusb_xpath_get_bool_from(doc, from, "option[@name='enforce_otp']",
-			   &(opts->enforce_otp));
+  pusb_xpath_get_bool_from(doc, from, "option[@name='one_time_pad']",
+			   &(opts->one_time_pad));
   pusb_xpath_get_int_from(doc, from, "option[@name='probe_timeout']",
 			  &(opts->probe_timeout));
 }
@@ -128,12 +126,11 @@ int	pusb_conf_init(t_pusb_options *opts)
       log_error("gethostname: %s\n", strerror(errno));
       return (0);
     }
-  strcpy(opts->system_otp_directory, "./");
-  strcpy(opts->device_otp_directory, ".auth");
+  strcpy(opts->system_pad_directory, "./");
+  strcpy(opts->device_pad_directory, ".auth");
   opts->probe_timeout = 10;
   opts->enable = 1;
-  opts->try_otp = 1;
-  opts->enforce_otp = 0;
+  opts->one_time_pad = 1;
   opts->debug = 0;
   return (1);
 }
@@ -143,12 +140,11 @@ static void	pusb_conf_dump(t_pusb_options *opts)
   log_debug("Configuration dump:\n");
   log_debug("enable\t\t\t: %s\n", opts->enable ? "true" : "false");
   log_debug("debug\t\t\t: %s\n", opts->debug ? "true" : "false");
-  log_debug("try_otp\t\t\t: %s\n", opts->try_otp ? "true" : "false");
-  log_debug("enforce_otp\t\t: %s\n", opts->enforce_otp ? "true" : "false");
+  log_debug("one_time_pad\t\t: %s\n", opts->one_time_pad ? "true" : "false");
   log_debug("probe_timeout\t\t: %d\n", opts->probe_timeout);
   log_debug("hostname\t\t\t: %s\n", opts->hostname);
-  log_debug("system_otp_directory\t: %s\n", opts->system_otp_directory);
-  log_debug("device_otp_directory\t: %s\n", opts->device_otp_directory);
+  log_debug("system_pad_directory\t: %s\n", opts->system_pad_directory);
+  log_debug("device_pad_directory\t: %s\n", opts->device_pad_directory);
 }
 
 
