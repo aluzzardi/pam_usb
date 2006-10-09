@@ -40,14 +40,14 @@ static FILE	*pusb_otp_open_device(t_pusb_options *opts,
   if (!mnt_point)
     return (NULL);
   path_size = strlen(mnt_point) + 1 + strlen(opts->device_pad_directory) + \
-    1 + strlen(opts->hostname) + strlen(".otp") + 1;
+    1 + strlen(opts->hostname) + strlen(".pad") + 1;
   if (!(path = malloc(path_size)))
     {
       log_error("malloc error!\n");
       return (NULL);
     }
   memset(path, 0x00, path_size);
-  snprintf(path, path_size, "%s/%s/%s.otp", mnt_point,
+  snprintf(path, path_size, "%s/%s/%s.pad", mnt_point,
 	   opts->device_pad_directory, opts->hostname);
   f = fopen(path, mode);
   free(path);
@@ -66,14 +66,14 @@ static FILE	*pusb_otp_open_system(t_pusb_options *opts, const char *mode)
   size_t	path_size;
 
   path_size = strlen(opts->system_pad_directory) + 1 +
-    strlen(opts->device.serial) + strlen(".otp") + 1;
+    strlen(opts->device.serial) + strlen(".pad") + 1;
   if (!(path = malloc(path_size)))
     {
       log_error("malloc error\n");
       return (NULL);
     }
   memset(path, 0x00, path_size);
-  snprintf(path, path_size, "%s/%s.otp", opts->system_pad_directory,
+  snprintf(path, path_size, "%s/%s.pad", opts->system_pad_directory,
 	   opts->device.serial);
   f = fopen(path, mode);
   free(path);
