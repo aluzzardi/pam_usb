@@ -40,7 +40,7 @@
 		     enforcing one time pads (enforce_otp).
 		-->
 		<service id="login">
-			<option name="try_otp">false</option>
+			<option name="one_time_pad">false</option>
 		</service>
 	</services>
 </configuration>
