@@ -18,20 +18,20 @@
 #ifndef PUSB_HAL_H_
 # define PUSB_HAL_H_
 
-DBusConnection *pusb_hal_dbus_connect(void);
-void pusb_hal_dbus_disconnect(DBusConnection *dbus);
-LibHalContext *pusb_hal_init(DBusConnection *dbus);
-void pusb_hal_destroy(LibHalContext *ctx);
-char *pusb_hal_get_property(LibHalContext *ctx,
-			    const char *udi,
-			    const char *name);
-int pusb_hal_check_property(LibHalContext *ctx,
-			    const char *udi,
-			    const char *name,
-			    const char *value);
-char *pusb_hal_find_item(LibHalContext *ctx,
-			 const char *property,
-			 const char *value,
-			 ...);
+DBusConnection	*pusb_hal_dbus_connect(void);
+void		pusb_hal_dbus_disconnect(DBusConnection *dbus);
+LibHalContext	*pusb_hal_init(DBusConnection *dbus);
+void		pusb_hal_destroy(LibHalContext *ctx);
+char		*pusb_hal_get_property(LibHalContext *ctx,
+				       const char *udi,
+				       const char *name);
+int		pusb_hal_check_property(LibHalContext *ctx,
+					const char *udi,
+					const char *name,
+					const char *value);
+char		*pusb_hal_find_item(LibHalContext *ctx,
+				    const char *property,
+				    const char *value,
+				    ...);
 
 #endif /* !PUSB_HAL_H_ */

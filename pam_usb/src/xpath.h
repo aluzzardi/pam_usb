@@ -19,17 +19,17 @@
 # define PUSB_XPATH_H_
 # include <libxml/parser.h>
 
-int pusb_xpath_get_string(xmlDocPtr doc, const char *path, char *value,
-			  size_t size);
-int pusb_xpath_get_bool(xmlDocPtr doc, const char *path, int *value);
-int pusb_xpath_get_string_from(xmlDocPtr doc, const char *base,
-			       const char *path, char *value, size_t size);
-int pusb_xpath_get_bool_from(xmlDocPtr doc, const char *base, const char *path,
-			     int *value);
-int pusb_xpath_get_int(xmlDocPtr doc, const char *path, int *value);
-int pusb_xpath_get_int_from(xmlDocPtr doc,
-			    const char *base,
-			    const char *path,
-			    int *value);
+int	pusb_xpath_get_string(xmlDocPtr doc, const char *path, char *value,
+			      size_t size);
+int	pusb_xpath_get_bool(xmlDocPtr doc, const char *path, int *value);
+int	pusb_xpath_get_string_from(xmlDocPtr doc, const char *base,
+				   const char *path, char *value, size_t size);
+int	pusb_xpath_get_bool_from(xmlDocPtr doc, const char *base,
+				 const char *path, int *value);
+int	pusb_xpath_get_int(xmlDocPtr doc, const char *path, int *value);
+int	pusb_xpath_get_int_from(xmlDocPtr doc,
+				const char *base,
+				const char *path,
+				int *value);
 
 #endif /* !PUSB_XPATH_H_ */

@@ -37,17 +37,17 @@ DBusConnection		*pusb_hal_dbus_connect(void)
   return (dbus);
 }
 
-void			pusb_hal_dbus_disconnect(DBusConnection *dbus)
+void	pusb_hal_dbus_disconnect(DBusConnection *dbus)
 {
   dbus_connection_close(dbus);
   dbus_connection_unref(dbus);
   dbus_shutdown();
 }
 
-LibHalContext		*pusb_hal_init(DBusConnection *dbus)
+LibHalContext	*pusb_hal_init(DBusConnection *dbus)
 {
-  DBusError		error;
-  LibHalContext		*ctx = NULL;
+  DBusError	error;
+  LibHalContext	*ctx = NULL;
 
   dbus_error_init(&error);
   if (!(ctx = libhal_ctx_new()))
@@ -70,17 +70,17 @@ LibHalContext		*pusb_hal_init(DBusConnection *dbus)
   return (ctx);
 }
 
-void			pusb_hal_destroy(LibHalContext *ctx)
+void	pusb_hal_destroy(LibHalContext *ctx)
 {
   libhal_ctx_free(ctx);
 }
 
-char			*pusb_hal_get_property(LibHalContext *ctx,
-					       const char *udi,
-					       const char *name)
+char		*pusb_hal_get_property(LibHalContext *ctx,
+				       const char *udi,
+				       const char *name)
 {
-  DBusError		error;
-  char			*data;
+  DBusError	error;
+  char		*data;
 
   dbus_error_init(&error);
   data = libhal_device_get_property_string(ctx, udi,
@@ -94,13 +94,13 @@ char			*pusb_hal_get_property(LibHalContext *ctx,
   return (data);
 }
 
-int		pusb_hal_check_property(LibHalContext *ctx,
-					const char *udi,
-					const char *name,
-					const char *value)
+int	pusb_hal_check_property(LibHalContext *ctx,
+				const char *udi,
+				const char *name,
+				const char *value)
 {
-  char		*data;
-  int		retval;
+  char	*data;
+  int	retval;
 
   data = pusb_hal_get_property(ctx, udi, name);
   if (!data)
@@ -163,7 +163,7 @@ char		*pusb_hal_find_item(LibHalContext *ctx,
   for (i = 0; i < n_devices; ++i)
     {
       char	*key = NULL;
-      int	match = 0;
+      int	match = 1;
 
       va_start(ap, value);
       while ((key = va_arg(ap, char *)))
