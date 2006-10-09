@@ -22,7 +22,7 @@
 #include "conf.h"
 #include "hal.h"
 #include "log.h"
-#include "otp.h"
+#include "pad.h"
 #include "device.h"
 
 static int	pusb_device_connected(t_pusb_options *opts, LibHalContext *ctx)
