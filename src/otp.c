@@ -26,7 +26,7 @@
 #include "conf.h"
 #include "log.h"
 #include "volume.h"
-#include "otp.h"
+#include "pad.h"
 
 static FILE	*pusb_pad_open_device(t_pusb_options *opts,
 				      LibHalVolume *volume, const char *mode)
