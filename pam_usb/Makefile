@@ -1,5 +1,5 @@
 DEBUG	:= no
-SRCS	:= src/test.c \
+SRCS	:= src/pusb_check.c \
 	   src/conf.c \
 	   src/log.c \
 	   src/xpath.c \
