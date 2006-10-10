@@ -16,14 +16,21 @@
  */
 
 #include <stdio.h>
+#include <syslog.h>
 #include <stdarg.h>
 #include "log.h"
+
+static void	pusb_log_syslog(int level, const char *format, va_list ap)
+{
+  openlog("pam_usb", LOG_PID, LOG_AUTH);
+  vsyslog(level, format, ap);
+  closelog();
+}
 
 void		__log_debug(const char *file, int line, const char *fmt, ...)
 {
   va_list	ap;
 
-  return ;
   fprintf(stderr, "\033[01;34m*\033[00m [%s:%03d] ", file, line);
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
@@ -38,6 +45,9 @@ void		log_error(const char *fmt, ...)
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   va_end(ap);
+  va_start(ap, fmt);
+  pusb_log_syslog(LOG_ERR, fmt, ap);
+  va_end(ap);
 }
 
 void		log_info(const char *fmt, ...)
@@ -47,5 +57,8 @@ void		log_info(const char *fmt, ...)
   fprintf(stderr, "\033[01;32m*\033[00m ");
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
+  va_end(ap);
+  va_start(ap, fmt);
+  pusb_log_syslog(LOG_NOTICE, fmt, ap);
   va_end(ap);
 }
