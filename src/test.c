@@ -51,7 +51,7 @@ int			main(int argc, char **argv)
   log_info("Authentication request for user \"%s\" (%s)\n",
 	   argv[1], argv[2]);
   pusb_conf_init(&opts);
-  if (!pusb_conf_parse("conf.xml", &opts, argv[1], argv[2]))
+  if (!pusb_conf_parse("pusb.conf", &opts, argv[1], argv[2]))
     return (0);
   pusb_log_init(&opts);
   pusb_conf_dump(&opts);
