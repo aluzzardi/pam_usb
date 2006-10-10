@@ -40,7 +40,7 @@ int			main(int argc, char **argv)
       log_debug("Not enabled, exiting...\n");
       return (0);
     }
-  retval = pusb_device_check(&opts);
+  retval = pusb_device_check(&opts, argv[1]);
   if (retval)
     log_info("Access granted.\n");
   else
