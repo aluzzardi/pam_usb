@@ -19,6 +19,24 @@
 #include "conf.h"
 #include "log.h"
 #include "device.h"
+#include "local.h"
+
+static void	pusb_conf_dump(t_pusb_options *opts)
+{
+  fprintf(stdout, "Configuration dump:\n");
+  fprintf(stdout, "enable\t\t\t: %s\n", opts->enable ? "true" : "false");
+  fprintf(stdout, "debug\t\t\t: %s\n", opts->debug ? "true" : "false");
+  fprintf(stdout, "quiet\t\t\t: %s\n", opts->quiet ? "true" : "false");
+  fprintf(stdout, "color_log\t\t: %s\n", opts->color_log ? "true" : "false");
+  fprintf(stdout, "one_time_pad\t\t: %s\n",
+	  opts->one_time_pad ? "true" : "false");
+  fprintf(stdout, "probe_timeout\t\t: %d\n", opts->probe_timeout);
+  fprintf(stdout, "hostname\t\t: %s\n", opts->hostname);
+  fprintf(stdout, "system_pad_directory\t: %s\n",
+	  opts->system_pad_directory);
+  fprintf(stdout, "device_pad_directory\t: %s\n",
+	  opts->device_pad_directory);
+}
 
 int			main(int argc, char **argv)
 {
@@ -35,9 +53,16 @@ int			main(int argc, char **argv)
   pusb_conf_init(&opts);
   if (!pusb_conf_parse("conf.xml", &opts, argv[1], argv[2]))
     return (0);
+  pusb_log_init(&opts);
+  pusb_conf_dump(&opts);
   if (!opts.enable)
     {
       log_debug("Not enabled, exiting...\n");
+      return (0);
+    }
+  if (!pusb_local_login(&opts, argv[1]))
+    {
+      log_error("Access denied.\n");
       return (0);
     }
   retval = pusb_device_check(&opts, argv[1]);
@@ -47,3 +72,6 @@ int			main(int argc, char **argv)
     log_error("Access denied.\n");
   return (0);
 }
+
+
+

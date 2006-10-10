@@ -15,15 +15,9 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef PUSB_LOG_H_
-# define PUSB_LOG_H_
-# define log_debug(s, ...) __log_debug(__FILE__, __LINE__, s, ##__VA_ARGS__)
-# include "conf.h"
+#ifndef PUSB_LOCAL_H_
+# define PUSB_LOCAL_H_
 
-void	__log_debug(const char *file, int line, const char *fmt, ...);
-void	log_error(const char *fmt, ...);
-void	log_info(const char *fmt, ...);
-void	pusb_log_init(t_pusb_options *opts);
+int	pusb_local_login(t_pusb_options *opts, const char *user);
 
-
-#endif /* !PUSB_LOG_H_ */
+#endif /* !PUSB_LOCAL_H_ */
