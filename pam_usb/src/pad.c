@@ -164,7 +164,7 @@ static int	pusb_pad_compare(t_pusb_options *opts, LibHalVolume *volume,
   int		retval;
 
   if (!(f_system = pusb_pad_open_system(opts, user, "r")))
-    return (1);
+    return (0);
   if (!(f_device = pusb_pad_open_device(opts, volume, user, "r")))
     {
       fclose(f_system);

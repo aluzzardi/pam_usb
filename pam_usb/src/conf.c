@@ -36,6 +36,10 @@ static void	pusb_conf_options_get_from(t_pusb_options *opts,
 			     sizeof(opts->device_pad_directory));
   pusb_xpath_get_bool_from(doc, from, "option[@name='debug']",
 			   &(opts->debug));
+  pusb_xpath_get_bool_from(doc, from, "option[@name='quiet']",
+			   &(opts->quiet));
+  pusb_xpath_get_bool_from(doc, from, "option[@name='color_log']",
+			   &(opts->color_log));
   pusb_xpath_get_bool_from(doc, from, "option[@name='enable']",
 			   &(opts->enable));
   pusb_xpath_get_bool_from(doc, from, "option[@name='one_time_pad']",
@@ -130,23 +134,12 @@ int	pusb_conf_init(t_pusb_options *opts)
   strcpy(opts->device_pad_directory, ".auth");
   opts->probe_timeout = 10;
   opts->enable = 1;
-  opts->one_time_pad = 1;
   opts->debug = 0;
+  opts->quiet = 0;
+  opts->color_log = 1;
+  opts->one_time_pad = 1;
   return (1);
 }
-
-static void	pusb_conf_dump(t_pusb_options *opts)
-{
-  log_debug("Configuration dump:\n");
-  log_debug("enable\t\t\t: %s\n", opts->enable ? "true" : "false");
-  log_debug("debug\t\t\t: %s\n", opts->debug ? "true" : "false");
-  log_debug("one_time_pad\t\t: %s\n", opts->one_time_pad ? "true" : "false");
-  log_debug("probe_timeout\t\t: %d\n", opts->probe_timeout);
-  log_debug("hostname\t\t\t: %s\n", opts->hostname);
-  log_debug("system_pad_directory\t: %s\n", opts->system_pad_directory);
-  log_debug("device_pad_directory\t: %s\n", opts->device_pad_directory);
-}
-
 
 int		pusb_conf_parse(const char *file, t_pusb_options *opts,
 				const char *user, const char *service)
@@ -190,6 +183,5 @@ int		pusb_conf_parse(const char *file, t_pusb_options *opts,
     }
   xmlFreeDoc(doc);
   xmlCleanupParser();
-  pusb_conf_dump(opts);
   return (1);
 }

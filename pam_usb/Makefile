@@ -6,6 +6,7 @@ SRCS	:= src/test.c \
 	   src/hal.c \
 	   src/pad.c \
 	   src/volume.c \
+	   src/local.c \
 	   src/device.c
 OBJS	:= $(SRCS:.c=.o)
 NAME	:= pusb_check

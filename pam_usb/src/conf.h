@@ -35,8 +35,10 @@ typedef struct	pusb_options
 {
   int		probe_timeout;
   int		enable;
-  int		one_time_pad;
   int		debug;
+  int		quiet;
+  int		color_log;
+  int		one_time_pad;
   char		hostname[32];
   char		system_pad_directory[128];
   char		device_pad_directory[32];
