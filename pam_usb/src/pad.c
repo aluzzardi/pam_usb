@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <pwd.h>
 #include <time.h>
 #include <libhal-storage.h>
 #include "conf.h"
@@ -29,7 +31,9 @@
 #include "pad.h"
 
 static FILE	*pusb_pad_open_device(t_pusb_options *opts,
-				      LibHalVolume *volume, const char *mode)
+				      LibHalVolume *volume,
+				      const char *user,
+				      const char *mode)
 {
   FILE		*f;
   char		*path;
@@ -39,16 +43,16 @@ static FILE	*pusb_pad_open_device(t_pusb_options *opts,
   mnt_point = (char *)libhal_volume_get_mount_point(volume);
   if (!mnt_point)
     return (NULL);
-  path_size = strlen(mnt_point) + 1 + strlen(opts->device_pad_directory) + \
-    1 + strlen(opts->hostname) + strlen(".pad") + 1;
+  path_size = strlen(mnt_point) + 1 + strlen(opts->device_pad_directory) +
+    1 + strlen(user) + 1 + strlen(opts->hostname) + strlen(".pad") + 1;
   if (!(path = malloc(path_size)))
     {
       log_error("malloc error!\n");
       return (NULL);
     }
   memset(path, 0x00, path_size);
-  snprintf(path, path_size, "%s/%s/%s.pad", mnt_point,
-	   opts->device_pad_directory, opts->hostname);
+  snprintf(path, path_size, "%s/%s/%s.%s.pad", mnt_point,
+	   opts->device_pad_directory, user, opts->hostname);
   f = fopen(path, mode);
   free(path);
   if (!f)
@@ -59,22 +63,50 @@ static FILE	*pusb_pad_open_device(t_pusb_options *opts,
   return (f);
 }
 
-static FILE	*pusb_pad_open_system(t_pusb_options *opts, const char *mode)
+static int	pusb_pad_protect(const char *user, int fd)
+{
+  struct passwd	*user_ent = NULL;
+
+  log_debug("Protecting pad file...\n");
+  if (!(user_ent = getpwnam(user)))
+    {
+      log_error("Unable to retrieve informations for user \"%s\": %s\n",
+		strerror(errno));
+      return (0);
+    }
+  if (fchown(fd, user_ent->pw_uid, user_ent->pw_gid) == -1)
+    {
+      log_error("Unable to change owner of the pad: %s\n",
+		strerror(errno));
+      return (0);
+    }
+  if (fchmod(fd, S_IRUSR | S_IWUSR) == -1)
+    {
+      log_error("Unable to change mode of the pad: %s\n",
+		strerror(errno));
+      return (0);
+    }
+  return (1);
+}
+
+static FILE	*pusb_pad_open_system(t_pusb_options *opts,
+				      const char *user,
+				      const char *mode)
 {
   FILE		*f;
   char		*path;
   size_t	path_size;
 
   path_size = strlen(opts->system_pad_directory) + 1 +
-    strlen(opts->device.serial) + strlen(".pad") + 1;
+    strlen(user) + 1 + strlen(opts->device.name) + strlen(".pad") + 1;
   if (!(path = malloc(path_size)))
     {
       log_error("malloc error\n");
       return (NULL);
     }
   memset(path, 0x00, path_size);
-  snprintf(path, path_size, "%s/%s.pad", opts->system_pad_directory,
-	   opts->device.serial);
+  snprintf(path, path_size, "%s/%s.%s.pad", opts->system_pad_directory,
+	   user, opts->device.name);
   f = fopen(path, mode);
   free(path);
   if (!f)
@@ -86,32 +118,35 @@ static FILE	*pusb_pad_open_system(t_pusb_options *opts, const char *mode)
 }
 
 static void	pusb_pad_update(t_pusb_options *opts,
-				LibHalVolume *volume)
+				LibHalVolume *volume,
+				const char *user)
 {
   FILE		*f_device = NULL;
   FILE		*f_system = NULL;
-  int		magic[1024];
+  char		magic[1024];
   int		i;
 
-  if (!(f_device = pusb_pad_open_device(opts, volume, "w+")))
+  if (!(f_device = pusb_pad_open_device(opts, volume, user, "w+")))
     {
       log_error("Unable to update pads.\n");
       return ;
     }
-  if (!(f_system = pusb_pad_open_system(opts, "w+")))
+  pusb_pad_protect(user, fileno(f_device));
+  if (!(f_system = pusb_pad_open_system(opts, user, "w+")))
     {
       log_error("Unable to update pads.\n");
       fclose(f_device);
       return ;
     }
+  pusb_pad_protect(user, fileno(f_system));
   log_debug("Generating %d bytes unique pad...\n", sizeof(magic));
   srand(getpid() * time(NULL));
-  for (i = 0; i < (sizeof(magic) / sizeof(int)); ++i)
-    magic[i] = rand();
+  for (i = 0; i < sizeof(magic); ++i)
+    magic[i] = (char)rand();
   log_debug("Writing pad to the device...\n");
-  fwrite(magic, sizeof(int), sizeof(magic) / sizeof(int), f_system);
+  fwrite(magic, sizeof(char), sizeof(magic), f_system);
   log_debug("Writing pad to the system...\n");
-  fwrite(magic, sizeof(int), sizeof(magic) / sizeof(int), f_device);
+  fwrite(magic, sizeof(char), sizeof(magic), f_device);
   log_debug("Synchronizing filesystems...\n");
   fclose(f_system);
   fclose(f_device);
@@ -119,34 +154,34 @@ static void	pusb_pad_update(t_pusb_options *opts,
   log_debug("One time pads updated.\n");
 }
 
-static int	pusb_pad_compare(t_pusb_options *opts, LibHalVolume *volume)
+static int	pusb_pad_compare(t_pusb_options *opts, LibHalVolume *volume,
+				 const char *user)
 {
   FILE		*f_device = NULL;
   FILE		*f_system = NULL;
-  int		magic_device[1024];
-  int		magic_system[1024];
+  char		magic_device[1024];
+  char		magic_system[1024];
   int		retval;
 
-  if (!(f_system = pusb_pad_open_system(opts, "r")))
+  if (!(f_system = pusb_pad_open_system(opts, user, "r")))
     return (1);
-  if (!(f_device = pusb_pad_open_device(opts, volume, "r")))
+  if (!(f_device = pusb_pad_open_device(opts, volume, user, "r")))
     {
       fclose(f_system);
       return (0);
     }
   log_debug("Loading device pad...\n");
-  fread(magic_device, sizeof(int), sizeof(magic_device) / sizeof(int),
-	f_device);
+  fread(magic_device, sizeof(char), sizeof(magic_device), f_device);
   log_debug("Loading system pad...\n");
-  fread(magic_system, sizeof(int), sizeof(magic_system) / sizeof(int),
-	f_system);
+  fread(magic_system, sizeof(char), sizeof(magic_system), f_system);
   retval = memcmp(magic_system, magic_device, sizeof(magic_system));
   fclose(f_system);
   fclose(f_device);
   return (retval == 0);
 }
 
-int		pusb_pad_check(t_pusb_options *opts, LibHalContext *ctx)
+int		pusb_pad_check(t_pusb_options *opts, LibHalContext *ctx,
+			       const char *user)
 {
   LibHalVolume	*volume = NULL;
   int		retval;
@@ -154,11 +189,11 @@ int		pusb_pad_check(t_pusb_options *opts, LibHalContext *ctx)
   volume = pusb_volume_get(opts, ctx);
   if (!volume)
     return (0);
-  retval = pusb_pad_compare(opts, volume);
+  retval = pusb_pad_compare(opts, volume, user);
   if (retval)
     {
       log_info("Verification match, updating one time pads...\n");
-      pusb_pad_update(opts, volume);
+      pusb_pad_update(opts, volume, user);
     }
   else
     log_error("Pad checking failed !\n");

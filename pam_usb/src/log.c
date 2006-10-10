@@ -23,6 +23,7 @@ void		__log_debug(const char *file, int line, const char *fmt, ...)
 {
   va_list	ap;
 
+  return ;
   fprintf(stderr, "\033[01;34m*\033[00m [%s:%03d] ", file, line);
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);

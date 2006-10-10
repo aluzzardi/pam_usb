@@ -18,6 +18,7 @@
 #ifndef PUSB_OTP_H_
 # define PUSB_OTP_H_
 
-int	pusb_pad_check(t_pusb_options *opts, LibHalContext *ctx);
+int	pusb_pad_check(t_pusb_options *opts, LibHalContext *ctx,
+		       const char *user);
 
 #endif /* !PUSB_OTP_H_ */
