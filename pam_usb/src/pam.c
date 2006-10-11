@@ -83,35 +83,7 @@ PAM_EXTERN
 int	pam_sm_setcred(pam_handle_t *pamh,int flags,int argc,
 		       const char **argv)
 {
-  return (PAM_IGNORE);
-}
-
-PAM_EXTERN
-int	pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
-			 const char **argv)
-{
-  return (PAM_IGNORE);
-}
-
-PAM_EXTERN
-int	pam_sm_open_session(pam_handle_t *pamh, int flags, int argc,
-			    const char **argv)
-{
-  return (PAM_IGNORE);
-}
-
-PAM_EXTERN
-int	pam_sm_close_session(pam_handle_t *pamh, int flags, int argc,
-			     const char **argv)
-{
-  return (PAM_IGNORE);
-}
-
-PAM_EXTERN
-int	pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc,
-			 const char **argv)
-{
-  return (PAM_IGNORE);
+  return (PAM_SUCCESS);
 }
 
 #ifdef PAM_STATIC
@@ -120,10 +92,10 @@ struct pam_module _pam_usb_modstruct = {
   "pam_usb",
   pam_sm_authenticate,
   pam_sm_setcred,
-  pam_sm_acct_mgmt,
-  pam_sm_open_session,
-  pam_sm_close_session,
-  pam_sm_chauthtok
+  NULL,
+  NULL,
+  NULL,
+  NULL
 };
 
 #endif
