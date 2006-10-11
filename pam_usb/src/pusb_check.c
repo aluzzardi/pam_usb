@@ -16,12 +16,13 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include "conf.h"
 #include "log.h"
 #include "device.h"
 #include "local.h"
 
-static void	pusb_conf_dump(t_pusb_options *opts)
+static void	pusb_check_conf_dump(t_pusb_options *opts)
 {
   fprintf(stdout, "Configuration dump:\n");
   fprintf(stdout, "enable\t\t\t: %s\n", opts->enable ? "true" : "false");
@@ -38,37 +39,92 @@ static void	pusb_conf_dump(t_pusb_options *opts)
 	  opts->device_pad_directory);
 }
 
-int			main(int argc, char **argv)
+static int	pusb_check_perform_authentication(t_pusb_options *opts,
+						  const char *user,
+						  const char *service)
 {
-  t_pusb_options	opts;
-  int			retval;
+  int		retval;
 
-  if (argc < 3)
-    {
-      printf("Usage: %s <username> <service>\n", argv[0]);
-      return (1);
-    }
   log_info("Authentication request for user \"%s\" (%s)\n",
-	   argv[1], argv[2]);
-  pusb_conf_init(&opts);
-  if (!pusb_conf_parse("pusb.conf", &opts, argv[1], argv[2]))
-    return (0);
-  pusb_log_init(&opts);
-  pusb_conf_dump(&opts);
-  if (!opts.enable)
+	   user, service);
+  if (!opts->enable)
     {
       log_debug("Not enabled, exiting...\n");
       return (0);
     }
-  if (!pusb_local_login(&opts, argv[1]))
+  if (!pusb_local_login(opts, user))
     {
       log_error("Access denied.\n");
       return (0);
     }
-  retval = pusb_device_check(&opts, argv[1]);
+  retval = pusb_device_check(opts, user);
   if (retval)
     log_info("Access granted.\n");
   else
     log_error("Access denied.\n");
+  return (retval);
+}
+
+static void	pusb_check_usage(const char *name)
+{
+  fprintf(stderr, "Usage: %s [-c <config file>] -u <username> -s <service>" \
+	  "[options]\n", name);
+  fprintf(stderr, "Options can be one or more of the followings:\n");
+  fprintf(stderr, "\t-a Authenticate: Try to authenticate the user\n");
+  fprintf(stderr, "\t-d Dump: Parse and dump the settings\n");
+  fprintf(stderr, "\t-q Quiet: Silent mode\n");
+}
+
+int			main(int argc, char **argv)
+{
+  t_pusb_options	opts;
+  char			*conf_file = PUSB_CONF_FILE;
+  int			quiet = 0;
+  char			*user = NULL;
+  char			*service = NULL;
+  int			opt;
+  int			mode = 0;
+  extern char		*optarg;
+
+  while ((opt = getopt(argc, argv, "u:s:c:qad")) != EOF)
+    {
+      switch (opt)
+	{
+	case 'u':
+	  user = optarg;
+	  break;
+	case 's':
+	  service = optarg;
+	  break;
+	case 'c':
+	  conf_file = optarg;
+	  break;
+	case 'q':
+	  quiet = 1;
+	  break;
+	case 'a':
+	  mode = 1;
+	  break;
+	case 'd':
+	  mode = 2;
+	  break;
+	default:
+	  break;
+	}
+    }
+  if (!user || !service || !mode)
+    {
+      pusb_check_usage(argv[0]);
+      return (1);
+    }
+  pusb_conf_init(&opts);
+  if (!pusb_conf_parse(conf_file, &opts, user, service))
+    return (0);
+  opts.quiet = quiet;
+  pusb_log_init(&opts);
+  if (mode == 1)
+    return (pusb_check_perform_authentication(&opts, user, service));
+  else if (mode == 2)
+    pusb_check_conf_dump(&opts);
   return (0);
 }

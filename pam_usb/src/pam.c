@@ -25,8 +25,6 @@
 #include "local.h"
 #include "device.h"
 
-#define PUSB_CONFIG_FILE "/etc/pam_usb/pusb.conf"
-
 PAM_EXTERN
 int			pam_sm_authenticate(pam_handle_t *pamh, int flags,
 					    int argc, const char **argv)
@@ -34,7 +32,7 @@ int			pam_sm_authenticate(pam_handle_t *pamh, int flags,
   t_pusb_options	opts;
   const char		*service;
   const char		*user;
-  char			*conf_file = PUSB_CONFIG_FILE;
+  char			*conf_file = PUSB_CONF_FILE;
   int			retval;
 
   retval = pam_get_item(pamh, PAM_SERVICE, (const void **)&service);
