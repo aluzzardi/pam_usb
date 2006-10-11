@@ -164,7 +164,7 @@ static int	pusb_pad_compare(t_pusb_options *opts, LibHalVolume *volume,
   int		retval;
 
   if (!(f_system = pusb_pad_open_system(opts, user, "r")))
-    return (0);
+    return (1);
   if (!(f_device = pusb_pad_open_device(opts, volume, user, "r")))
     {
       fclose(f_system);
@@ -177,6 +177,8 @@ static int	pusb_pad_compare(t_pusb_options *opts, LibHalVolume *volume,
   retval = memcmp(magic_system, magic_device, sizeof(magic_system));
   fclose(f_system);
   fclose(f_device);
+  if (!retval)
+    log_debug("Pad match.\n");
   return (retval == 0);
 }
 
