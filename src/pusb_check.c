@@ -119,11 +119,11 @@ int			main(int argc, char **argv)
     }
   pusb_conf_init(&opts);
   if (!pusb_conf_parse(conf_file, &opts, user, service))
-    return (0);
+    return (1);
   opts.quiet = quiet;
   pusb_log_init(&opts);
   if (mode == 1)
-    return (pusb_check_perform_authentication(&opts, user, service));
+    return (!pusb_check_perform_authentication(&opts, user, service));
   else if (mode == 2)
     pusb_check_conf_dump(&opts);
   return (0);
