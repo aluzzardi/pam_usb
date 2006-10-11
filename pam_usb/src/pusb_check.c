@@ -45,13 +45,13 @@ static int	pusb_check_perform_authentication(t_pusb_options *opts,
 {
   int		retval;
 
-  log_info("Authentication request for user \"%s\" (%s)\n",
-	   user, service);
   if (!opts->enable)
     {
       log_debug("Not enabled, exiting...\n");
       return (0);
     }
+  log_info("Authentication request for user \"%s\" (%s)\n",
+	   user, service);
   if (!pusb_local_login(opts, user))
     {
       log_error("Access denied.\n");
