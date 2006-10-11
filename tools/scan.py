@@ -38,6 +38,8 @@ def showProperties(udi):
     deviceProperties = deviceObj.GetAllProperties(
         dbus_interface = 'org.freedesktop.Hal.Device')
     print 'Device %s' % udi
+    print 'Vendor: %s' % deviceProperties['usb_device.vendor']
+    print 'Product: %s' % deviceProperties['info.product']
     print 'Serial Number: %s' % deviceProperties['usb_device.serial']
     print
     print 'Volume\t\t\tUUID'
