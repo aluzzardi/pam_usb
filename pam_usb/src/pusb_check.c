@@ -72,6 +72,3 @@ int			main(int argc, char **argv)
     log_error("Access denied.\n");
   return (0);
 }
-
-
-

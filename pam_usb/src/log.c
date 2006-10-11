@@ -25,6 +25,13 @@ static t_pusb_options	*pusb_opts = NULL;
 
 static void	pusb_log_syslog(int level, const char *format, va_list ap)
 {
+  openlog("pam_usb", LOG_PID, LOG_AUTH);
+  vsyslog(level, format, ap);
+  closelog();
+}
+
+static void	pusb_log_output(int level, const char *format, va_list ap)
+{
   if ((pusb_opts && !pusb_opts->quiet) ||
       level == LOG_ERR)
     {
@@ -39,9 +46,6 @@ static void	pusb_log_syslog(int level, const char *format, va_list ap)
 	fprintf(stderr, "* ");
       vfprintf(stderr, format, ap);
     }
-  openlog("pam_usb", LOG_PID, LOG_AUTH);
-  vsyslog(level, format, ap);
-  closelog();
 }
 
 void		__log_debug(const char *file, int line, const char *fmt, ...)
@@ -63,6 +67,9 @@ void		log_error(const char *fmt, ...)
   va_start(ap, fmt);
   pusb_log_syslog(LOG_ERR, fmt, ap);
   va_end(ap);
+  va_start(ap, fmt);
+  pusb_log_output(LOG_ERR, fmt, ap);
+  va_end(ap);
 }
 
 void		log_info(const char *fmt, ...)
@@ -71,6 +78,9 @@ void		log_info(const char *fmt, ...)
 
   va_start(ap, fmt);
   pusb_log_syslog(LOG_NOTICE, fmt, ap);
+  va_end(ap);
+  va_start(ap, fmt);
+  pusb_log_output(LOG_NOTICE, fmt, ap);
   va_end(ap);
 }
 
