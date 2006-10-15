@@ -22,6 +22,11 @@
 # define CONF_USER_XPATH "//configuration/users/user[@id='%s']/%s"
 # define CONF_SERVICE_XPATH "//configuration/services/service[@id='%s']/%s"
 # define CONF_USER_MAXLEN 32
+# include <limits.h>
+# include <linux/limits.h>
+# ifndef PATH_MAX
+#  define PATH_MAX 4096
+# endif
 
 typedef struct	pusb_device
 {
@@ -41,8 +46,8 @@ typedef struct	pusb_options
   int		color_log;
   int		one_time_pad;
   char		hostname[32];
-  char		system_pad_directory[128];
-  char		device_pad_directory[32];
+  char		system_pad_directory[PATH_MAX];
+  char		device_pad_directory[PATH_MAX];
   t_pusb_device	device;
 }		t_pusb_options;
 
