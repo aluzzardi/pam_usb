@@ -36,25 +36,31 @@ static FILE	*pusb_pad_open_device(t_pusb_options *opts,
 				      const char *mode)
 {
   FILE		*f;
-  char		*path;
-  size_t	path_size;
+  char		path[PATH_MAX];
   const char	*mnt_point;
 
   mnt_point = (char *)libhal_volume_get_mount_point(volume);
   if (!mnt_point)
     return (NULL);
-  path_size = strlen(mnt_point) + 1 + strlen(opts->device_pad_directory) +
-    1 + strlen(user) + 1 + strlen(opts->hostname) + strlen(".pad") + 1;
-  if (!(path = malloc(path_size)))
+  memset(path, 0x00, PATH_MAX);
+  if (strchr(mode, 'w'))
     {
-      log_error("malloc error!\n");
-      return (NULL);
+      snprintf(path, PATH_MAX, "%s/%s", mnt_point, opts->device_pad_directory);
+      if (access(path, F_OK) != 0)
+	{
+	  log_debug("Directory %s does not exist, creating one.\n", path);
+	  if (mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
+	    {
+	      log_debug("Unable to create directory %s: %s\n", path,
+			strerror(errno));
+	      return (NULL);
+	    }
+	}
+      memset(path, 0x00, PATH_MAX);
     }
-  memset(path, 0x00, path_size);
-  snprintf(path, path_size, "%s/%s/%s.%s.pad", mnt_point,
+  snprintf(path, PATH_MAX, "%s/%s/%s.%s.pad", mnt_point,
 	   opts->device_pad_directory, user, opts->hostname);
   f = fopen(path, mode);
-  free(path);
   if (!f)
     {
       log_debug("Cannot open device file: %s\n", strerror(errno));
@@ -94,21 +100,12 @@ static FILE	*pusb_pad_open_system(t_pusb_options *opts,
 				      const char *mode)
 {
   FILE		*f;
-  char		*path;
-  size_t	path_size;
+  char		path[PATH_MAX];
 
-  path_size = strlen(opts->system_pad_directory) + 1 +
-    strlen(user) + 1 + strlen(opts->device.name) + strlen(".pad") + 1;
-  if (!(path = malloc(path_size)))
-    {
-      log_error("malloc error\n");
-      return (NULL);
-    }
-  memset(path, 0x00, path_size);
-  snprintf(path, path_size, "%s/%s.%s.pad", opts->system_pad_directory,
+  memset(path, 0x00, PATH_MAX);
+  snprintf(path, PATH_MAX, "%s/%s.%s.pad", opts->system_pad_directory,
 	   user, opts->device.name);
   f = fopen(path, mode);
-  free(path);
   if (!f)
     {
       log_debug("Cannot open system file: %s\n", strerror(errno));
