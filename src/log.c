@@ -58,6 +58,10 @@ void		__log_debug(const char *file, int line, const char *fmt, ...)
   va_start(ap, fmt);
   vfprintf(stderr, fmt, ap);
   va_end(ap);
+
+  va_start(ap, fmt);
+  pusb_log_syslog(LOG_DEBUG, fmt, ap);
+  va_end(ap);
 }
 
 void		log_error(const char *fmt, ...)
@@ -67,6 +71,7 @@ void		log_error(const char *fmt, ...)
   va_start(ap, fmt);
   pusb_log_syslog(LOG_ERR, fmt, ap);
   va_end(ap);
+
   va_start(ap, fmt);
   pusb_log_output(LOG_ERR, fmt, ap);
   va_end(ap);
@@ -79,6 +84,7 @@ void		log_info(const char *fmt, ...)
   va_start(ap, fmt);
   pusb_log_syslog(LOG_NOTICE, fmt, ap);
   va_end(ap);
+
   va_start(ap, fmt);
   pusb_log_output(LOG_NOTICE, fmt, ap);
   va_end(ap);
