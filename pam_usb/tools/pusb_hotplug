@@ -1,0 +1,165 @@
+#!/usr/bin/env python2.4
+
+import os
+import sys
+import pwd
+import getopt
+import gobject
+import dbus
+if getattr(dbus, 'version', (0,0,0)) >= (0,41,0):
+    import dbus.glib
+try:
+    import cElementTree as et
+except ImportError:
+    import elementtree.ElementTree as et
+
+class HotPlugDevice:
+    def __init__(self, serial):
+        self.__udi = None
+        self.__serial = serial
+        self.__callbacks = []
+        self.__bus = dbus.SystemBus()
+        self.__running = False
+
+    def run(self):
+        self.__scanDevices()
+        self.__registerSignals()
+        self.__running = True
+        gobject.MainLoop().run()
+        print 'signals registered'
+
+    def addCallback(self, callback):
+        self.__callbacks.append(callback)
+
+    def __scanDevices(self):
+        halService = self.__bus.get_object('org.freedesktop.Hal',
+                                           '/org/freedesktop/Hal/Manager')
+        halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
+        for udi in halManager.FindDeviceStringMatch('info.bus', 'usb_device'):
+            self.__deviceAdded(udi)
+
+    def __registerSignals(self):
+        for signal, callback in (('DeviceAdded', self.__deviceAdded),
+                                 ('DeviceRemoved', self.__deviceRemoved)):
+            self.__bus.add_signal_receiver(callback,
+                                           signal,
+                                           'org.freedesktop.Hal.Manager',
+                                           'org.freedesktop.Hal',
+                                           '/org/freedesktop/Hal/Manager')
+
+    def __deviceAdded(self, udi):
+        if self.__udi is not None:
+            return
+        deviceObj = self.__bus.get_object('org.freedesktop.Hal',
+                                          udi)
+        deviceProperties = deviceObj.GetAllProperties(
+            dbus_interface = 'org.freedesktop.Hal.Device')
+        if not deviceProperties.has_key('usb_device.serial'):
+            return
+        if deviceProperties['usb_device.serial'] != self.__serial:
+            return
+        self.__udi = udi
+        print 'Device %s added' % udi
+        if self.__running:
+            [ cb('added') for cb in self.__callbacks ]
+
+    def __deviceRemoved(self, udi):
+        if self.__udi is None:
+            return
+        if self.__udi != udi:
+            return
+        self.__udi = None
+        print 'Device %s removed' % udi
+        if self.__running:
+            [ cb('removed') for cb in self.__callbacks ]
+
+
+
+def usage():
+    print 'Usage: %s [--config file] [--daemon] [--path pusb_check_path]' \
+          % sys.argv[0]
+    sys.exit(1)
+
+import getopt
+
+try:
+    opts, args = getopt.getopt(sys.argv[1:], "hc:dp:",
+                               ["help", "config=", "daemon", "path="])
+except getopt.GetoptError:
+    usage()
+
+options = {'configFile' : '/etc/pam_usb/pusb.conf',
+            'daemon' : False,
+            'path' : '/usr/bin/pusb_check'}
+
+if len(args) != 0:
+    usage()
+
+for o, a in opts:
+    if o in ('-h', '--help'):
+        usage()
+    if o in ('-c', '--config'):
+        options['configFile'] = a
+    if o in ('-d', '--daemon'):
+        options['daemon'] = True
+    if o in ('-p', '--path'):
+        options['path'] = a
+
+
+if not os.path.exists(options['path']):
+    print '%s not found.' % options['path']
+    print "You might specify manually pusb_check's location using --path."
+    usage()
+
+username = pwd.getpwuid(os.getuid())[0]
+
+print 'Running pusb_hotplug for user %s' % username
+
+doc = et.parse(options['configFile'])
+users = doc.findall('users/user')
+for user in users:
+    if user.get('id') == username:
+        break
+else:
+    print 'User %s not found' % username
+
+events = {
+    'lock' : [],
+    'unlock' : []
+    }
+
+for hotplug in user.findall('hotplug'):
+    events[hotplug.get('event')].append(hotplug.text)
+
+deviceName = user.find('device').text
+
+devices = doc.findall("devices/device")
+for device in devices:
+    if device.get('id') == deviceName:
+        break
+else:
+    print 'Device %s not found' % deviceName
+
+serial = device.find('serial').text
+
+def authChangeCallback(event):
+    print 'User %s is now %s' % (username, event)
+    retValue = os.system("%s -c %s -u %s -s pusb_hotplug -a" % (
+        options['path'], options['configFile'], username))
+    print retValue
+    if retValue == 0:
+        run = events['unlock']
+    else:
+        run = events['lock']
+    [os.system(e) for e in run]
+
+hpDev = HotPlugDevice(serial)
+hpDev.addCallback(authChangeCallback)
+
+if options['daemon'] and os.fork():
+    sys.exit(0)
+
+try:
+    hpDev.run()
+except KeyboardInterrupt:
+    print 'Exiting...'
