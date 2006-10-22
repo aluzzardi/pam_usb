@@ -22,31 +22,23 @@
 #include "log.h"
 #include "conf.h"
 
-int		pusb_local_login(t_pusb_options *opts, const char *user,
-				 const char *from)
+int		pusb_local_login(t_pusb_options *opts, const char *user)
 {
   struct utmp	utsearch;
   struct utmp	*utent;
+  const char	*from;
   int		i;
 
   log_debug("Checking whether the caller is local or not...\n");
+  from = ttyname(STDIN_FILENO);
   if (!from || !(*from))
     {
-      from = ttyname(STDIN_FILENO);
-      if (!from)
-	{
-	  log_debug("Couldn't retrieve the tty name, aborting.\n");
-	  return (1);
-	}
-      if (!strncmp(from, "/dev/", strlen("/dev/")))
-	from += strlen("/dev/");
+      log_debug("Couldn't retrieve the tty name, aborting.\n");
+      return (1);
     }
+  if (!strncmp(from, "/dev/", strlen("/dev/")))
+    from += strlen("/dev/");
   log_debug("Authentication request from tty %s\n", from);
-  if (!strcmp(from, "ssh"))
-    {
-      log_debug("SSH Authentication, aborting.\n");
-      return (0);
-    }
   strncpy(utsearch.ut_line, from, sizeof(utsearch.ut_line));
   setutent();
   utent = getutline(&utsearch);
