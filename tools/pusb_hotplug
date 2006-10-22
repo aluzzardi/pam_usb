@@ -74,7 +74,6 @@ class HotPlugDevice:
         if deviceProperties['usb_device.serial'] != self.__serial:
             return
         self.__udi = udi
-        print 'Device %s added' % udi
         if self.__running:
             [ cb('added') for cb in self.__callbacks ]
 
@@ -84,7 +83,6 @@ class HotPlugDevice:
         if self.__udi != udi:
             return
         self.__udi = None
-        print 'Device %s removed' % udi
         if self.__running:
             [ cb('removed') for cb in self.__callbacks ]
 
@@ -158,16 +156,22 @@ else:
 serial = device.find('serial').text
 
 def authChangeCallback(event):
-    print 'User %s is now %s' % (username, event)
+    print 'Device for user %s was %s' % (username, event)
+
+    if event == 'removed':
+        print 'Locking'
+        [os.system(cmd) for cmd in events['lock'] ]
+        return
+
     cmdLine = "%s -q -c %s -u %s -s pusb_hotplug -a" % (options['path'],
                                                         options['configFile'],
                                                         username)
     print 'Executing %s' % cmdLine
     if not os.system(cmdLine):
-        run = events['unlock']
+        print 'Authentication succeeded. Unlocking.'
+        [os.system(cmd) for cmd in events['unlock'] ]
     else:
-        run = events['lock']
-    [os.system(e) for e in run]
+        print 'Authentication failed.'
 
 hpDev = HotPlugDevice(serial)
 hpDev.addCallback(authChangeCallback)
