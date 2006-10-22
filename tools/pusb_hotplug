@@ -96,7 +96,7 @@ class Log:
         self.__logMessage(syslog.LOG_NOTICE, message)
 
     def error(self, message):
-        self.__logMessage(syslog.LOG_ERROR, message)
+        self.__logMessage(syslog.LOG_ERR, message)
 
     def __logMessage(self, priority, message):
         syslog.syslog(priority, message)
@@ -210,4 +210,4 @@ logger.info('Watching device "%s" for user "%s"' % (deviceName, username))
 try:
     hpDev.run()
 except KeyboardInterrupt:
-    print 'Exiting...'
+    logger.error('Caught keyboard interruption, exiting...')
