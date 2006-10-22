@@ -38,13 +38,14 @@ static FILE	*pusb_pad_open_device(t_pusb_options *opts,
   FILE		*f;
   char		path[PATH_MAX];
   const char	*mnt_point;
+  struct stat	sb;
 
   mnt_point = (char *)libhal_volume_get_mount_point(volume);
   if (!mnt_point)
     return (NULL);
   memset(path, 0x00, PATH_MAX);
   snprintf(path, PATH_MAX, "%s/%s", mnt_point, opts->device_pad_directory);
-  if (access(path, F_OK) != 0)
+  if (stat(path, &sb) != 0)
     {
       log_debug("Directory %s does not exist, creating one.\n", path);
       if (mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
@@ -73,6 +74,7 @@ static FILE	*pusb_pad_open_system(t_pusb_options *opts,
   FILE		*f;
   char		path[PATH_MAX];
   struct passwd	*user_ent = NULL;
+  struct stat	sb;
 
   if (!(user_ent = getpwnam(user)) || !(user_ent->pw_dir))
     {
@@ -83,7 +85,7 @@ static FILE	*pusb_pad_open_system(t_pusb_options *opts,
   memset(path, 0x00, PATH_MAX);
   snprintf(path, PATH_MAX, "%s/%s", user_ent->pw_dir,
 	   opts->system_pad_directory);
-  if (access(path, F_OK) != 0)
+  if (stat(path, &sb) != 0)
     {
       log_debug("Directory %s does not exist, creating one.\n", path);
       if (mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
