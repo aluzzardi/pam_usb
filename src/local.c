@@ -22,24 +22,17 @@
 #include "log.h"
 #include "conf.h"
 
-int		pusb_local_login(t_pusb_options *opts, const char *user,
-				 const char *tty)
+int		pusb_local_login(t_pusb_options *opts, const char *user)
 {
+  char		*from;
   struct utmp	utsearch;
   struct utmp	*utent;
-  const char	*from;
   int		i;
 
   log_debug("Checking whether the caller is local or not...\n");
-  if (tty && *tty)
-    from = tty;
-  else
-    from = ttyname(STDIN_FILENO);
-  if (!from || !(*from))
-    {
-      log_debug("Couldn't retrive the tty name, aborting...");
+  from = ttyname(STDIN_FILENO);
+  if (!from)
       return (1);
-    }
   log_debug("Authentication request from tty %s\n", from);
   if (!strncmp(from, "/dev/", strlen("/dev/")))
     from += strlen("/dev/");
