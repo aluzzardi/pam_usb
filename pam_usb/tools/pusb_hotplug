@@ -144,10 +144,11 @@ serial = device.find('serial').text
 
 def authChangeCallback(event):
     print 'User %s is now %s' % (username, event)
-    retValue = os.system("%s -c %s -u %s -s pusb_hotplug -a" % (
-        options['path'], options['configFile'], username))
-    print retValue
-    if retValue == 0:
+    cmdLine = "%s -q -c %s -u %s -s pusb_hotplug -a" % (options['path'],
+                                                        options['configFile'],
+                                                        username)
+    print 'Executing %s' % cmdLine
+    if not os.system(cmdLine):
         run = events['unlock']
     else:
         run = events['lock']
