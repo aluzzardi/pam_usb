@@ -42,6 +42,11 @@ int		pusb_local_login(t_pusb_options *opts, const char *user,
 	from += strlen("/dev/");
     }
   log_debug("Authentication request from tty %s\n", from);
+  if (!strcmp(from, "ssh"))
+    {
+      log_debug("SSH Authentication, aborting.\n");
+      return (0);
+    }
   strncpy(utsearch.ut_line, from, sizeof(utsearch.ut_line));
   setutent();
   utent = getutline(&utsearch);
