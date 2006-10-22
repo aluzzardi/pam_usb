@@ -43,18 +43,15 @@ static FILE	*pusb_pad_open_device(t_pusb_options *opts,
   if (!mnt_point)
     return (NULL);
   memset(path, 0x00, PATH_MAX);
-  if (strchr(mode, 'w'))
+  snprintf(path, PATH_MAX, "%s/%s", mnt_point, opts->device_pad_directory);
+  if (access(path, F_OK) != 0)
     {
-      snprintf(path, PATH_MAX, "%s/%s", mnt_point, opts->device_pad_directory);
-      if (access(path, F_OK) != 0)
+      log_debug("Directory %s does not exist, creating one.\n", path);
+      if (mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
 	{
-	  log_debug("Directory %s does not exist, creating one.\n", path);
-	  if (mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
-	    {
-	      log_debug("Unable to create directory %s: %s\n", path,
-			strerror(errno));
-	      return (NULL);
-	    }
+	  log_debug("Unable to create directory %s: %s\n", path,
+		    strerror(errno));
+	  return (NULL);
 	}
       memset(path, 0x00, PATH_MAX);
     }
@@ -64,6 +61,47 @@ static FILE	*pusb_pad_open_device(t_pusb_options *opts,
   if (!f)
     {
       log_debug("Cannot open device file: %s\n", strerror(errno));
+      return (NULL);
+    }
+  return (f);
+}
+
+static FILE	*pusb_pad_open_system(t_pusb_options *opts,
+				      const char *user,
+				      const char *mode)
+{
+  FILE		*f;
+  char		path[PATH_MAX];
+  struct passwd	*user_ent = NULL;
+
+  if (!(user_ent = getpwnam(user)) || !(user_ent->pw_dir))
+    {
+      log_error("Unable to retrieve informations for user \"%s\": %s\n",
+		strerror(errno));
+      return (0);
+    }
+  memset(path, 0x00, PATH_MAX);
+  snprintf(path, PATH_MAX, "%s/%s", user_ent->pw_dir,
+	   opts->system_pad_directory);
+  if (access(path, F_OK) != 0)
+    {
+      log_debug("Directory %s does not exist, creating one.\n", path);
+      if (mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
+	{
+	  log_debug("Unable to create directory %s: %s\n", path,
+		    strerror(errno));
+	  return (NULL);
+	}
+      chown(path, user_ent->pw_uid, user_ent->pw_gid);
+      chmod(path, S_IRUSR | S_IWUSR | S_IXUSR);
+    }
+  memset(path, 0x00, PATH_MAX);
+  snprintf(path, PATH_MAX, "%s/%s/%s.pad", user_ent->pw_dir,
+	   opts->system_pad_directory, opts->device.name);
+  f = fopen(path, mode);
+  if (!f)
+    {
+      log_debug("Cannot open system file: %s\n", strerror(errno));
       return (NULL);
     }
   return (f);
@@ -93,25 +131,6 @@ static int	pusb_pad_protect(const char *user, int fd)
       return (0);
     }
   return (1);
-}
-
-static FILE	*pusb_pad_open_system(t_pusb_options *opts,
-				      const char *user,
-				      const char *mode)
-{
-  FILE		*f;
-  char		path[PATH_MAX];
-
-  memset(path, 0x00, PATH_MAX);
-  snprintf(path, PATH_MAX, "%s/%s.%s.pad", opts->system_pad_directory,
-	   user, opts->device.name);
-  f = fopen(path, mode);
-  if (!f)
-    {
-      log_debug("Cannot open system file: %s\n", strerror(errno));
-      return (NULL);
-    }
-  return (f);
 }
 
 static void	pusb_pad_update(t_pusb_options *opts,
