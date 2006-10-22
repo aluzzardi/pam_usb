@@ -19,6 +19,7 @@ import os
 import sys
 import pwd
 import getopt
+import syslog
 import gobject
 import dbus
 if getattr(dbus, 'version', (0,0,0)) >= (0,41,0):
@@ -86,7 +87,19 @@ class HotPlugDevice:
         if self.__running:
             [ cb('removed') for cb in self.__callbacks ]
 
+class Log:
+    def __init__(self):
+        syslog.openlog('pusb_hotplug', syslog.LOG_PID | syslog.LOG_PERROR,
+                       syslog.LOG_AUTH)
 
+    def info(self, message):
+        self.__logMessage(syslog.LOG_NOTICE, message)
+
+    def error(self, message):
+        self.__logMessage(syslog.LOG_ERROR, message)
+
+    def __logMessage(self, priority, message):
+        syslog.syslog(priority, message)
 
 def usage():
     print 'Usage: %s [--config file] [--daemon] [--path pusb_check_path]' \
@@ -126,7 +139,7 @@ if not os.path.exists(options['path']):
 
 username = pwd.getpwuid(os.getuid())[0]
 
-print 'Running pusb_hotplug for user %s' % username
+logger = Log()
 
 doc = et.parse(options['configFile'])
 users = doc.findall('users/user')
@@ -134,7 +147,8 @@ for user in users:
     if user.get('id') == username:
         break
 else:
-    print 'User %s not found' % username
+    logger.error('User %s not found in configuration file' % username)
+    sys.exit(1)
 
 events = {
     'lock' : [],
@@ -151,33 +165,47 @@ for device in devices:
     if device.get('id') == deviceName:
         break
 else:
-    print 'Device %s not found' % deviceName
+    logger.error('Device %s not found in configurtion file' % deviceName)
+    sys.exit(1)
 
 serial = device.find('serial').text
 
 def authChangeCallback(event):
-    print 'Device for user %s was %s' % (username, event)
-
     if event == 'removed':
-        print 'Locking'
-        [os.system(cmd) for cmd in events['lock'] ]
+        logger.info('Device "%s" has been removed, ' \
+                    'locking down user "%s"...' % (deviceName, username))
+        for cmd in events['lock']:
+            logger.info('Running "%s"' % cmd)
+            os.system(cmd)
+        logger.info('Locked.')
         return
 
+    logger.info('Device "%s" has been inserted. ' \
+                'Performing verification...' % deviceName)
     cmdLine = "%s -q -c %s -u %s -s pusb_hotplug -a" % (options['path'],
                                                         options['configFile'],
                                                         username)
-    print 'Executing %s' % cmdLine
+    logger.info('Executing "%s"' % cmdLine)
     if not os.system(cmdLine):
-        print 'Authentication succeeded. Unlocking.'
-        [os.system(cmd) for cmd in events['unlock'] ]
+        logger.info('Authentication succeeded. ' \
+                    'Unlocking user "%s"...' % username)
+        for cmd in events['unlock']:
+            logger.info('Running "%s"' % cmd)
+            os.system(cmd)
+        logger.info('Unlocked.')
     else:
-        print 'Authentication failed.'
+        logger.info('Authentication failed for device %s. ' \
+                    'Keeping user "%s" locked down.' % (deviceName, username))
 
 hpDev = HotPlugDevice(serial)
 hpDev.addCallback(authChangeCallback)
 
+
 if options['daemon'] and os.fork():
     sys.exit(0)
+
+logger.info('pusb_hotplug up and running.')
+logger.info('Watching device "%s" for user "%s"' % (deviceName, username))
 
 try:
     hpDev.run()
