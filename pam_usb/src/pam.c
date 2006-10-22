@@ -32,6 +32,7 @@ int			pam_sm_authenticate(pam_handle_t *pamh, int flags,
   t_pusb_options	opts;
   const char		*service;
   const char		*user;
+  char			*tty;
   char			*conf_file = PUSB_CONF_FILE;
   int			retval;
 
@@ -65,7 +66,8 @@ int			pam_sm_authenticate(pam_handle_t *pamh, int flags,
   log_info("pam_usb v.%s\n", PUSB_VERSION);
   log_info("Authentication request for user \"%s\" (%s)\n",
 	   user, service);
-  if (!pusb_local_login(&opts, user))
+  pam_get_item(pamh, PAM_TTY, (const void**)&tty);
+  if (!pusb_local_login(&opts, user, tty))
     {
       log_error("Access denied.\n");
       return (PAM_AUTH_ERR);
