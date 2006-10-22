@@ -35,6 +35,7 @@ static int	pusb_volume_mount(t_pusb_options *opts, LibHalVolume **volume,
   char		tempname[32];
   const char	*devname;
   const char	*udi;
+  const	char	*fs;
 
   snprintf(tempname, sizeof(tempname), "pam_usb%d", getpid());
   if (!(devname = libhal_volume_get_device_file(*volume)))
@@ -42,10 +43,15 @@ static int	pusb_volume_mount(t_pusb_options *opts, LibHalVolume **volume,
       log_error("Unable to retrieve device filename\n");
       return (0);
     }
+  fs = libhal_volume_get_fstype(*volume);
   log_debug("Attempting to mount device %s with label %s\n",
 	    devname, tempname);
-  snprintf(command, sizeof(command), "pmount -s %s %s",
-	   devname, tempname);
+  if (!fs)
+    snprintf(command, sizeof(command), "pmount -s %s %s",
+	     devname, tempname);
+  else
+    snprintf(command, sizeof(command), "pmount -s -t %s %s %s",
+	     fs, devname, tempname);
   log_debug("Executing \"%s\"\n", command);
   if (system(command) != 0)
     {
