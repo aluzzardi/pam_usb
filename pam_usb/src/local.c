@@ -53,10 +53,7 @@ int		pusb_local_login(t_pusb_options *opts, const char *user)
     {
       if (utent->ut_addr_v6[i] != 0)
 	{
-	  char	*ptr = (char *)utent->ut_addr_v6;
-
-	  log_error("Remote authentication request: %s (%u.%u.%u.%u)\n",
-		    utent->ut_host, ptr[0], ptr[1], ptr[2], ptr[3]);
+	  log_error("Remote authentication request: %s\n", utent->ut_host);
 	  return (0);
 	}
     }
