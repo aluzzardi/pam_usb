@@ -24,11 +24,21 @@ PAM_USB_SRCS	:= src/pam.c
 PAM_USB_OBJS	:= $(PAM_USB_SRCS:.c=.o)
 PAM_USB		:= pam_usb.so
 PAM_USB_LDFLAGS	:= -shared $(LDFLAGS)
+PAM_USB_DEST	:= $(DESTDIR)/lib/security
 
 # pusb_check
 PUSB_CHECK_SRCS	:= src/pusb_check.c
 PUSB_CHECK_OBJS	:= $(PUSB_CHECK_SRCS:.c=.o)
 PUSB_CHECK	:= pusb_check
+
+# Tools
+PUSB_ADM	:= tools/pusb_adm
+PUSB_HOTPLUG	:= tools/pusb_hotplug
+TOOLS_DEST	:= $(DESTDIR)/usr/bin
+
+# Binaries
+RM		:= rm
+INSTALL		:= install
 
 ifeq (yes, ${DEBUG})
 	CFLAGS := ${CFLAGS} -ggdb
@@ -46,4 +56,14 @@ $(PUSB_CHECK)	: $(OBJS) $(PUSB_CHECK_OBJS)
 		${CC} -c ${CFLAGS} $< -o $@
 
 clean		:
-		rm -f $(PAM_USB) $(PUSB_CHECK) $(OBJS) $(PUSB_CHECK_OBJS) $(PAM_USB_OBJS)
+		$(RM) -f $(PAM_USB) $(PUSB_CHECK) $(OBJS) $(PUSB_CHECK_OBJS) $(PAM_USB_OBJS)
+
+install		: all
+		$(INSTALL) -m644 $(PAM_USB) $(PAM_USB_DEST)
+		$(INSTALL) -m755 $(PUSB_CHECK) $(TOOLS_DEST)
+		$(INSTALL) -m755 $(PUSB_ADM) $(TOOLS_DEST)
+		$(INSTALL) -m755 $(PUSB_HOTPLUG) $(TOOLS_DEST)
+
+deinstall	:
+		$(RM) -f $(PAM_USB_DEST)/$(PAM_USB)
+		$(RM) -f $(TOOLS_DEST)/$(PUSB_CHECK) $(TOOLS_DEST)/$(PUSB_ADM) $(TOOLS_DEST)/$(PUSB_HOTPLUG)
