@@ -151,7 +151,7 @@ if len(args) != 0:
     usage()
 
 options = { 'force' : False, 'deviceName' : None,
-            'configFile' : '/etc/pamusb/pusb.conf' }
+            'configFile' : '/etc/pusb/pusb.conf' }
 
 for o, a in opts:
     if o in ("-h", "--help"):
