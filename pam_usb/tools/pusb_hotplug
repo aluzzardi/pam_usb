@@ -102,8 +102,8 @@ class Log:
         syslog.syslog(priority, message)
 
 def usage():
-    print 'Usage: %s [--config file] [--daemon] [--path pusb_check_path]' \
-          % sys.argv[0]
+    print 'Usage: %s [--config file] [--daemon] [--path pusb_check_path]' % \
+          os.path.basename(__file__)
     sys.exit(1)
 
 import getopt
