@@ -39,6 +39,7 @@ TOOLS_DEST	:= $(DESTDIR)/usr/bin
 # Binaries
 RM		:= rm
 INSTALL		:= install
+MKDIR		:= mkdir
 
 ifeq (yes, ${DEBUG})
 	CFLAGS := ${CFLAGS} -ggdb
@@ -59,10 +60,12 @@ clean		:
 		$(RM) -f $(PAM_USB) $(PUSB_CHECK) $(OBJS) $(PUSB_CHECK_OBJS) $(PAM_USB_OBJS)
 
 install		: all
+		$(MKDIR) -p /etc/pusb
 		$(INSTALL) -m644 $(PAM_USB) $(PAM_USB_DEST)
 		$(INSTALL) -m755 $(PUSB_CHECK) $(TOOLS_DEST)
 		$(INSTALL) -m755 $(PUSB_ADM) $(TOOLS_DEST)
 		$(INSTALL) -m755 $(PUSB_HOTPLUG) $(TOOLS_DEST)
+		$(INSTALL) -m644 doc/pusb.conf-example /etc/pusb
 
 deinstall	:
 		$(RM) -f $(PAM_USB_DEST)/$(PAM_USB)
