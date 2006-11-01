@@ -130,8 +130,8 @@ int	pusb_conf_init(t_pusb_options *opts)
       log_error("gethostname: %s\n", strerror(errno));
       return (0);
     }
-  strcpy(opts->system_pad_directory, ".pusb");
-  strcpy(opts->device_pad_directory, ".pusb");
+  strcpy(opts->system_pad_directory, ".pamusb");
+  strcpy(opts->device_pad_directory, ".pamusb");
   opts->probe_timeout = 10;
   opts->enable = 1;
   opts->debug = 0;
