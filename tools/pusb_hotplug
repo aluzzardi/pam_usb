@@ -114,7 +114,7 @@ try:
 except getopt.GetoptError:
     usage()
 
-options = {'configFile' : '/etc/pam_usb/pusb.conf',
+options = {'configFile' : '/etc/pamusb/pusb.conf',
             'daemon' : False,
             'path' : '/usr/bin/pusb_check'}
 
