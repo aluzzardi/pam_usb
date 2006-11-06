@@ -65,7 +65,7 @@ install		: all
 		$(INSTALL) -m755 $(PUSB_CHECK) $(TOOLS_DEST)
 		$(INSTALL) -m755 $(PUSB_ADM) $(TOOLS_DEST)
 		$(INSTALL) -m755 $(PUSB_HOTPLUG) $(TOOLS_DEST)
-		$(INSTALL) -m644 doc/pusb.conf-example /etc/pusb
+		$(INSTALL) -m644 doc/pusb.conf-dist /etc/pusb
 
 deinstall	:
 		$(RM) -f $(PAM_USB_DEST)/$(PAM_USB)
