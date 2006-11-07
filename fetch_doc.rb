@@ -1,4 +1,10 @@
 #!/usr/bin/env ruby
+#
+# fetch_doc.rb
+#
+# Fetch the documentation from the wiki and translate it
+# to be human readable.
+#
 
 require 'open-uri'
 

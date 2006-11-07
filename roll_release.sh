@@ -1,4 +1,10 @@
 #!/bin/sh
+#
+# roll_release.sh
+#
+# Rolls a distribution tarball from the svn trunk
+# and performs basic QA checks.
+#
 
 TRUNK_PATH="./pam_usb"
 
