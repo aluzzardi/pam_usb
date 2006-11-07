@@ -19,16 +19,19 @@ REPLACE_LIST = [
 	# Remove wiki links [[link|name]]
 	{ :pattern => /\[\[.+\|(.+)\]\]/, :with => '\1' },
 
-	# Remove trailing whitespaces
-	{ :pattern => /^  /, :with => '' },
-
-	# Remove misc xhtml / wiki characters
+	# Remove misc xhtml/wiki characters
 	{ :pattern => /\/\//, :with => '' },
 	{ :pattern => /\\\\ /, :with => '' },
 	{ :pattern => /\*\*/, :with => '' },
 	{ :pattern => /&lt;/, :with => '<' },
 	{ :pattern => /&gt;/, :with => '>' },
 	{ :pattern => /&quot;/, :with => '"' },
+
+	# Remove trailing whitespaces
+	{ :pattern => /^  /, :with => '' },
+
+	# Fit 80 colums
+	{ :pattern => /(.{1,80})( +|$\n?)|(.{1,80})/, :with => "\\1\\3\n" },
 ]
 
 def fetch_doc(name)
