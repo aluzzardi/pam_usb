@@ -2,7 +2,7 @@
 pusb.conf-dist: Default configuration file for pamusb.
 Copy this file to /etc/pusb/pusb.conf if you don't already have one.
 
-See http://www.pamusb.org/doc/config
+See http://www.pamusb.org/doc/configuring
 -->
 
 <configuration>
@@ -35,17 +35,16 @@ See http://www.pamusb.org/doc/config
 				<device>MyDevice</device>
 				<option name="quiet">true</option>
 				<hotplug event="lock">gnome-screensaver-command -lock</hotplug>
-				<hotplug event="unlock">gnome-screensaver-command -unlock</hotplug>
+				<hotplug event="unlock">gnome-screensaver-command -deactivate</hotplug>
 			</user>
 		-->
 	</users>
 
 	<!-- Services settings (e.g. gdm, su, sudo...) -->
 	<services>
-		<!-- Example:
-			<service id="pusb_hotplug">
-				<option name="one_time_pad">false</option>
-			</service>
-		-->
+		<!-- Example: Speed up hotplugging by disabling one time pads -->
+		<service id="pusb_hotplug">
+			<option name="one_time_pad">false</option>
+		</service>
 	</services>
 </configuration>
