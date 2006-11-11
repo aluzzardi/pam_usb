@@ -8,9 +8,9 @@
 
 require 'open-uri'
 
-BASE_URI = 'http://www.pamusb.org/doku/doc/'
+BASE_URI = 'http://www.pamusb.org/wiki/doc/'
 DOC_PATH = './pam_usb/doc/'
-DOCS = [ 'install', 'upgrading' ]
+DOCS = [ 'install', 'upgrading', 'configuring' ]
 
 REPLACE_LIST = [
 	# Extract text area from xhtml document.
@@ -26,6 +26,8 @@ REPLACE_LIST = [
 	{ :pattern => /&lt;/, :with => '<' },
 	{ :pattern => /&gt;/, :with => '>' },
 	{ :pattern => /&quot;/, :with => '"' },
+	{ :pattern => /<code .+>.*\n/, :with => '' },
+	{ :pattern => /<\/code>.*\n/, :with => '' },
 
 	# Remove trailing whitespaces
 	{ :pattern => /^  /, :with => '' },
