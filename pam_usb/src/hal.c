@@ -39,9 +39,7 @@ DBusConnection		*pusb_hal_dbus_connect(void)
 
 void	pusb_hal_dbus_disconnect(DBusConnection *dbus)
 {
-  dbus_connection_close(dbus);
   dbus_connection_unref(dbus);
-  dbus_shutdown();
 }
 
 LibHalContext	*pusb_hal_init(DBusConnection *dbus)
