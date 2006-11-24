@@ -3,7 +3,7 @@ DEBUG		:= no
 
 # compiler/linker options
 CC		:= gcc
-CFLAGS		:= -Wall `pkg-config --cflags libxml-2.0` \
+CFLAGS		:= -Wall -fPIC `pkg-config --cflags libxml-2.0` \
 	`pkg-config --cflags hal-storage`
 LDFLAGS		:= `pkg-config --libs libxml-2.0` \
 	`pkg-config --libs hal-storage`
