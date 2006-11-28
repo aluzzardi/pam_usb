@@ -39,6 +39,9 @@ create_release()
 	cp -r $TRUNK_PATH ${SRC_PATH}
 	find "$SRC_PATH" -type d -name ".svn" -exec rm -rf "{}" +
 
+	echo "* Tagging release \"$1\""
+	sed -ri "s/(PUSB_VERSION) \"[^\"]*\"/\1 \"${1}\"/" ${SRC_PATH}/src/version.h
+
 	echo "* Creating tarball..."
 	cd $BUILD_ENV
 	tar -zcf $TARBALL pam_usb-${1}
