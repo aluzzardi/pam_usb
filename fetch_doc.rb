@@ -11,11 +11,9 @@ require 'open-uri'
 BASE_URI = 'http://www.pamusb.org/wiki/doc/'
 DOC_PATH = './pam_usb/doc/'
 DOCS = [ 'install', 'upgrading', 'configuring' ]
+MANS = [ 'pusb_hotplug' ]
 
 REPLACE_LIST = [
-	# Extract text area from xhtml document.
-	{ :pattern => /.*<textarea .+>(.*)<\/textarea>.*/m, :with => '\1' },
-
 	# Remove wiki links [[link|name]]
 	{ :pattern => /\[\[.+\|(.+)\]\]/, :with => '\1' },
 
@@ -28,6 +26,7 @@ REPLACE_LIST = [
 	{ :pattern => /&quot;/, :with => '"' },
 	{ :pattern => /<code .+>.*\n/, :with => '' },
 	{ :pattern => /<\/code>.*\n/, :with => '' },
+	{ :pattern => /<file>(.+)<\/file>/m, :with => '\1' },
 
 	# Remove trailing whitespaces
 	{ :pattern => /^  /, :with => '' },
@@ -36,10 +35,16 @@ REPLACE_LIST = [
 	{ :pattern => /(.{1,80})( +|$\n?)|(.{1,80})/, :with => "\\1\\3\n" },
 ]
 
-def fetch_doc(name)
+def fetch_raw_doc(name)
 	uri = BASE_URI + name + '?do=edit'
 
 	body = open(uri) { |f| f.read }
+	body.gsub!(/.*<textarea .+>\n(.*)<\/textarea>.*/m, '\1')
+	body.gsub(/\r\n/, "\n")
+end
+
+def fetch_doc(name)
+	body = fetch_raw_doc(name)
 	REPLACE_LIST.each { |r| body.gsub!(r[:pattern], r[:with]) }
 
 	body
@@ -51,6 +56,21 @@ DOCS.each do |doc|
 
 	text = fetch_doc(doc)
 	File.open(File.join(DOC_PATH, doc), 'w') { |f| f.write(text) }
+
+	puts "Done."
+end
+
+MANS.each do |man|
+	print "Fetching man:#{man}... "
+	STDOUT.flush
+
+	doc = fetch_doc("man/#{man}")
+	cmd = "txt2man -v \"PAMUSB\" -s1 -t#{man}"
+	cmd += ' | sed "s/\\\\\\\\\\\\\\\\/\\\\\\/g"'
+	File.popen("#{cmd} > #{File.join(DOC_PATH, man)}.1", 'w') do |f|
+		f.write(doc)
+	end
+	system("gzip #{File.join(DOC_PATH, man)}.1")
 
 	puts "Done."
 end
