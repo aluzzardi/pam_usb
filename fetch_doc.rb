@@ -10,7 +10,7 @@ require 'open-uri'
 
 BASE_URI = 'http://www.pamusb.org/wiki/doc/'
 DOC_PATH = './pam_usb/doc/'
-DOCS = [ 'install', 'upgrading', 'configuring' ]
+DOCS = [ 'installation', 'upgrading', 'configuration' ]
 MANS = [ 'pusb_hotplug' ]
 
 REPLACE_LIST = [
