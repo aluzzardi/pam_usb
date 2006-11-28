@@ -63,7 +63,7 @@ int			pam_sm_authenticate(pam_handle_t *pamh, int flags,
       return (PAM_IGNORE);
     }
 
-  log_info("pam_usb v.%s\n", PUSB_VERSION);
+  log_info("pam_usb v%s\n", PUSB_VERSION);
   log_info("Authentication request for user \"%s\" (%s)\n",
 	   user, service);
 
