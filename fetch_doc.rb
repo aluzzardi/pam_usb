@@ -11,7 +11,7 @@ require 'open-uri'
 BASE_URI = 'http://www.pamusb.org/wiki/doc/'
 DOC_PATH = './pam_usb/doc/'
 DOCS = [ 'installation', 'upgrading', 'configuration' ]
-MANS = [ 'pusb_hotplug' ]
+MANS = [ 'pusb_hotplug', 'pusb_adm' ]
 
 REPLACE_LIST = [
 	# Remove wiki links [[link|name]]
@@ -69,6 +69,10 @@ MANS.each do |man|
 	cmd += ' | sed "s/\\\\\\\\\\\\\\\\/\\\\\\/g"'
 	File.popen("#{cmd} > #{File.join(DOC_PATH, man)}.1", 'w') do |f|
 		f.write(doc)
+	end
+	begin
+		File.unlink("#{File.join(DOC_PATH, man)}.1.gz")
+	rescue Exception
 	end
 	system("gzip #{File.join(DOC_PATH, man)}.1")
 
