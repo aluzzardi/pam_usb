@@ -1,0 +1,53 @@
+====== Upgrading  ======
+
+If you're already using a pamusb version prior to 0.4.0, you will have to remove
+the older version before installing.
+
+You do not have to do this if you're already using >=0.4.0 or Subversion.
+
+===== Remove pam_usb.so from pam.d =====
+
+$ grep -r pam_usb.so /etc/pam.d
+/etc/pam.d/su:auth sufficient pam_usb.so
+/etc/pam.d/gdm:auth sufficient pam_usb.so
+[...]
+
+Edit every matching file and remove the pam_usb.so lines.
+At the end of the operation, there shouldn't be any file contanining a reference
+to pam_usb.so:
+
+$ grep -r pam_usb /etc/pam.d
+$
+
+=====  Remove .auth directories =====
+
+Older versions of pamusb used to create .auth directories in both the device and
+the user's home directory. Those directories aren't used anymore, so feel free
+to remove them:
+
+# rm -rf /root/.auth
+# rm -rf /home/scox/.auth
+# rm -rf /media/usbdisk/.auth
+
+===== Remove configuration files =====
+
+As configuration files of pamusb 0.4.0 aren't backward compatible and are
+located under /etc/pusb, the old /etc/pam_usb is no more needed.
+
+# rm -rf /etc/pam_usb
+
+===== Deinstall pamusb =====
+
+If you installed the old pamusb version using your operating system's package
+manager, then remove it by the same mean.
+
+Otherwise, you can remove it by hand by performing the following instructions:
+
+# rm -f /usr/bin/usbadm /usr/share/man/usbadm.1.gz
+# rm -f /usr/bin/usbhotplug /etc/hotplug.d/default/pamusb.hotplug
+/etc/pam.d/usbhotplug
+# rm -f /lib/security/pam_usb.so
+
+===== Next =====
+
+Go aheand and install the new version.
