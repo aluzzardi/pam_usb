@@ -1,0 +1,159 @@
+====== Installation ======
+
+Before going ahead, be sure to follow the upgrading instructions if you're using
+an older version of pamusb.
+
+===== Requirements =====
+* Requirements for pam_usb and pusb_check:
+  * libhal-storage
+  * libxml2
+
+* Requirements for pusb_hotplug and pusb_adm:
+  * python2.4
+  * python-celementtree
+  * python-dbus
+  * python-gobject
+
+===== Installing from sources =====
+* Step 1: Download the latest release
+* Step 2: Unpack the distribution tarball
+
+$ tar -zxvf pam_usb-<version>.tar.gz
+$ cd pam_usb-<version>
+
+* Step 3: Compile and install
+
+$ make
+# make install
+
+====== Configuring ======
+
+===== Devices and Users =====
+
+* Copy the default configuration file to /etc/pusb/pusb.conf:
+
+cp /etc/pusb/pusb.conf-dist /etc/pusb/pusb.conf
+
+* Once you've connected your USB device to the computer, use pusb_adm to add it
+to the configuration file:
+
+# pusb_adm --add-device MyDevice
+Name            : MyDevice
+Vendor          : SanDisk Corp.
+Model           : Cruzer Titanium
+Serial          : SNDKXXXXXXXXXXXXXXXX
+Volume UUID     : 6F6B-42FC (/dev/sda1)
+Save device to /etc/pusb/pusb.conf ?
+[y/n] y
+Done.
+
+Note that MyDevice can be any arbitrary name you'd like.
+If more devices are connected, pusb_adm will ask you which device you want to
+use.
+
+* Edit your /etc/pusb/pusb.conf config file to add the users:
+<users>
+  <user id="root">
+    <device>MyDevice</device>
+  </user>
+
+  <user id="scox">
+    <device>MyDevice</device>
+  </user>
+</users>
+
+* In order to test if everything went fine, we're gonna use the pusb_check tool
+which will simulate an authentication event.
+
+# pusb_check -a -u root -s su
+* Authentication request for user "root" (su)
+* Device "MyDevice" is connected (good).
+* Performing one time pad verification...
+* Verification match, updating one time pads...
+* Access granted.
+
+===== PAM Module =====
+
+The PAM module pam_usb.so is used to let applications authenticate you using
+your USB device instead of asking your password. The default password-based
+authentication will be used as fallback if the device authentication goes wrong.
+
+You don't need to setup the hotplugging feature as pam_usb.so and pusb_hotplug
+are independent of each other.
+
+* Depending on the operating system you're using, you have to tell PAM to use
+pam_usb.so as default authentication method.  There should be a file named
+either common-auth (Gentoo) under /etc/pam.d/. If you do NOT have neither of
+those files, you'll have to edit each pam.d service file you want to use (e.g.
+/etc/pam.d/su, /etc/pam.d/gdm and so on).
+
+* Locate the following line on /etc/pam.d/common-auth or /etc/pam.d/system-auth:
+
+auth    required        pam_unix.so nullok_secure
+
+* And change it to look something like that:
+
+auth    sufficient      pam_usb.so
+auth    required        pam_unix.so nullok_secure
+
+* You should now be able to authenticate the users configured in pusb.conf using
+your USB device:
+
+scox $ su
+* pam_usb v.SVN
+* Authentication request for user "root" (su)
+* Device "MyDevice" is connected (good).
+* Performing one time pad verification...
+* Verification match, updating one time pads...
+* Access granted.
+
+* Try to authenticate to a different application. pam_usb.so should work with
+any application using xscreensaver and many more).
+
+===== Hotplug =====
+
+Hotplugging is a feature provided by pusb_hotplug that allows you to
+automatically execute commands upon locking and unlocking events. Those events
+are generated when you insert or remove your authentication device.
+
+For instance, you could automatically start your screensaver as soon as you
+remove the device, and deactivate it when you plug the device back:
+
+<user id="scox">
+  <device>MyDevice</device>
+  <hotplug event="lock">gnome-screensaver-command --lock</hotplug>
+  <hotplug event="unlock">gnome-screensaver-command --deactivate</hotplug>
+</user>
+
+Replace gnome-screensaver-command --lock and gnome-screensaver-command --unlock
+with any command you want to execute. You can also execute more commands by
+adding extra <hotplug> entries.
+
+
+$ pusb_hotplug
+pusb_hotplug[18329]: pusb_hotplug up and running.
+pusb_hotplug[18329]: Watching device "MyDevice" for user "scox"
+pusb_hotplug[18329]: Device "MyDevice" has been removed, locking down user
+"scox"...
+pusb_hotplug[18329]: Running "gnome-screensaver-command --lock"
+pusb_hotplug[18329]: Locked.
+pusb_hotplug[18329]: Device "MyDevice" has been inserted. Performing
+verification...
+pusb_hotplug[18329]: Executing "/usr/bin/pusb_check -q -c /etc/pusb/pusb.conf -u
+scox -s pusb_hotplug -a"
+pusb_hotplug[18329]: Authentication succeeded. Unlocking user "scox"...
+pusb_hotplug[18329]: Running "gnome-screensaver-command --deactivate"
+pusb_hotplug[18329]: Unlocked.
+
+Depending on your desktop environment, you have to add pusb_hotplug to the list
+of autostarted applications so it will be started automatically.
+For instance, with GNOME:
+
+- Open System -> Preferences -> Sessions
+- Select Startup Programs and press Add
+- Enter pusb_hotplug and press OK
+- Press Close
+
+====== It works - What next ? ======
+
+* Have a look at the configuration documentation
