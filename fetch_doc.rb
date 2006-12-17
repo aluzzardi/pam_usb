@@ -11,7 +11,7 @@ require 'open-uri'
 BASE_URI = 'http://www.pamusb.org/wiki/doc/'
 DOC_PATH = './pam_usb/doc/'
 DOCS = [ 'installation', 'upgrading', 'configuration' ]
-MANS = [ 'pusb_hotplug', 'pusb_adm' ]
+MANS = [ 'pusb_hotplug', 'pusb_adm', 'pusb_check' ]
 
 REPLACE_LIST = [
 	# Remove wiki links [[link|name]]
