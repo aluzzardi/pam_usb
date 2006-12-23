@@ -65,6 +65,12 @@ int			pusb_xpath_get_string(xmlDocPtr doc, const char *path,
 
   node = result->nodesetval->nodeTab[0]->xmlChildrenNode;
   result_string = xmlNodeListGetString(doc, node, 1);
+  if (!result_string)
+    {
+      xmlXPathFreeObject(result);
+      log_debug("Empty value for %s\n", path);
+      return (0);
+    }
   if (strlen((const char *)result_string) + 1 > size)
     {
       xmlFree(result_string);
