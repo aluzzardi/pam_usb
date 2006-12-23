@@ -79,6 +79,11 @@ static LibHalVolume	*pusb_volume_probe(t_pusb_options *opts,
   int			maxtries = 0;
   int			i;
 
+  if (!*(opts->device.volume_uuid))
+    {
+      log_debug("No UUID configured for device\n");
+      return (NULL);
+    }
   log_debug("Searching for volume with uuid %s\n", opts->device.volume_uuid);
   maxtries = ((opts->probe_timeout * 1000000) / 250000);
   for (i = 0; i < maxtries; ++i)
