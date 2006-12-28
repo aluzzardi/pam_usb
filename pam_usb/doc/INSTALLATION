@@ -5,6 +5,7 @@ an older version of pamusb.
 
 ===== Requirements =====
 * Requirements for pam_usb and pusb_check:
+  * libpam
   * libhal-storage
   * libxml2
 
@@ -153,6 +154,49 @@ For instance, with GNOME:
 - Select Startup Programs and press Add
 - Enter pusb_hotplug and press OK
 - Press Close
+
+====== Troubleshooting ======
+
+===== Log Analysis =====
+
+Both pam_usb.so and pusb_hotplug use the syslog facility to log authentication
+attempts.
+This can be useful for GUI-driven applications (for instance GDM) where you
+don't get to see console output.
+Messages are logged with the AUTH facility, they are usually written to
+/var/log/auth.log but may vary
+depending on the operating system you're using.
+
+# tail -f /var/log/auth.log
+pusb_hotplug[25429]: Device "sandisk" has been inserted. Performing
+verification...
+pusb_hotplug[25429]: Executing "/usr/bin/pusb_check -q -c /etc/pusb/pusb.conf -u
+scox -s pusb_hotplug -a"
+pam_usb[25485]: Authentication request for user "scox" (pusb_hotplug)
+pam_usb[25485]: Device "sandisk" is connected (good).
+pam_usb[25485]: Access granted.
+pusb_hotplug[25429]: Authentication succeeded. Unlocking user "scox"...
+pusb_hotplug[25429]: Unlocked.
+
+===== Enabling debug =====
+
+Enabling debug messages may help you find out what's wrong.
+
+To enable them, edit /etc/pusb/pusb.conf and set the following option:
+<defaults>
+  <option name="debug">true</option>
+</defaults>
+
+If you wish, you could enable debug messages only for a specific user, device or
+service.
+For instance, if you want to enable debug messages only for the sudo service,
+you could do the following:
+
+<services>
+  <service id="sudo">
+    <option name="debug">true</option>
+  </service>
+</services>
 
 ====== It works - What next ? ======
 

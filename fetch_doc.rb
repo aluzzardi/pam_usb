@@ -10,7 +10,7 @@ require 'open-uri'
 
 BASE_URI = 'http://www.pamusb.org/wiki/doc/'
 DOC_PATH = './pam_usb/doc/'
-DOCS = [ 'installation', 'upgrading', 'configuration' ]
+DOCS = [ 'installation', 'upgrading', 'configuration', 'faq' ]
 MANS = [ 'pusb_hotplug', 'pusb_adm', 'pusb_check' ]
 
 REPLACE_LIST = [
@@ -55,7 +55,7 @@ DOCS.each do |doc|
 	STDOUT.flush
 
 	text = fetch_doc(doc)
-	File.open(File.join(DOC_PATH, doc), 'w') { |f| f.write(text) }
+	File.open(File.join(DOC_PATH, doc.upcase), 'w') { |f| f.write(text) }
 
 	puts "Done."
 end

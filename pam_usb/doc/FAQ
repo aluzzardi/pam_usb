@@ -1,0 +1,21 @@
+====== Frequently Asked Questions ======
+
+> Q: Can I use my USB drive as usual ?
+>> A: Yes. pam_usb only occupies a few kilobytes of the device's space.
+
+> Q: What if I lose or break my USB key ? Will I be able to log back in ?
+>> A: Sure. Your usual password will be asked.
+
+> Q: How is the USB key identified ?
+>> A: The USB device is both identified by its manufacturer attributes (vendor,
+product, serial number) and by a few random bytes called one time pads that
+pam_usb writes and updates on the USB device upon authentication.
+
+> Q: What if someone copies the content of my flash drive ? Will she/he be able
+to log into my account ?
+>> A: Even if that person manages to fake your device's attributes (vendor,
+product, serial number, UUID), the one time pad they copied will be outdated as
+soon as you authenticate.
+
+> Q: Is my USB drive compatible with pam_usb ?
+>> A: About every USB flash drive will work with pam_usb.

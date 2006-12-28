@@ -41,7 +41,7 @@ CONFS		:= doc/pusb.conf-dist
 CONFS_DEST	:= $(DESTDIR)/etc/pusb
 
 # Doc
-DOCS		:= doc/installation doc/configuration doc/upgrading
+DOCS		:= doc/INSTALLATION doc/CONFIGURATION doc/UPGRADING doc/FAQ
 DOCS_DEST	:= $(DESTDIR)/usr/share/doc/pamusb
 
 # Man
