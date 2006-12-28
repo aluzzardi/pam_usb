@@ -32,7 +32,7 @@ PUSB_CHECK_OBJS	:= $(PUSB_CHECK_SRCS:.c=.o)
 PUSB_CHECK	:= pusb_check
 
 # Tools
-PUSB_ADM	:= tools/pusb_adm
+PUSB_CONF	:= tools/pusb_conf
 PUSB_HOTPLUG	:= tools/pusb_hotplug
 TOOLS_DEST	:= $(DESTDIR)/usr/bin
 
@@ -45,7 +45,7 @@ DOCS		:= doc/INSTALLATION doc/CONFIGURATION doc/UPGRADING doc/FAQ
 DOCS_DEST	:= $(DESTDIR)/usr/share/doc/pamusb
 
 # Man
-MANS		:= doc/pusb_adm.1.gz doc/pusb_hotplug.1.gz doc/pusb_check.1.gz
+MANS		:= doc/pusb_conf.1.gz doc/pusb_hotplug.1.gz doc/pusb_check.1.gz
 MANS_DEST	:= $(DESTDIR)/usr/share/man/man1
 
 # Binaries
@@ -74,13 +74,13 @@ clean		:
 install		: all
 		$(MKDIR) -p $(CONFS_DEST) $(DOCS_DEST)
 		$(INSTALL) -m644 $(PAM_USB) $(PAM_USB_DEST)
-		$(INSTALL) -m755 $(PUSB_CHECK) $(PUSB_ADM) $(PUSB_HOTPLUG) $(TOOLS_DEST)
+		$(INSTALL) -m755 $(PUSB_CHECK) $(PUSB_CONF) $(PUSB_HOTPLUG) $(TOOLS_DEST)
 		$(INSTALL) -m644 $(CONFS) $(CONFS_DEST)
 		$(INSTALL) -m644 $(DOCS) $(DOCS_DEST)
 		$(INSTALL) -m644 $(MANS) $(MANS_DEST)
 
 deinstall	:
 		$(RM) -f $(PAM_USB_DEST)/$(PAM_USB)
-		$(RM) -f $(TOOLS_DEST)/$(PUSB_CHECK) $(TOOLS_DEST)/$(PUSB_ADM) $(TOOLS_DEST)/$(PUSB_HOTPLUG)
+		$(RM) -f $(TOOLS_DEST)/$(PUSB_CHECK) $(TOOLS_DEST)/$(PUSB_CONF) $(TOOLS_DEST)/$(PUSB_HOTPLUG)
 		$(RM) -rf $(DOCS_DEST)
 		$(RM) -f $(MANS_DEST)/pusb_*

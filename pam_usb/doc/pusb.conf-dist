@@ -16,7 +16,7 @@ See http://www.pamusb.org/doc/configuring
 	<!-- Device settings -->
 	<devices>
 		<!-- Example:
-		Note: You should use pusb_adm to add devices automatically.
+		Note: You should use pusb_conf to add devices automatically.
 		<device id="MyDevice">
 			<vendor>SanDisk Corp.</vendor>
 			<model>Cruzer Titanium</model>
