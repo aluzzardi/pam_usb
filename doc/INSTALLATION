@@ -9,7 +9,7 @@ an older version of pamusb.
   * libhal-storage
   * libxml2
 
-* Requirements for pusb_hotplug and pusb_adm:
+* Requirements for pusb_hotplug and pusb_conf:
   * python2.4
   * python-celementtree
   * python-dbus
@@ -35,10 +35,10 @@ $ make
 
 cp /etc/pusb/pusb.conf-dist /etc/pusb/pusb.conf
 
-* Once you've connected your USB device to the computer, use pusb_adm to add it
+* Once you've connected your USB device to the computer, use pusb_conf to add it
 to the configuration file:
 
-# pusb_adm --add-device MyDevice
+# pusb_conf --add-device MyDevice
 Name            : MyDevice
 Vendor          : SanDisk Corp.
 Model           : Cruzer Titanium
@@ -49,7 +49,7 @@ Save device to /etc/pusb/pusb.conf ?
 Done.
 
 Note that MyDevice can be any arbitrary name you'd like.
-If more devices are connected, pusb_adm will ask you which device you want to
+If more devices are connected, pusb_conf will ask you which device you want to
 use.
 
 * Edit your /etc/pusb/pusb.conf config file to add the users:
