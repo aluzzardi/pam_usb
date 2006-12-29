@@ -9,7 +9,7 @@
 require 'open-uri'
 
 BASE_URI = 'http://www.pamusb.org/wiki/doc/'
-DOC_PATH = './pam_usb/doc/'
+DOC_PATH = '../doc/'
 DOCS = [ 'installation', 'upgrading', 'configuration', 'faq' ]
 MANS = [ 'pusb_hotplug', 'pusb_conf', 'pusb_check' ]
 
@@ -49,6 +49,8 @@ def fetch_doc(name)
 
 	body
 end
+
+Dir.chdir(File.dirname($0))
 
 DOCS.each do |doc|
 	print "Fetching doc:#{doc}... "

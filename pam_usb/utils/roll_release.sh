@@ -6,7 +6,7 @@
 # and performs basic QA checks.
 #
 
-TRUNK_PATH="./pam_usb"
+TRUNK_PATH="../"
 
 clean_sources()
 {
@@ -37,7 +37,10 @@ create_release()
 	echo "* Rolling release $1 on $BUILD_ENV..."
 
 	cp -r $TRUNK_PATH ${SRC_PATH}
+
+	echo "* Cleaning up..."
 	find "$SRC_PATH" -type d -name ".svn" -exec rm -rf "{}" +
+	rm -rf $SRC_PATH/utils
 
 	echo "* Tagging release \"$1\""
 	sed -ri "s/(PUSB_VERSION) \"[^\"]*\"/\1 \"${1}\"/" ${SRC_PATH}/src/version.h
@@ -47,7 +50,7 @@ create_release()
 	tar -zcf $TARBALL pam_usb-${1}
 	cd - > /dev/null
 
-	cp -a $SRC_PATH ../tags/${1}
+	cp -a $SRC_PATH ${TRUNK_PATH}/../../tags/${1}
 	cp ${BUILD_ENV}/${TARBALL} .
 	rm -rf $BUILD_ENV
 
