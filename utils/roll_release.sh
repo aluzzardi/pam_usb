@@ -28,7 +28,7 @@ create_release()
 	SRC_PATH=${BUILD_ENV}/pam_usb-${1}
 	TARBALL=pam_usb-${1}.tar.gz
 
-	if [ -d "../tags/${1}" -o -f $TARBALL ] ; then
+	if [ -d "${TRUNK_PATH}/../../tags/${1}" -o -f $TARBALL ] ; then
 		rm -rf $BUILD_ENV
 		echo "! Release $1 already exists !"
 		exit
