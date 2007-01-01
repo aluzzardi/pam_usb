@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003-2006 Andrea Luzzardi <scox@sig11.org>
+ * Copyright (c) 2003-2007 Andrea Luzzardi <scox@sig11.org>
  *
  * This file is part of the pam_usb project. pam_usb is free software;
  * you can redistribute it and/or modify it under the terms of the GNU General
