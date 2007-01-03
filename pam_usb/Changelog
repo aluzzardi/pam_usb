@@ -1,0 +1,178 @@
+* 0.4.0
+- Both pam_usb and its tools (adm, hotplug) have been redesigned from the
+  ground up and rewritten from scratch.
+- Hardware recognition is now done through HAL which provides a stable
+  interface over kernel changes.
+- Certificates have been replaced by one time pads. That will prevent
+  copies of the USB device to be used for authentication.
+- Device's manufacturer properties verification. Pamusb now verifies
+  device informations (vendor, product, serial number, UUID) in the
+  authentication process.
+- Configuration is now handled in a central place, the pusb.conf
+  configuration file. This XML file contains configuration entries for
+  users, devices and services.
+- pusb_hotplug (formely usbhotplug) make use of DBUS signals (sent by HAL)
+  instead of kernel hotplugging. Also, its configuration has been merged
+  into the pusb.conf configuration file.
+
+* 0.3.3
+- The option keypath is now splitted into local_keypath and device_keypath.
+- Fixed a bug that occurred when the TTY entry was empty.
+- pam_usb doesn't get anymore the tty name from PAM_TTY as it used to be
+  empty on some systems.
+- Better defaults. The default options have been set to fit most needs,
+  you are no longer required to use !check_device on 2.6.
+- Verbose mode. By default, pam_usb now prints some informations during
+  the login process (access granted, the reason why access was refused, etc).
+  This can be turned off using the brand new 'quiet' option.
+- Other small fixes.
+
+* 0.3.2
+- Now pam_usb will also try to autodetect /dev/sdN devices (not just
+  /dev/sdNX). 
+- Fixed a bug that happened when the application using PAM didn't set
+  PAM_TTY correctly.
+- Added the use_first_pass and try_first_pass options.
+  Now if you enter your password on another PAM module (such as pam_mount
+  or pam_ssh), pam_usb will use that password to decrypt the private key.
+
+* 0.3.1
+- Lot of misc fixes (memory management, Makefiles, sanity checks, etc).
+  I'd like to thank the PaX Team <pageexec@freemail.hu> who did almost
+  the whole job.
+- Added the hostname option which allows to select what hostname should
+  be used for authentication (useful for shared public keys over lan).
+  Thanks to Nicolas Chauvat <chauvat@nerim.net> who reported the issue,
+  the idea and the patch for this feature.
+
+* 0.3.0
+- Not much changes in this version beside a gcc fix, but the 0.2 branch
+  reached too many new features so i wanted to name this release 0.3.0
+  as i should have done with 0.2.3
+- Fixed a gcc 3.3 compile issue, and all related warning.
+  I would like to thank the following guys for having reported this bug so fast:
+  Lalande Fabrice <fabrice.lalande@orange.fr>
+  Marco <gaedol@softhome.net>
+  Neil Dunbar <neil.dunbar@hp.com>
+
+* 0.2.3
+- Added the usbhotplug tool. 
+  usbhotplug is a hotplug agent that will automagically start a lock handler 
+  when the usb device is removed and an unlock handler when the usb device 
+  is plugged back in and authenticated through pam_usb.
+
+  The default handlers will start xlock when the usb device is removed,
+  and will kill it when the usb device is plugged back in and authenticated.
+
+  I'd like to thank Wout Mertens <wmertens@cisco.com> as we had a couple
+  of discussions about hotplug which helped me implementing this tool.
+
+- The parser can now understand "option" and "!option" instead of
+  option=1 and option=-1 (e.g. debug !check_device).
+  Thanks to Jean-Christophe JASKULA <jean.christophe.jasku-la@wanadoo.fr> who
+  suggested me that and provided an initial patch.
+
+- Fixed a loop bug on serial number checking. Thanks to Zs <horzsol@freemail.hu>
+  for reporting the bug and a patch to fix it.
+
+- Added the direct_open option which allows to open the private key
+  using O_DIRECT to avoid disk caching (works only on devices that
+  supports it). Thanks to myles <myles@tenhand.com> who suggested me that.
+
+- Added some sanity checks here and there because it seems that the PAM
+  API can return weird stuff from time to time.
+
+- Handling the mount point creation/remotion in a better way which seems
+  to fix a couple of mntpoint problems.
+
+* 0.2.2
+- Added the keep_mounted option, which allows to not umount the mount point
+  once logged (useful if the gpg/ssh key is stored on there)
+
+- Fixed the mntpoint option: do not delete the directory if it's not a
+  temporary one.
+
+- Added the support to pass multiple filesystems name with the fs= 
+  option (comma separated list). Changed the default fs to "ext2,vfat"
+
+- Added the log_file option. Takes a filename as a argument. 
+  Combined with debug=1 it can log debug messages to a file.
+
+- Not mounting the device as read-only anymore. Instead, the mount_opts 
+  option has been created. It accepts a comma separated list of mount 
+  options (accepted options are: ro,bind,sync,remount,nosuid,noexec,nodev).
+
+- Fixed an issue which made the allow_remote feature not working correctly
+  with gdm/kdm.
+
+- Introduced the local_hosts and local_consoles options. They contain a
+  comma separated lists of hosts and consoles allowed to log in while using
+  allow_remote=-1
+
+* 0.2.1
+- Changed the naming method from x.y to x.y.z
+
+- pam_usb is now able to distinguish local users from remote (as in
+  logged via ssh), and denies the authentication of non-local users.
+  Setting allow_remote to 1 disable this feature.
+
+- Mounting is now done in read-only.
+
+- Added the missing mandatory PAM functions.
+
+* 0.2_rc2
+- Workaround to make pam_usb not use /proc so it can run on Linux 2.6
+  By setting check_device to -1, pam_usb will neither check the device's 
+  serial number, nor if it's attached. It's not a real problem if you 
+  don't need serial number checking, but don't combine it with 
+  check_if_mounted.
+
+- Added the force_device capability. Now you can specify a device that 
+  will be mounted without going in guessing mode. If the device cannot 
+  be mounted, it'll switch back to the default guess mode.
+  Useful if guess mode fails, if you don't want it to try several 
+  devices before getting the right one (so you can login faster), or if 
+  you want to login using a floppy disk, a cdrom or whatever you want.
+
+- Modified the serial number authentication method so now if no serial 
+  numbers are avaible on a device, it will try to use the GUID.
+  Thanks to Damien Braillard <damien.b@freesurf.ch> who reported the 
+  issue, suggested a way to fix it, and provided a first patch for it.
+
+* 0.2_rc1
+- Radically changed the way pam_usb authenticates the user on the 
+  system. Now it works with a pair of DSA keys.
+
+  Thanks to Wout Mertens <wmertens@cisco.com> who told me that i could 
+  use a couple of SSH keys to fix the authentication issue.
+  That gave me the idea to use a set of private/public keys.
+
+  Thanks to Ilkka Mattila <ilkka@lyseo.edu.ouka.fi> who helped me to 
+  find out a better way to implement the key challenge: extracting the 
+  public key was inadequate.
+
+  Also thanks to those who brought up weird scenarios and/or tested 
+  pre-releases of pam_usb, in alphabetical order:
+
+  Ilkka Mattila <ilkka@lyseo.edu.ouka.fi>
+  Joonas Kortesalmi
+  Thomas Stewart <thomas@stewarts.org.uk>
+  Tuure Laurinolli <tuure@laurinolli.net>
+
+* 0.1:
+- Now pam_usb doesn't require a mount point. Instead, it creates 
+  a temporary directory under /tmp. 
+  Thanks to Loic Jaquemet <jaquemet@fiifo.u-psud.fr> who gave me the idea.
+
+- Compiles with gcc 2.95 thanks to Tobias Bayer <tobi.bayer@gmx.de> bug 
+  report.
+
+* 0.1-beta2:
+- procfile and device entries autodetection have been fixed thanks to 
+  Thomas Stewart <thomas@stewarts.org.uk> bug reports.
+
+- devfs support added. Thanks to Loic Jaquemet <jaquemet@fiifo.u-psud.fr> 
+  for the bug report.
+
+* 0.1-beta1: 
+- Initial release
