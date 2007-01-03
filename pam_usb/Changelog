@@ -14,6 +14,9 @@
 - pusb_hotplug (formely usbhotplug) make use of DBUS signals (sent by HAL)
   instead of kernel hotplugging. Also, its configuration has been merged
   into the pusb.conf configuration file.
+- A new tool named pusb_check has been added. It can perform authentication
+  the way the PAM module does. It can be useful for testing and scripting
+  purposes.
 
 * 0.3.3
 - The option keypath is now splitted into local_keypath and device_keypath.
