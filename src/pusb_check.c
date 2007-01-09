@@ -69,6 +69,7 @@ static void	pusb_check_usage(const char *name)
 {
   fprintf(stderr, "Usage: %s [-c <config file>] -u <username> -s <service>" \
 	  " [options]\n", name);
+  fprintf(stderr, "-u and -s are mandatory\n");
   fprintf(stderr, "Options can be one or more of the followings:\n");
   fprintf(stderr, "\t-a Authenticate: Try to authenticate the user\n");
   fprintf(stderr, "\t-d Dump: Parse and dump the settings\n");
