@@ -3,9 +3,9 @@ DEBUG		:= no
 
 # compiler/linker options
 CC		:= gcc
-CFLAGS		:= -Wall -fPIC `pkg-config --cflags libxml-2.0` \
+CFLAGS		:= $(CFLAGS) -Wall -fPIC `pkg-config --cflags libxml-2.0` \
 	`pkg-config --cflags hal-storage`
-LDFLAGS		:= `pkg-config --libs libxml-2.0` \
+LIBS		:= `pkg-config --libs libxml-2.0` \
 	`pkg-config --libs hal-storage`
 
 # common source files
@@ -23,7 +23,7 @@ OBJS		:= $(SRCS:.c=.o)
 PAM_USB_SRCS	:= src/pam.c
 PAM_USB_OBJS	:= $(PAM_USB_SRCS:.c=.o)
 PAM_USB		:= pam_usb.so
-PAM_USB_LDFLAGS	:= -shared $(LDFLAGS)
+PAM_USB_LDFLAGS	:= -shared
 PAM_USB_DEST	:= $(DESTDIR)/lib/security
 
 # pusb_check
@@ -60,10 +60,10 @@ endif
 all		: $(PAM_USB) $(PUSB_CHECK)
 
 $(PAM_USB)	: $(OBJS) $(PAM_USB_OBJS)
-		$(CC) -o $(PAM_USB) $(PAM_USB_LDFLAGS) $(OBJS) $(PAM_USB_OBJS)
+		$(CC) -o $(PAM_USB) $(PAM_USB_LDFLAGS) $(LDFLAGS) $(OBJS) $(PAM_USB_OBJS) $(LIBS)
 
 $(PUSB_CHECK)	: $(OBJS) $(PUSB_CHECK_OBJS)
-		$(CC) -o $(PUSB_CHECK) $(LDFLAGS) $(OBJS) $(PUSB_CHECK_OBJS)
+		$(CC) -o $(PUSB_CHECK) $(LDFLAGS) $(OBJS) $(PUSB_CHECK_OBJS) $(LIBS)
 
 %.o		: %.c
 		${CC} -c ${CFLAGS} $< -o $@
@@ -73,7 +73,7 @@ clean		:
 
 install		: all
 		$(MKDIR) -p $(CONFS_DEST) $(DOCS_DEST)
-		$(INSTALL) -m644 $(PAM_USB) $(PAM_USB_DEST)
+		$(INSTALL) -m755 $(PAM_USB) $(PAM_USB_DEST)
 		$(INSTALL) -m755 $(PUSB_CHECK) $(PUSB_CONF) $(PUSB_HOTPLUG) $(TOOLS_DEST)
 		$(INSTALL) -m644 $(CONFS) $(CONFS_DEST)
 		$(INSTALL) -m644 $(DOCS) $(DOCS_DEST)
