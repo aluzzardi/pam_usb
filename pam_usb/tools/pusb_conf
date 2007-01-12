@@ -114,7 +114,12 @@ def addDevice(options):
     if sys.stdin.readline().strip() != 'y':
         sys.exit(1)
 
-    doc = minidom.parse(options['configFile'])
+    try:
+        doc = minidom.parse(options['configFile'])
+    except Exception, err:
+        print 'Unable to read %s: %s' % (options['configFile'], err)
+        sys.exit(1)
+
     devs = doc.getElementsByTagName('devices')
     dev = doc.createElement('device')
     dev.attributes['id'] = options['deviceName']
@@ -129,10 +134,15 @@ def addDevice(options):
         e.appendChild(t)
         dev.appendChild(e)
 
-    f = open(options['configFile'], 'w')
-    f.write(doc.toxml())
-    f.close()
-    print 'Done.'
+    try:
+        f = open(options['configFile'], 'w')
+        f.write(doc.toxml())
+        f.close()
+    except Exception, err:
+        print 'Unable to save %s: %s' % (options['configFile'], err)
+        sys.exit(1)
+    else:
+        print 'Done.'
 
 def usage():
     print 'Usage: %s [--config file] --add-device <name> [--no-autodetect]' % os.path.basename(__file__)
@@ -171,4 +181,8 @@ halService = bus.get_object('org.freedesktop.Hal',
                             '/org/freedesktop/Hal/Manager')
 halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
 
-addDevice(options)
+try:
+    addDevice(options)
+except KeyboardInterrupt:
+    sys.exit(1)
+
