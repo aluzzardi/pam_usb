@@ -106,7 +106,11 @@ def addDevice(options):
     print 'Vendor\t\t: %s' % device.vendor
     print 'Model\t\t: %s' % device.product
     print 'Serial\t\t: %s' % device.serialNumber
-    print 'Volume UUID\t: %s (%s)' % (volume['uuid'], volume['device'])
+    if volume['uuid'] != '':
+        print 'Volume UUID\t: %s (%s)' % (volume['uuid'], volume['device'])
+    else:
+        print
+        print 'WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device']
     print
     print 'Save device to %s ?' % options['configFile']
 
@@ -132,6 +136,13 @@ def addDevice(options):
         e = doc.createElement(name)
         t = doc.createTextNode(value)
         e.appendChild(t)
+        dev.appendChild(e)
+
+    # Disable one time pads if there's no device UUID
+    if volume['uuid'] == '':
+        e = doc.createElement('option')
+        e.setAttribute('name', 'one_time_pad')
+        e.appendChild(doc.createTextNode('false'))
         dev.appendChild(e)
 
     try:
