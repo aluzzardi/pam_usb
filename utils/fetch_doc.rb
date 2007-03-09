@@ -67,7 +67,7 @@ MANS.each do |man|
 	STDOUT.flush
 
 	doc = fetch_doc("man/#{man}")
-	cmd = "txt2man -v \"PAMUSB\" -s1 -t#{man}"
+	cmd = "txt2man -v \"PAM_USB\" -s1 -t#{man}"
 	cmd += ' | sed "s/\\\\\\\\\\\\\\\\/\\\\\\/g"'
 	File.popen("#{cmd} > #{File.join(DOC_PATH, man)}.1", 'w') do |f|
 		f.write(doc)

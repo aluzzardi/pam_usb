@@ -1,7 +1,7 @@
 ====== Upgrading  ======
 
-If you're already using a pamusb version prior to 0.4.0, you will have to remove
-the older version before installing.
+If you're already using a pam_usb version prior to 0.4.0, you will have to
+remove the older version before installing.
 
 You do not have to do this if you're already using >=0.4.0 or Subversion.
 
@@ -19,26 +19,30 @@ to pam_usb.so:
 $ grep -r pam_usb /etc/pam.d
 $
 
+
 =====  Remove .auth directories =====
 
-Older versions of pamusb used to create .auth directories in both the device and
-the user's home directory. Those directories aren't used anymore, so feel free
-to remove them:
+Older versions of pam_usb used to create .auth directories in both the device
+and the user's home directory. Those directories aren't used anymore, so feel
+free to remove them:
 
 # rm -rf /root/.auth
 # rm -rf /home/scox/.auth
 # rm -rf /media/usbdisk/.auth
 
+
 ===== Remove configuration files =====
 
-As configuration files of pamusb 0.4.0 aren't backward compatible and are
+As configuration files of pam_usb 0.4.0 aren't backward compatible and are
 located under /etc/pusb, the old /etc/pam_usb is no more needed.
 
 # rm -rf /etc/pam_usb
 
-===== Deinstall pamusb =====
 
-If you installed the old pamusb version using your operating system's package
+
+===== Deinstall pam_usb =====
+
+If you installed the old pam_usb version using your operating system's package
 manager, then remove it by the same mean.
 
 Otherwise, you can remove it by hand by performing the following instructions:

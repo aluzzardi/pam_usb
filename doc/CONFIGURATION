@@ -1,5 +1,6 @@
 ====== Configuration ======
 
+
 ===== Introduction =====
 
 * The configuration file is formatted in XML and subdivided in 4 sections:
@@ -37,14 +38,16 @@ using the -c option:
 auth    sufficient      pam_usb.so -c /some/other/path.conf
 auth    required        pam_unix.so nullok_secure
 
-You will also have to use the -c option when calling pamusb's tools. For
+You will also have to use the -c option when calling pam_usb's tools. For
 instance, when calling pusb_hotplug:
 pusb_hotplug -c /some/other/path.conf
+
+
 
 ===== Options =====
 
 ^ Name              ^ Type            ^ Default value       ^ Description  ^
-| enable        | Boolean         | true                | Enable pamusb         
+| enable        | Boolean         | true                | Enable pam_usb        
 |
 | debug         | Boolean         | false               | Enable debug messages 
 |
@@ -90,7 +93,7 @@ device to be detected -->
  </devices>
  <services>
    <service id="su">
-     <!-- Disable pamusb for "su" ("su" will ask for a password as usual) -->
+     <!-- Disable pam_usb for "su" ("su" will ask for a password as usual) -->
      <option name="enable">false<option>
    </service>
  </services>
@@ -159,9 +162,10 @@ beep-media-player -->
 -->
 </service>
 
+
 ===== Full example =====
 
-This example demonstrates how to write a pamusb configuration file and how to
+This example demonstrates how to write a pam_usb configuration file and how to
 combine and override options.
 
 <configuration>
@@ -211,7 +215,7 @@ enabled.
   <user id="scox">
     <device>MyDevice</device>
 
-    <!-- We want pamusb to work in quiet mode when authenticating "scox", so we
+    <!-- We want pam_usb to work in quiet mode when authenticating "scox", so we
 override the "quiet" option -->
     <option name="quiet">true</option>
 
@@ -224,7 +228,7 @@ override the "quiet" option -->
 <!-- Services settings (e.g. gdm, su, sudo...) -->
 <services>
 
-  <!-- Disable pamusb for gdm (a password will be asked as usual) -->
+  <!-- Disable pam_usb for gdm (a password will be asked as usual) -->
   <service id="gdm">
     <option name="enable">false</option>
   </service>

@@ -1,7 +1,7 @@
 ====== Installation ======
 
 Before going ahead, be sure to follow the upgrading instructions if you're using
-an older version of pamusb.
+an older version of pam_usb.
 
 ===== Requirements =====
 * Requirements for pam_usb and pusb_check:
@@ -118,17 +118,24 @@ automatically execute commands upon locking and unlocking events. Those events
 are generated when you insert or remove your authentication device.
 
 For instance, you could automatically start your screensaver as soon as you
-remove the device, and deactivate it when you plug the device back:
+remove the device, and deactivate it when you plug the device back.
 
+* GNOME (gnome-screensaver):
 <user id="scox">
   <device>MyDevice</device>
   <hotplug event="lock">gnome-screensaver-command --lock</hotplug>
   <hotplug event="unlock">gnome-screensaver-command --deactivate</hotplug>
 </user>
 
-Replace gnome-screensaver-command --lock and gnome-screensaver-command --unlock
-with any command you want to execute. You can also execute more commands by
-adding extra <hotplug> entries.
+* KDE (kscreensaver):
+<user id="scox">
+  <device>MyDevice</device>
+  <hotplug event="lock">dcop kdesktop KScreensaverIface lock</hotplug>
+  <hotplug event="unlock">dcop kdesktop KScreensaverIface quit</hotplug>
+</user>
+
+
+You can also execute more commands by adding extra <hotplug> entries.
 
 
 $ pusb_hotplug
@@ -148,12 +155,16 @@ pusb_hotplug[18329]: Unlocked.
 
 Depending on your desktop environment, you have to add pusb_hotplug to the list
 of autostarted applications so it will be started automatically.
-For instance, with GNOME:
 
-- Open System -> Preferences -> Sessions
-- Select Startup Programs and press Add
-- Enter pusb_hotplug and press OK
-- Press Close
+* GNOME:
+  - Open System -> Preferences -> Sessions
+  - Select Startup Programs and press Add
+  - Enter pusb_hotplug and press OK
+  - Press Close
+
+* KDE:
+  - cd ~/.kde/Autostart
+  - ln -s /usr/bin/pusb_hotplug pusb_hotplug
 
 ====== Troubleshooting ======
 
