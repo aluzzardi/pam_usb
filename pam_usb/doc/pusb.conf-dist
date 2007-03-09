@@ -1,5 +1,5 @@
 <!--
-pusb.conf-dist: Default configuration file for pamusb.
+pusb.conf-dist: Default configuration file for pam_usb.
 Copy this file to /etc/pusb/pusb.conf if you don't already have one.
 
 See http://www.pamusb.org/doc/configuring

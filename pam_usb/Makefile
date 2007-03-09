@@ -42,7 +42,7 @@ CONFS_DEST	:= $(DESTDIR)/etc/pusb
 
 # Doc
 DOCS		:= doc/INSTALLATION doc/CONFIGURATION doc/UPGRADING doc/FAQ
-DOCS_DEST	:= $(DESTDIR)/usr/share/doc/pamusb
+DOCS_DEST	:= $(DESTDIR)/usr/share/doc/pam_usb
 
 # Man
 MANS		:= doc/pusb_conf.1.gz doc/pusb_hotplug.1.gz doc/pusb_check.1.gz
@@ -66,6 +66,7 @@ $(PUSB_CHECK)	: $(OBJS) $(PUSB_CHECK_OBJS)
 		$(CC) -o $(PUSB_CHECK) $(LDFLAGS) $(OBJS) $(PUSB_CHECK_OBJS) $(LIBS)
 
 %.o		: %.c
+		sleep 1
 		${CC} -c ${CFLAGS} $< -o $@
 
 clean		:

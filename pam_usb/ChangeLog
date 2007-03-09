@@ -5,7 +5,7 @@
   interface over kernel changes.
 - Certificates have been replaced by one time pads. That will prevent
   copies of the USB device to be used for authentication.
-- Device's manufacturer properties verification. Pamusb now verifies
+- Device's manufacturer properties verification. pam_usb now verifies
   device informations (vendor, product, serial number, UUID) in the
   authentication process.
 - Configuration is now handled in a central place, the pusb.conf
