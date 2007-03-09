@@ -66,7 +66,6 @@ $(PUSB_CHECK)	: $(OBJS) $(PUSB_CHECK_OBJS)
 		$(CC) -o $(PUSB_CHECK) $(LDFLAGS) $(OBJS) $(PUSB_CHECK_OBJS) $(LIBS)
 
 %.o		: %.c
-		sleep 1
 		${CC} -c ${CFLAGS} $< -o $@
 
 clean		:
