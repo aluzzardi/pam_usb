@@ -43,7 +43,7 @@ CONFS_DEST		:= $(DESTDIR)/etc
 
 # Doc
 DOCS		:= doc/INSTALLATION doc/CONFIGURATION doc/UPGRADING doc/FAQ
-DOCS_DEST	:= $(DESTDIR)/usr/share/doc/pam_usb
+DOCS_DEST	:= $(DESTDIR)/usr/share/doc/pamusb
 
 # Man
 MANS		:= doc/pusb_conf.1.gz doc/pusb_hotplug.1.gz doc/pusb_check.1.gz
