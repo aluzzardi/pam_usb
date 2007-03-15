@@ -60,8 +60,8 @@ class Device:
 				'device' : deviceProperties['block.device']})
 			return vols
 
-def listOptions(question, options, force = False):
-	if force == False and len(options) == 1:
+def listOptions(question, options, autodetect = True):
+	if autodetect == True and len(options) == 1:
 		return 0
 	while True:
 		try:
@@ -79,6 +79,64 @@ def listOptions(question, options, force = False):
 		except Exception: pass
 		else: break
 
+def writeConf(options, doc):
+	try:
+		f = open(options['configFile'], 'w')
+		f.write(doc.toxml())
+		f.close()
+	except Exception, err:
+		print 'Unable to save %s: %s' % (options['configFile'], err)
+		sys.exit(1)
+	else:
+		print 'Done.'
+
+def shouldSave(options, items):
+	print "\n".join(["%s\t\t: %s" % item for item in items])
+	print
+	print 'Save to %s ?' % options['configFile']
+	sys.stdout.write('[y/n] ')
+	if sys.stdin.readline().strip() != 'y':
+		sys.exit(1)
+
+def addUser(options):
+	print 'adding user %s' % options['userName']
+	try:
+		doc = minidom.parse(options['configFile'])
+	except Exception, err:
+		print 'Unable to read %s: %s' % (options['configFile'], err)
+		sys.exit(1)
+	devSection = doc.getElementsByTagName('devices')
+	if len(devSection) == 0:
+		print 'Malformed configuration file: No <devices> section found.'
+		sys.exit(1)
+	devicesObj = devSection[0].getElementsByTagName('device')
+	if len(devicesObj) == 0:
+		print 'No devices found.'
+		print 'You must add a device (--add-device) before adding users'
+		sys.exit(1)
+
+	devices = []
+	for device in devicesObj:
+		devices.append(device.getAttribute('id'))
+	print devices
+	device = devices[listOptions("Which device would you like to use for authentication ?",
+		devices, False)]
+
+	shouldSave(options, [
+		('User', options['userName']),
+		('Device', device)
+		])
+
+	users = doc.getElementsByTagName('users')
+	user = doc.createElement('user')
+	user.attributes['id'] = options['userName']
+	e = doc.createElement('device')
+	t = doc.createTextNode(device)
+	e.appendChild(t)
+	user.appendChild(e)
+	users[0].appendChild(user)
+	writeConf(options, doc)
+
 def addDevice(options):
 	devices = []
 
@@ -91,32 +149,28 @@ def addDevice(options):
 	if len(devices) == 0:
 		print 'No devices detected.'
 		sys.exit()
+	device = devices[listOptions("Please select the device you wish to add.", devices)]
 
-	device = devices[listOptions("Please select the device you wish to add.",
-		devices, force = options['force'])]
 	volumes = device.volumes()
 	volume = volumes[listOptions("Which volume would you like to use for " \
 			"storing data ?",
 			["%s (UUID: %s)" % (volume['device'],
 				volume['uuid'])
-				for volume in volumes],
-			force = options['force'])]
+				for volume in volumes]
+			)]
 
-	print 'Name\t\t: %s' % options['deviceName']
-	print 'Vendor\t\t: %s' % device.vendor
-	print 'Model\t\t: %s' % device.product
-	print 'Serial\t\t: %s' % device.serialNumber
-	if volume['uuid'] != '':
-		print 'Volume UUID\t: %s (%s)' % (volume['uuid'], volume['device'])
-	else:
-		print
+	uuid = volume['uuid']
+	if volume['uuid'] == '':
 		print 'WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device']
-	print
-	print 'Save device to %s ?' % options['configFile']
+		uuid = "<UNDEFINED>"
 
-	sys.stdout.write('[y/n] ')
-	if sys.stdin.readline().strip() != 'y':
-		sys.exit(1)
+	shouldSave(options,[
+		('Name', options['deviceName']),
+		('Vendor', device.vendor),
+		('Model', device.product),
+		('Serial', device.serialNumber),
+		('UUID', uuid)
+		])
 
 	try:
 		doc = minidom.parse(options['configFile'])
@@ -133,6 +187,8 @@ def addDevice(options):
 			('model', device.product),
 			('serial', device.serialNumber),
 			('volume_uuid', volume['uuid'])):
+		if value == '':
+			continue
 		e = doc.createElement(name)
 		t = doc.createTextNode(value)
 		e.appendChild(t)
@@ -144,16 +200,7 @@ def addDevice(options):
 		e.setAttribute('name', 'one_time_pad')
 		e.appendChild(doc.createTextNode('false'))
 		dev.appendChild(e)
-
-	try:
-		f = open(options['configFile'], 'w')
-		f.write(doc.toxml())
-		f.close()
-	except Exception, err:
-		print 'Unable to save %s: %s' % (options['configFile'], err)
-		sys.exit(1)
-	else:
-		print 'Done.'
+	writeConf(options, doc)
 
 def usage():
 	print 'Usage: %s [--config file] --add-device <name> [--no-autodetect]' % os.path.basename(__file__)
@@ -162,38 +209,47 @@ def usage():
 import getopt
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], "ha:nc:",
-			["help", "add-device=", "no-autodetect",
-				"config="])
+	opts, args = getopt.getopt(sys.argv[1:], "hd:nu:c:",
+			["help", "add-device=", "add-user=", "config="])
 except getopt.GetoptError:
 	usage()
 
 if len(args) != 0:
 	usage()
 
-options = { 'force' : False, 'deviceName' : None,
+options = { 'deviceName' : None, 'userName' : None,
 		'configFile' : '/etc/pamusb.conf' }
 
 for o, a in opts:
 	if o in ("-h", "--help"):
 		usage()
-	if o in ("-a", "--add-device"):
+	if o in ("-d", "--add-device"):
 		options['deviceName'] = a
-	if o in ("-n", "--no-autodetect"):
-		options['force'] = True
+	if o in ("-u", "--add-user"):
+		options['userName'] = a
 	if o in ("-c", "--config"):
 		options['configFile'] = a
 
-if options['deviceName'] is None:
+if options['deviceName'] is not None and options['userName'] is not None:
+	print 'You cannot use both --add-user and --add-device'
 	usage()
 
-bus = dbus.SystemBus()
-halService = bus.get_object('org.freedesktop.Hal',
-		'/org/freedesktop/Hal/Manager')
-halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
+if options['deviceName'] is None and options['userName'] is None:
+	usage()
 
-try:
-	addDevice(options)
-except KeyboardInterrupt:
-	sys.exit(1)
+if options['deviceName'] is not None:
+	bus = dbus.SystemBus()
+	halService = bus.get_object('org.freedesktop.Hal',
+			'/org/freedesktop/Hal/Manager')
+	halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
+	try:
+		addDevice(options)
+	except KeyboardInterrupt:
+		sys.exit(1)
+
+if options['userName'] is not None:
+	try:
+		addUser(options)
+	except KeyboardInterrupt:
+		sys.exit(1)
 
