@@ -155,7 +155,7 @@ events = {
     'unlock' : []
     }
 
-for hotplug in user.findall('hotplug'):
+for hotplug in user.findall('agent'):
     events[hotplug.get('event')].append(hotplug.text)
 
 deviceName = user.find('device').text
