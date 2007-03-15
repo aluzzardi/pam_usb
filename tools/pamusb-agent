@@ -23,119 +23,119 @@ import syslog
 import gobject
 import dbus
 if getattr(dbus, 'version', (0,0,0)) >= (0,41,0):
-    import dbus.glib
+	import dbus.glib
 try:
-    import cElementTree as et
+	import cElementTree as et
 except ImportError:
-    import elementtree.ElementTree as et
+	import elementtree.ElementTree as et
 
 class HotPlugDevice:
-    def __init__(self, serial):
-        self.__udi = None
-        self.__serial = serial
-        self.__callbacks = []
-        self.__bus = dbus.SystemBus()
-        self.__running = False
+	def __init__(self, serial):
+		self.__udi = None
+		self.__serial = serial
+		self.__callbacks = []
+		self.__bus = dbus.SystemBus()
+		self.__running = False
 
-    def run(self):
-        self.__scanDevices()
-        self.__registerSignals()
-        self.__running = True
-        gobject.MainLoop().run()
-        print 'signals registered'
+	def run(self):
+		self.__scanDevices()
+		self.__registerSignals()
+		self.__running = True
+		gobject.MainLoop().run()
+		print 'signals registered'
 
-    def addCallback(self, callback):
-        self.__callbacks.append(callback)
+	def addCallback(self, callback):
+		self.__callbacks.append(callback)
 
-    def __scanDevices(self):
-        halService = self.__bus.get_object('org.freedesktop.Hal',
-                                           '/org/freedesktop/Hal/Manager')
-        halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
-        for udi in halManager.FindDeviceStringMatch('info.bus', 'usb_device'):
-            self.__deviceAdded(udi)
+	def __scanDevices(self):
+		halService = self.__bus.get_object('org.freedesktop.Hal',
+				'/org/freedesktop/Hal/Manager')
+		halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
+		for udi in halManager.FindDeviceStringMatch('info.bus', 'usb_device'):
+			self.__deviceAdded(udi)
 
-    def __registerSignals(self):
-        for signal, callback in (('DeviceAdded', self.__deviceAdded),
-                                 ('DeviceRemoved', self.__deviceRemoved)):
-            self.__bus.add_signal_receiver(callback,
-                                           signal,
-                                           'org.freedesktop.Hal.Manager',
-                                           'org.freedesktop.Hal',
-                                           '/org/freedesktop/Hal/Manager')
+	def __registerSignals(self):
+		for signal, callback in (('DeviceAdded', self.__deviceAdded),
+				('DeviceRemoved', self.__deviceRemoved)):
+			self.__bus.add_signal_receiver(callback,
+					signal,
+					'org.freedesktop.Hal.Manager',
+					'org.freedesktop.Hal',
+					'/org/freedesktop/Hal/Manager')
 
-    def __deviceAdded(self, udi):
-        if self.__udi is not None:
-            return
-        deviceObj = self.__bus.get_object('org.freedesktop.Hal',
-                                          udi)
-        deviceProperties = deviceObj.GetAllProperties(
-            dbus_interface = 'org.freedesktop.Hal.Device')
-        if not deviceProperties.has_key('usb_device.serial'):
-            return
-        if deviceProperties['usb_device.serial'] != self.__serial:
-            return
-        self.__udi = udi
-        if self.__running:
-            [ cb('added') for cb in self.__callbacks ]
+	def __deviceAdded(self, udi):
+		if self.__udi is not None:
+			return
+		deviceObj = self.__bus.get_object('org.freedesktop.Hal',
+				udi)
+		deviceProperties = deviceObj.GetAllProperties(
+				dbus_interface = 'org.freedesktop.Hal.Device')
+		if not deviceProperties.has_key('usb_device.serial'):
+			return
+		if deviceProperties['usb_device.serial'] != self.__serial:
+			return
+		self.__udi = udi
+		if self.__running:
+			[ cb('added') for cb in self.__callbacks ]
 
-    def __deviceRemoved(self, udi):
-        if self.__udi is None:
-            return
-        if self.__udi != udi:
-            return
-        self.__udi = None
-        if self.__running:
-            [ cb('removed') for cb in self.__callbacks ]
+	def __deviceRemoved(self, udi):
+		if self.__udi is None:
+			return
+		if self.__udi != udi:
+			return
+		self.__udi = None
+		if self.__running:
+			[ cb('removed') for cb in self.__callbacks ]
 
 class Log:
-    def __init__(self):
-        syslog.openlog('pamusb-agent', syslog.LOG_PID | syslog.LOG_PERROR,
-                       syslog.LOG_AUTH)
+	def __init__(self):
+		syslog.openlog('pamusb-agent', syslog.LOG_PID | syslog.LOG_PERROR,
+				syslog.LOG_AUTH)
 
-    def info(self, message):
-        self.__logMessage(syslog.LOG_NOTICE, message)
+	def info(self, message):
+		self.__logMessage(syslog.LOG_NOTICE, message)
 
-    def error(self, message):
-        self.__logMessage(syslog.LOG_ERR, message)
+	def error(self, message):
+		self.__logMessage(syslog.LOG_ERR, message)
 
-    def __logMessage(self, priority, message):
-        syslog.syslog(priority, message)
+	def __logMessage(self, priority, message):
+		syslog.syslog(priority, message)
 
 def usage():
-    print 'Usage: %s [--config file] [--daemon] [--path pamusb-check\'s path]' % \
-          os.path.basename(__file__)
-    sys.exit(1)
+	print 'Usage: %s [--config file] [--daemon] [--path pamusb-check\'s path]' % \
+			os.path.basename(__file__)
+	sys.exit(1)
 
 import getopt
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "hc:dp:",
-                               ["help", "config=", "daemon", "path="])
+	opts, args = getopt.getopt(sys.argv[1:], "hc:dp:",
+			["help", "config=", "daemon", "path="])
 except getopt.GetoptError:
-    usage()
+	usage()
 
 options = {'configFile' : '/etc/pamusb.conf',
-            'daemon' : False,
-            'path' : '/usr/bin/pamusb-check'}
+		'daemon' : False,
+		'path' : '/usr/bin/pamusb-check'}
 
 if len(args) != 0:
-    usage()
+	usage()
 
 for o, a in opts:
-    if o in ('-h', '--help'):
-        usage()
-    if o in ('-c', '--config'):
-        options['configFile'] = a
-    if o in ('-d', '--daemon'):
-        options['daemon'] = True
-    if o in ('-p', '--path'):
-        options['path'] = a
+	if o in ('-h', '--help'):
+		usage()
+	if o in ('-c', '--config'):
+		options['configFile'] = a
+	if o in ('-d', '--daemon'):
+		options['daemon'] = True
+	if o in ('-p', '--path'):
+		options['path'] = a
 
 
 if not os.path.exists(options['path']):
-    print '%s not found.' % options['path']
-    print "You might specify manually pamusb-check's location using --path."
-    usage()
+	print '%s not found.' % options['path']
+	print "You might specify manually pamusb-check's location using --path."
+	usage()
 
 username = pwd.getpwuid(os.getuid())[0]
 
@@ -144,70 +144,69 @@ logger = Log()
 doc = et.parse(options['configFile'])
 users = doc.findall('users/user')
 for user in users:
-    if user.get('id') == username:
-        break
+	if user.get('id') == username:
+		break
 else:
-    logger.error('User %s not found in configuration file' % username)
-    sys.exit(1)
+	logger.error('User %s not found in configuration file' % username)
+	sys.exit(1)
 
 events = {
-    'lock' : [],
-    'unlock' : []
-    }
+		'lock' : [],
+		'unlock' : []
+		}
 
 for hotplug in user.findall('agent'):
-    events[hotplug.get('event')].append(hotplug.text)
+	events[hotplug.get('event')].append(hotplug.text)
 
 deviceName = user.find('device').text
 
 devices = doc.findall("devices/device")
 for device in devices:
-    if device.get('id') == deviceName:
-        break
+	if device.get('id') == deviceName:
+		break
 else:
-    logger.error('Device %s not found in configurtion file' % deviceName)
-    sys.exit(1)
+	logger.error('Device %s not found in configurtion file' % deviceName)
+	sys.exit(1)
 
 serial = device.find('serial').text
 
 def authChangeCallback(event):
-    if event == 'removed':
-        logger.info('Device "%s" has been removed, ' \
-                    'locking down user "%s"...' % (deviceName, username))
-        for cmd in events['lock']:
-            logger.info('Running "%s"' % cmd)
-            os.system(cmd)
-        logger.info('Locked.')
-        return
+	if event == 'removed':
+		logger.info('Device "%s" has been removed, ' \
+				'locking down user "%s"...' % (deviceName, username))
+		for cmd in events['lock']:
+			logger.info('Running "%s"' % cmd)
+			os.system(cmd)
+		logger.info('Locked.')
+		return
 
-    logger.info('Device "%s" has been inserted. ' \
-                'Performing verification...' % deviceName)
-    cmdLine = "%s -q -c %s -u %s -s pamusb-agent -a" % (options['path'],
-                                                        options['configFile'],
-                                                        username)
-    logger.info('Executing "%s"' % cmdLine)
-    if not os.system(cmdLine):
-        logger.info('Authentication succeeded. ' \
-                    'Unlocking user "%s"...' % username)
-        for cmd in events['unlock']:
-            logger.info('Running "%s"' % cmd)
-            os.system(cmd)
-        logger.info('Unlocked.')
-    else:
-        logger.info('Authentication failed for device %s. ' \
-                    'Keeping user "%s" locked down.' % (deviceName, username))
+	logger.info('Device "%s" has been inserted. ' \
+			'Performing verification...' % deviceName)
+	cmdLine = "%s -q -c %s -u %s -s pamusb-agent -a" % (options['path'],
+			options['configFile'],
+			username)
+	logger.info('Executing "%s"' % cmdLine)
+	if not os.system(cmdLine):
+		logger.info('Authentication succeeded. ' \
+				'Unlocking user "%s"...' % username)
+		for cmd in events['unlock']:
+			logger.info('Running "%s"' % cmd)
+			os.system(cmd)
+		logger.info('Unlocked.')
+	else:
+		logger.info('Authentication failed for device %s. ' \
+				'Keeping user "%s" locked down.' % (deviceName, username))
 
 hpDev = HotPlugDevice(serial)
 hpDev.addCallback(authChangeCallback)
 
-
 if options['daemon'] and os.fork():
-    sys.exit(0)
+	sys.exit(0)
 
 logger.info('pamusb-agent up and running.')
 logger.info('Watching device "%s" for user "%s"' % (deviceName, username))
 
 try:
-    hpDev.run()
+	hpDev.run()
 except KeyboardInterrupt:
-    logger.error('Caught keyboard interruption, exiting...')
+	logger.error('Caught keyboard interruption, exiting...')
