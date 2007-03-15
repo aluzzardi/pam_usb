@@ -43,7 +43,7 @@ See http://www.pamusb.org/doc/configuring
 	<!-- Services settings (e.g. gdm, su, sudo...) -->
 	<services>
 		<!-- Example: Speed up hotplugging by disabling one time pads -->
-		<service id="pusb_hotplug">
+		<service id="pamusb-agent">
 			<option name="one_time_pad">false</option>
 		</service>
 	</services>
