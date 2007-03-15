@@ -32,7 +32,7 @@ PUSB_CHECK_OBJS	:= $(PUSB_CHECK_SRCS:.c=.o)
 PUSB_CHECK	:= pamusb-check
 
 # Tools
-PUSB_CONF	:= pusb_conf
+PUSB_CONF	:= pamusb-conf
 PUSB_AGENT	:= pamusb-agent
 TOOLS_DEST	:= $(DESTDIR)/usr/bin
 TOOLS_SRC	:= tools
