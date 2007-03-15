@@ -22,7 +22,7 @@ OBJS		:= $(SRCS:.c=.o)
 # pam_usb
 PAM_USB_SRCS	:= src/pam.c
 PAM_USB_OBJS	:= $(PAM_USB_SRCS:.c=.o)
-PAM_USB		:= pam_usb.so
+PAM_USB			:= pam_usb.so
 PAM_USB_LDFLAGS	:= -shared
 PAM_USB_DEST	:= $(DESTDIR)/lib/security
 
@@ -38,8 +38,8 @@ TOOLS_DEST		:= $(DESTDIR)/usr/bin
 TOOLS_SRC		:= tools
 
 # Conf
-CONFS			:= doc/pusb.conf-dist
-CONFS_DEST		:= $(DESTDIR)/etc/pusb
+CONFS			:= doc/pamusb.conf
+CONFS_DEST		:= $(DESTDIR)/etc
 
 # Doc
 DOCS		:= doc/INSTALLATION doc/CONFIGURATION doc/UPGRADING doc/FAQ
@@ -73,7 +73,7 @@ clean		:
 		$(RM) -f $(PAM_USB) $(PAMUSB_CHECK) $(OBJS) $(PAMUSB_CHECK_OBJS) $(PAM_USB_OBJS)
 
 install		: all
-		$(MKDIR) -p $(CONFS_DEST) $(DOCS_DEST)
+		$(MKDIR) -p $(CONFS_DEST) $(DOCS_DEST) $(MANS_DEST) $(TOOLS_DEST) $(PAM_USB_DEST)
 		$(INSTALL) -m755 $(PAM_USB) $(PAM_USB_DEST)
 		$(INSTALL) -m755 $(PAMUSB_CHECK) $(TOOLS_SRC)/$(PAMUSB_CONF) $(TOOLS_SRC)/$(PAMUSB_AGENT) $(TOOLS_DEST)
 		$(INSTALL) -m644 $(CONFS) $(CONFS_DEST)
