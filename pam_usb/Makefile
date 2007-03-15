@@ -26,15 +26,16 @@ PAM_USB		:= pam_usb.so
 PAM_USB_LDFLAGS	:= -shared
 PAM_USB_DEST	:= $(DESTDIR)/lib/security
 
-# pusb_check
-PUSB_CHECK_SRCS	:= src/pusb_check.c
+# pamusb-check
+PUSB_CHECK_SRCS	:= src/pamusb-check.c
 PUSB_CHECK_OBJS	:= $(PUSB_CHECK_SRCS:.c=.o)
-PUSB_CHECK	:= pusb_check
+PUSB_CHECK	:= pamusb-check
 
 # Tools
-PUSB_CONF	:= tools/pusb_conf
-PUSB_HOTPLUG	:= tools/pusb_hotplug
+PUSB_CONF	:= pusb_conf
+PUSB_AGENT	:= pamusb-agent
 TOOLS_DEST	:= $(DESTDIR)/usr/bin
+TOOLS_SRC	:= tools
 
 # Conf
 CONFS		:= doc/pusb.conf-dist
@@ -74,13 +75,13 @@ clean		:
 install		: all
 		$(MKDIR) -p $(CONFS_DEST) $(DOCS_DEST)
 		$(INSTALL) -m755 $(PAM_USB) $(PAM_USB_DEST)
-		$(INSTALL) -m755 $(PUSB_CHECK) $(PUSB_CONF) $(PUSB_HOTPLUG) $(TOOLS_DEST)
+		$(INSTALL) -m755 $(PUSB_CHECK) $(TOOLS_SRC)/$(PUSB_CONF) $(TOOLS_SRC)/$(PUSB_AGENT) $(TOOLS_DEST)
 		$(INSTALL) -m644 $(CONFS) $(CONFS_DEST)
 		$(INSTALL) -m644 $(DOCS) $(DOCS_DEST)
 		$(INSTALL) -m644 $(MANS) $(MANS_DEST)
 
 deinstall	:
 		$(RM) -f $(PAM_USB_DEST)/$(PAM_USB)
-		$(RM) -f $(TOOLS_DEST)/$(PUSB_CHECK) $(TOOLS_DEST)/$(PUSB_CONF) $(TOOLS_DEST)/$(PUSB_HOTPLUG)
+		$(RM) -f $(TOOLS_DEST)/$(PUSB_CHECK) $(TOOLS_DEST)/$(PUSB_CONF) $(TOOLS_DEST)/$(PUSB_AGENT)
 		$(RM) -rf $(DOCS_DEST)
 		$(RM) -f $(MANS_DEST)/pusb_*
