@@ -22,178 +22,178 @@ import os
 from xml.dom import minidom
 
 class Device:
-    def __init__(self, udi):
-        self.__udi = udi
-        self.__findStorageDevice()
-        deviceObj = bus.get_object('org.freedesktop.Hal',
-                                   udi)
-        deviceProperties = deviceObj.GetAllProperties(
-            dbus_interface = 'org.freedesktop.Hal.Device')
-        self.vendor = deviceProperties['usb_device.vendor']
-        self.product = deviceProperties['info.product']
-        self.serialNumber = deviceProperties['usb_device.serial']
+	def __init__(self, udi):
+		self.__udi = udi
+		self.__findStorageDevice()
+		deviceObj = bus.get_object('org.freedesktop.Hal',
+				udi)
+		deviceProperties = deviceObj.GetAllProperties(
+				dbus_interface = 'org.freedesktop.Hal.Device')
+		self.vendor = deviceProperties['usb_device.vendor']
+		self.product = deviceProperties['info.product']
+		self.serialNumber = deviceProperties['usb_device.serial']
 
-    def __findStorageDevice(self):
-        for child in halManager.FindDeviceByCapability('storage'):
-            obj = bus.get_object('org.freedesktop.Hal',
-                                 child)
-            properties = obj.GetAllProperties(
-                dbus_interface = 'org.freedesktop.Hal.Device')
-            if properties['storage.physical_device'] == self.__udi + '_if0':
-                self.__storageUdi = child
-                return
-        raise Exception, '%s is not a storage device.' % self.__udi
+	def __findStorageDevice(self):
+		for child in halManager.FindDeviceByCapability('storage'):
+			obj = bus.get_object('org.freedesktop.Hal',
+					child)
+			properties = obj.GetAllProperties(
+					dbus_interface = 'org.freedesktop.Hal.Device')
+			if properties['storage.physical_device'] == self.__udi + '_if0':
+				self.__storageUdi = child
+				return
+		raise Exception, '%s is not a storage device.' % self.__udi
 
-    def __repr__(self):
-        return "%s %s (%s)" % (self.vendor, self.product, self.serialNumber)
+	def __repr__(self):
+		return "%s %s (%s)" % (self.vendor, self.product, self.serialNumber)
 
-    def volumes(self):
-        vols = []
-        for volume in halManager.FindDeviceByCapability('volume'):
-            deviceObj = bus.get_object('org.freedesktop.Hal',
-                                       volume)
-            deviceProperties = deviceObj.GetAllProperties(
-                dbus_interface = 'org.freedesktop.Hal.Device')
-            if deviceProperties['block.storage_device'] != self.__storageUdi:
-                continue
-            vols.append({'uuid' : deviceProperties['volume.uuid'],
-                   'device' : deviceProperties['block.device']})
-        return vols
+	def volumes(self):
+		vols = []
+		for volume in halManager.FindDeviceByCapability('volume'):
+			deviceObj = bus.get_object('org.freedesktop.Hal',
+					volume)
+			deviceProperties = deviceObj.GetAllProperties(
+					dbus_interface = 'org.freedesktop.Hal.Device')
+			if deviceProperties['block.storage_device'] != self.__storageUdi:
+				continue
+			vols.append({'uuid' : deviceProperties['volume.uuid'],
+				'device' : deviceProperties['block.device']})
+			return vols
 
 def listOptions(question, options, force = False):
-    if force == False and len(options) == 1:
-        return 0
-    while True:
-        try:
-            print question
-            for i in range(len(options)):
-                print "%d) %s" % (i, options[i])
-            print
-            sys.stdout.write('[%s-%s]: ' % (0, len(options) - 1))
-            optionId = int(sys.stdin.readline())
-            print
-            if optionId not in range(len(options)):
-                raise Exception
-            return optionId
-        except KeyboardInterrupt: sys.exit()
-        except Exception: pass
-        else: break
+	if force == False and len(options) == 1:
+		return 0
+	while True:
+		try:
+			print question
+			for i in range(len(options)):
+				print "%d) %s" % (i, options[i])
+			print
+			sys.stdout.write('[%s-%s]: ' % (0, len(options) - 1))
+			optionId = int(sys.stdin.readline())
+			print
+			if optionId not in range(len(options)):
+				raise Exception
+			return optionId
+		except KeyboardInterrupt: sys.exit()
+		except Exception: pass
+		else: break
 
 def addDevice(options):
-    devices = []
+	devices = []
 
-    for udi in halManager.FindDeviceStringMatch('info.bus', 'usb_device'):
-        try:
-            devices.append(Device(udi))
-        except Exception, ex:
-            pass
+	for udi in halManager.FindDeviceStringMatch('info.bus', 'usb_device'):
+		try:
+			devices.append(Device(udi))
+		except Exception, ex:
+			pass
 
-    if len(devices) == 0:
-        print 'No devices detected.'
-        sys.exit()
+	if len(devices) == 0:
+		print 'No devices detected.'
+		sys.exit()
 
-    device = devices[listOptions("Please select the device you wish to add.",
-                                 devices, force = options['force'])]
-    volumes = device.volumes()
-    volume = volumes[listOptions("Which volume would you like to use for " \
-                                 "storing data ?",
-                                 ["%s (UUID: %s)" % (volume['device'],
-                                                     volume['uuid'])
-                                  for volume in volumes],
-                                 force = options['force'])]
+	device = devices[listOptions("Please select the device you wish to add.",
+		devices, force = options['force'])]
+	volumes = device.volumes()
+	volume = volumes[listOptions("Which volume would you like to use for " \
+			"storing data ?",
+			["%s (UUID: %s)" % (volume['device'],
+				volume['uuid'])
+				for volume in volumes],
+			force = options['force'])]
 
-    print 'Name\t\t: %s' % options['deviceName']
-    print 'Vendor\t\t: %s' % device.vendor
-    print 'Model\t\t: %s' % device.product
-    print 'Serial\t\t: %s' % device.serialNumber
-    if volume['uuid'] != '':
-        print 'Volume UUID\t: %s (%s)' % (volume['uuid'], volume['device'])
-    else:
-        print
-        print 'WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device']
-    print
-    print 'Save device to %s ?' % options['configFile']
+	print 'Name\t\t: %s' % options['deviceName']
+	print 'Vendor\t\t: %s' % device.vendor
+	print 'Model\t\t: %s' % device.product
+	print 'Serial\t\t: %s' % device.serialNumber
+	if volume['uuid'] != '':
+		print 'Volume UUID\t: %s (%s)' % (volume['uuid'], volume['device'])
+	else:
+		print
+		print 'WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device']
+	print
+	print 'Save device to %s ?' % options['configFile']
 
-    sys.stdout.write('[y/n] ')
-    if sys.stdin.readline().strip() != 'y':
-        sys.exit(1)
+	sys.stdout.write('[y/n] ')
+	if sys.stdin.readline().strip() != 'y':
+		sys.exit(1)
 
-    try:
-        doc = minidom.parse(options['configFile'])
-    except Exception, err:
-        print 'Unable to read %s: %s' % (options['configFile'], err)
-        sys.exit(1)
+	try:
+		doc = minidom.parse(options['configFile'])
+	except Exception, err:
+		print 'Unable to read %s: %s' % (options['configFile'], err)
+		sys.exit(1)
 
-    devs = doc.getElementsByTagName('devices')
-    dev = doc.createElement('device')
-    dev.attributes['id'] = options['deviceName']
-    devs[0].appendChild(dev)
+	devs = doc.getElementsByTagName('devices')
+	dev = doc.createElement('device')
+	dev.attributes['id'] = options['deviceName']
+	devs[0].appendChild(dev)
 
-    for name, value in (('vendor', device.vendor),
-                        ('model', device.product),
-                        ('serial', device.serialNumber),
-                        ('volume_uuid', volume['uuid'])):
-        e = doc.createElement(name)
-        t = doc.createTextNode(value)
-        e.appendChild(t)
-        dev.appendChild(e)
+	for name, value in (('vendor', device.vendor),
+			('model', device.product),
+			('serial', device.serialNumber),
+			('volume_uuid', volume['uuid'])):
+		e = doc.createElement(name)
+		t = doc.createTextNode(value)
+		e.appendChild(t)
+		dev.appendChild(e)
 
-    # Disable one time pads if there's no device UUID
-    if volume['uuid'] == '':
-        e = doc.createElement('option')
-        e.setAttribute('name', 'one_time_pad')
-        e.appendChild(doc.createTextNode('false'))
-        dev.appendChild(e)
+	# Disable one time pads if there's no device UUID
+	if volume['uuid'] == '':
+		e = doc.createElement('option')
+		e.setAttribute('name', 'one_time_pad')
+		e.appendChild(doc.createTextNode('false'))
+		dev.appendChild(e)
 
-    try:
-        f = open(options['configFile'], 'w')
-        f.write(doc.toxml())
-        f.close()
-    except Exception, err:
-        print 'Unable to save %s: %s' % (options['configFile'], err)
-        sys.exit(1)
-    else:
-        print 'Done.'
+	try:
+		f = open(options['configFile'], 'w')
+		f.write(doc.toxml())
+		f.close()
+	except Exception, err:
+		print 'Unable to save %s: %s' % (options['configFile'], err)
+		sys.exit(1)
+	else:
+		print 'Done.'
 
 def usage():
-    print 'Usage: %s [--config file] --add-device <name> [--no-autodetect]' % os.path.basename(__file__)
-    sys.exit(1)
+	print 'Usage: %s [--config file] --add-device <name> [--no-autodetect]' % os.path.basename(__file__)
+	sys.exit(1)
 
 import getopt
 
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "ha:nc:",
-                               ["help", "add-device=", "no-autodetect",
-                                "config="])
+	opts, args = getopt.getopt(sys.argv[1:], "ha:nc:",
+			["help", "add-device=", "no-autodetect",
+				"config="])
 except getopt.GetoptError:
-    usage()
+	usage()
 
 if len(args) != 0:
-    usage()
+	usage()
 
 options = { 'force' : False, 'deviceName' : None,
-            'configFile' : '/etc/pamusb.conf' }
+		'configFile' : '/etc/pamusb.conf' }
 
 for o, a in opts:
-    if o in ("-h", "--help"):
-        usage()
-    if o in ("-a", "--add-device"):
-        options['deviceName'] = a
-    if o in ("-n", "--no-autodetect"):
-        options['force'] = True
-    if o in ("-c", "--config"):
-        options['configFile'] = a
+	if o in ("-h", "--help"):
+		usage()
+	if o in ("-a", "--add-device"):
+		options['deviceName'] = a
+	if o in ("-n", "--no-autodetect"):
+		options['force'] = True
+	if o in ("-c", "--config"):
+		options['configFile'] = a
 
 if options['deviceName'] is None:
-    usage()
+	usage()
 
 bus = dbus.SystemBus()
 halService = bus.get_object('org.freedesktop.Hal',
-                            '/org/freedesktop/Hal/Manager')
+		'/org/freedesktop/Hal/Manager')
 halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
 
 try:
-    addDevice(options)
+	addDevice(options)
 except KeyboardInterrupt:
-    sys.exit(1)
+	sys.exit(1)
 
