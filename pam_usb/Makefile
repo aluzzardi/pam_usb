@@ -27,19 +27,19 @@ PAM_USB_LDFLAGS	:= -shared
 PAM_USB_DEST	:= $(DESTDIR)/lib/security
 
 # pamusb-check
-PUSB_CHECK_SRCS	:= src/pamusb-check.c
-PUSB_CHECK_OBJS	:= $(PUSB_CHECK_SRCS:.c=.o)
-PUSB_CHECK	:= pamusb-check
+PAMUSB_CHECK_SRCS	:= src/pamusb-check.c
+PAMUSB_CHECK_OBJS	:= $(PAMUSB_CHECK_SRCS:.c=.o)
+PAMUSB_CHECK		:= pamusb-check
 
 # Tools
-PUSB_CONF	:= pamusb-conf
-PUSB_AGENT	:= pamusb-agent
-TOOLS_DEST	:= $(DESTDIR)/usr/bin
-TOOLS_SRC	:= tools
+PAMUSB_CONF		:= pamusb-conf
+PAMUSB_AGENT	:= pamusb-agent
+TOOLS_DEST		:= $(DESTDIR)/usr/bin
+TOOLS_SRC		:= tools
 
 # Conf
-CONFS		:= doc/pusb.conf-dist
-CONFS_DEST	:= $(DESTDIR)/etc/pusb
+CONFS			:= doc/pusb.conf-dist
+CONFS_DEST		:= $(DESTDIR)/etc/pusb
 
 # Doc
 DOCS		:= doc/INSTALLATION doc/CONFIGURATION doc/UPGRADING doc/FAQ
@@ -58,30 +58,30 @@ ifeq (yes, ${DEBUG})
 	CFLAGS := ${CFLAGS} -ggdb
 endif
 
-all		: $(PAM_USB) $(PUSB_CHECK)
+all		: $(PAM_USB) $(PAMUSB_CHECK)
 
 $(PAM_USB)	: $(OBJS) $(PAM_USB_OBJS)
 		$(CC) -o $(PAM_USB) $(PAM_USB_LDFLAGS) $(LDFLAGS) $(OBJS) $(PAM_USB_OBJS) $(LIBS)
 
-$(PUSB_CHECK)	: $(OBJS) $(PUSB_CHECK_OBJS)
-		$(CC) -o $(PUSB_CHECK) $(LDFLAGS) $(OBJS) $(PUSB_CHECK_OBJS) $(LIBS)
+$(PAMUSB_CHECK)	: $(OBJS) $(PAMUSB_CHECK_OBJS)
+		$(CC) -o $(PAMUSB_CHECK) $(LDFLAGS) $(OBJS) $(PAMUSB_CHECK_OBJS) $(LIBS)
 
 %.o		: %.c
 		${CC} -c ${CFLAGS} $< -o $@
 
 clean		:
-		$(RM) -f $(PAM_USB) $(PUSB_CHECK) $(OBJS) $(PUSB_CHECK_OBJS) $(PAM_USB_OBJS)
+		$(RM) -f $(PAM_USB) $(PAMUSB_CHECK) $(OBJS) $(PAMUSB_CHECK_OBJS) $(PAM_USB_OBJS)
 
 install		: all
 		$(MKDIR) -p $(CONFS_DEST) $(DOCS_DEST)
 		$(INSTALL) -m755 $(PAM_USB) $(PAM_USB_DEST)
-		$(INSTALL) -m755 $(PUSB_CHECK) $(TOOLS_SRC)/$(PUSB_CONF) $(TOOLS_SRC)/$(PUSB_AGENT) $(TOOLS_DEST)
+		$(INSTALL) -m755 $(PAMUSB_CHECK) $(TOOLS_SRC)/$(PAMUSB_CONF) $(TOOLS_SRC)/$(PAMUSB_AGENT) $(TOOLS_DEST)
 		$(INSTALL) -m644 $(CONFS) $(CONFS_DEST)
 		$(INSTALL) -m644 $(DOCS) $(DOCS_DEST)
 		$(INSTALL) -m644 $(MANS) $(MANS_DEST)
 
 deinstall	:
 		$(RM) -f $(PAM_USB_DEST)/$(PAM_USB)
-		$(RM) -f $(TOOLS_DEST)/$(PUSB_CHECK) $(TOOLS_DEST)/$(PUSB_CONF) $(TOOLS_DEST)/$(PUSB_AGENT)
+		$(RM) -f $(TOOLS_DEST)/$(PAMUSB_CHECK) $(TOOLS_DEST)/$(PAMUSB_CONF) $(TOOLS_DEST)/$(PAMUSB_AGENT)
 		$(RM) -rf $(DOCS_DEST)
 		$(RM) -f $(MANS_DEST)/pusb_*
