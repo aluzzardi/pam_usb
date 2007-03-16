@@ -82,7 +82,7 @@ def listOptions(question, options, autodetect = True):
 def writeConf(options, doc):
 	try:
 		f = open(options['configFile'], 'w')
-		f.write(doc.toxml())
+		doc.writexml(f)
 		f.close()
 	except Exception, err:
 		print 'Unable to save %s: %s' % (options['configFile'], err)
@@ -97,6 +97,10 @@ def shouldSave(options, items):
 	sys.stdout.write('[y/n] ')
 	if sys.stdin.readline().strip() != 'y':
 		sys.exit(1)
+
+def prettifyElement(element):
+	tmp = minidom.parseString(element.toprettyxml())
+	return tmp.lastChild
 
 def addUser(options):
 	print 'adding user %s' % options['userName']
@@ -134,7 +138,7 @@ def addUser(options):
 	t = doc.createTextNode(device)
 	e.appendChild(t)
 	user.appendChild(e)
-	users[0].appendChild(user)
+	users[0].appendChild(prettifyElement(user))
 	writeConf(options, doc)
 
 def addDevice(options):
@@ -181,7 +185,6 @@ def addDevice(options):
 	devs = doc.getElementsByTagName('devices')
 	dev = doc.createElement('device')
 	dev.attributes['id'] = options['deviceName']
-	devs[0].appendChild(dev)
 
 	for name, value in (('vendor', device.vendor),
 			('model', device.product),
@@ -200,6 +203,8 @@ def addDevice(options):
 		e.setAttribute('name', 'one_time_pad')
 		e.appendChild(doc.createTextNode('false'))
 		dev.appendChild(e)
+
+	devs[0].appendChild(prettifyElement(dev))
 	writeConf(options, doc)
 
 def usage():
