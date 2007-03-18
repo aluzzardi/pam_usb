@@ -57,10 +57,10 @@ static int	pusb_xpath_strip_string(char *dest, const char *src,
   for (i = 0; src[i]; ++i)
     {
       if (isspace(src[i]))
-	continue ;
+        continue ;
 
       if (first_char == -1)
-	first_char = i;
+        first_char = i;
       last_char = i;
     }
 
