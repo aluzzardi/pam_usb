@@ -47,31 +47,32 @@ static xmlXPathObject	*pusb_xpath_match(xmlDocPtr doc, const char *path)
   return (result);
 }
 
-static int	pusb_xpath_strip_string(char *dest, const char *src, size_t size)
+static int	pusb_xpath_strip_string(char *dest, const char *src,
+					size_t size)
 {
-	int		first_char = -1;
-	int		last_char = -1;
-	int		i;
+  int		first_char = -1;
+  int		last_char = -1;
+  int		i;
 
-	for (i = 0; src[i]; ++i)
-	{
-		if (isspace(src[i]))
-			continue ;
+  for (i = 0; src[i]; ++i)
+    {
+      if (isspace(src[i]))
+	continue ;
 
-		if (first_char == -1)
-			first_char = i;
-		last_char = i;
-	}
+      if (first_char == -1)
+	first_char = i;
+      last_char = i;
+    }
 
-	if (first_char == -1 || last_char == -1)
-		return (0);
+  if (first_char == -1 || last_char == -1)
+    return (0);
 
-	if ((last_char - first_char) > (size - 1))
-		return (0);
+  if ((last_char - first_char) > (size - 1))
+    return (0);
 
-	memset(dest, 0x0, size);
-	strncpy(dest, &(src[first_char]), last_char - first_char + 1);
-	return (1);
+  memset(dest, 0x0, size);
+  strncpy(dest, &(src[first_char]), last_char - first_char + 1);
+  return (1);
 }
 
 int			pusb_xpath_get_string(xmlDocPtr doc, const char *path,
@@ -104,7 +105,7 @@ int			pusb_xpath_get_string(xmlDocPtr doc, const char *path,
       xmlFree(result_string);
       xmlXPathFreeObject(result);
       log_debug("Result for %s (%s) is too long (max: %d)\n",
-        path, (const char *)result_string, size);
+		path, (const char *)result_string, size);
       return (0);
     }
   xmlFree(result_string);
