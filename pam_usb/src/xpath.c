@@ -17,6 +17,7 @@
 
 #include <libxml/xpath.h>
 #include <string.h>
+#include <ctype.h>
 #include "xpath.h"
 #include "log.h"
 
@@ -46,6 +47,33 @@ static xmlXPathObject	*pusb_xpath_match(xmlDocPtr doc, const char *path)
   return (result);
 }
 
+static int	pusb_xpath_strip_string(char *dest, const char *src, size_t size)
+{
+	int		first_char = -1;
+	int		last_char = -1;
+	int		i;
+
+	for (i = 0; src[i]; ++i)
+	{
+		if (isspace(src[i]))
+			continue ;
+
+		if (first_char == -1)
+			first_char = i;
+		last_char = i;
+	}
+
+	if (first_char == -1 || last_char == -1)
+		return (0);
+
+	if ((last_char - first_char) > (size - 1))
+		return (0);
+
+	memset(dest, 0x0, size);
+	strncpy(dest, &(src[first_char]), last_char - first_char + 1);
+	return (1);
+}
+
 int			pusb_xpath_get_string(xmlDocPtr doc, const char *path,
 					      char *value, size_t size)
 {
@@ -71,16 +99,14 @@ int			pusb_xpath_get_string(xmlDocPtr doc, const char *path,
       log_debug("Empty value for %s\n", path);
       return (0);
     }
-  if (strlen((const char *)result_string) + 1 > size)
+  if (!pusb_xpath_strip_string(value, (const char *)result_string, size))
     {
       xmlFree(result_string);
       xmlXPathFreeObject(result);
       log_debug("Result for %s (%s) is too long (max: %d)\n",
-		path, (const char *)result_string, size);
+        path, (const char *)result_string, size);
       return (0);
     }
-  memset(value, '\0', size);
-  strncpy(value, (const char *)result_string, size);
   xmlFree(result_string);
   xmlXPathFreeObject(result);
   return (1);
