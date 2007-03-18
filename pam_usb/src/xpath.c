@@ -16,8 +16,8 @@
  */
 
 #include <libxml/xpath.h>
-#include <string.h>
 #include <ctype.h>
+#include <string.h>
 #include "xpath.h"
 #include "log.h"
 
