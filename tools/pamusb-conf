@@ -99,9 +99,8 @@ def shouldSave(options, items):
 		sys.exit(1)
 
 def prettifyElement(element):
-	return element
-#	tmp = minidom.parseString(element.toprettyxml())
-#	return tmp.lastChild
+	tmp = minidom.parseString(element.toprettyxml())
+	return tmp.lastChild
 
 def addUser(options):
 	print 'adding user %s' % options['userName']
