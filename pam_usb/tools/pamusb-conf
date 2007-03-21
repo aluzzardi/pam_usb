@@ -62,7 +62,11 @@ class Device:
 
 def listOptions(question, options, autodetect = True):
 	if autodetect == True and len(options) == 1:
+		print question
+		print "* Using \"%s\" (only option)" % options[0]
+		print
 		return 0
+
 	while True:
 		try:
 			print question
@@ -103,7 +107,6 @@ def prettifyElement(element):
 	return tmp.lastChild
 
 def addUser(options):
-	print 'adding user %s' % options['userName']
 	try:
 		doc = minidom.parse(options['configFile'])
 	except Exception, err:
@@ -122,9 +125,8 @@ def addUser(options):
 	devices = []
 	for device in devicesObj:
 		devices.append(device.getAttribute('id'))
-	print devices
 	device = devices[listOptions("Which device would you like to use for authentication ?",
-		devices, False)]
+		devices)]
 
 	shouldSave(options, [
 		('User', options['userName']),
@@ -159,21 +161,19 @@ def addDevice(options):
 	volume = volumes[listOptions("Which volume would you like to use for " \
 			"storing data ?",
 			["%s (UUID: %s)" % (volume['device'],
-				volume['uuid'])
+				volume['uuid'] or "<UNDEFINED>")
 				for volume in volumes]
 			)]
 
-	uuid = volume['uuid']
 	if volume['uuid'] == '':
 		print 'WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device']
-		uuid = "<UNDEFINED>"
 
 	shouldSave(options,[
 		('Name', options['deviceName']),
 		('Vendor', device.vendor),
 		('Model', device.product),
 		('Serial', device.serialNumber),
-		('UUID', uuid)
+		('UUID', volume['uuid'] or "<UNDEFINED>")
 		])
 
 	try:
