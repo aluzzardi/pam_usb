@@ -98,8 +98,9 @@ def shouldSave(options, items):
 	print "\n".join(["%s\t\t: %s" % item for item in items])
 	print
 	print 'Save to %s ?' % options['configFile']
-	sys.stdout.write('[y/n] ')
-	if sys.stdin.readline().strip() != 'y':
+	sys.stdout.write('[Y/n] ')
+	response = sys.stdin.readline().strip()
+	if len(response) > 0 and response.lower() != 'y':
 		sys.exit(1)
 
 def prettifyElement(element):
