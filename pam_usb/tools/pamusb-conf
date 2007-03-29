@@ -33,13 +33,21 @@ class Device:
 		self.product = deviceProperties['info.product']
 		self.serialNumber = deviceProperties['usb_device.serial']
 
+	def __isChildOfDevice(self, udi):
+		obj = bus.get_object('org.freedesktop.Hal', udi)
+		properties = obj.GetAllProperties(
+				dbus_interface = 'org.freedesktop.Hal.Device')
+		if not properties.has_key('info.parent'):
+			return False
+		if properties.has_key('info.bus') and properties['info.bus'] == 'usb_device':
+			return False
+		if properties['info.parent'] == self.__udi:
+			return True
+		return self.__isChildOfDevice(properties['info.parent'])
+
 	def __findStorageDevice(self):
 		for child in halManager.FindDeviceByCapability('storage'):
-			obj = bus.get_object('org.freedesktop.Hal',
-					child)
-			properties = obj.GetAllProperties(
-					dbus_interface = 'org.freedesktop.Hal.Device')
-			if properties['storage.physical_device'] == self.__udi + '_if0':
+			if self.__isChildOfDevice(child):
 				self.__storageUdi = child
 				return
 		raise Exception, '%s is not a storage device.' % self.__udi
