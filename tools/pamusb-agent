@@ -158,7 +158,7 @@ events = {
 for hotplug in user.findall('agent'):
 	events[hotplug.get('event')].append(hotplug.text)
 
-deviceName = user.find('device').text
+deviceName = user.find('device').text.strip()
 
 devices = doc.findall("devices/device")
 for device in devices:
