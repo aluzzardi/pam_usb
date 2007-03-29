@@ -168,7 +168,7 @@ else:
 	logger.error('Device %s not found in configurtion file' % deviceName)
 	sys.exit(1)
 
-serial = device.find('serial').text
+serial = device.find('serial').text.strip()
 
 def authChangeCallback(event):
 	if event == 'removed':
