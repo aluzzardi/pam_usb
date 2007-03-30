@@ -182,9 +182,8 @@ def authChangeCallback(event):
 
 	logger.info('Device "%s" has been inserted. ' \
 			'Performing verification...' % deviceName)
-	cmdLine = "%s -q -c %s -u %s -s pamusb-agent -a" % (options['check'],
-			options['configFile'],
-			username)
+	cmdLine = "%s --quiet --config=%s --service=pamusb-agent %s" % (
+			options['check'], options['configFile'], username)
 	logger.info('Executing "%s"' % cmdLine)
 	if not os.system(cmdLine):
 		logger.info('Authentication succeeded. ' \
