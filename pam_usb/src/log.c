@@ -23,74 +23,74 @@
 
 static t_pusb_options	*pusb_opts = NULL;
 
-static void	pusb_log_syslog(int level, const char *format, va_list ap)
+static void pusb_log_syslog(int level, const char *format, va_list ap)
 {
-  openlog("pam_usb", LOG_PID, LOG_AUTH);
-  vsyslog(level, format, ap);
-  closelog();
+	openlog("pam_usb", LOG_PID, LOG_AUTH);
+	vsyslog(level, format, ap);
+	closelog();
 }
 
-static void	pusb_log_output(int level, const char *format, va_list ap)
+static void pusb_log_output(int level, const char *format, va_list ap)
 {
-  if ((pusb_opts && !pusb_opts->quiet) ||
-      level == LOG_ERR)
-    {
-      if (pusb_opts && pusb_opts->color_log)
+	if ((pusb_opts && !pusb_opts->quiet) ||
+			level == LOG_ERR)
 	{
-	  if (level == LOG_ERR)
-	    fprintf(stderr, "\033[01;31m*\033[00m ");
-	  else if (level == LOG_NOTICE)
-	    fprintf(stderr, "\033[01;32m*\033[00m ");
+		if (pusb_opts && pusb_opts->color_log)
+		{
+			if (level == LOG_ERR)
+				fprintf(stderr, "\033[01;31m*\033[00m ");
+			else if (level == LOG_NOTICE)
+				fprintf(stderr, "\033[01;32m*\033[00m ");
+		}
+		else
+			fprintf(stderr, "* ");
+		vfprintf(stderr, format, ap);
 	}
-      else
-	fprintf(stderr, "* ");
-      vfprintf(stderr, format, ap);
-    }
 }
 
-void		__log_debug(const char *file, int line, const char *fmt, ...)
+void __log_debug(const char *file, int line, const char *fmt, ...)
 {
-  va_list	ap;
+	va_list	ap;
 
-  if (!pusb_opts || !pusb_opts->debug)
-    return ;
-  fprintf(stderr, "[%s:%03d] ", file, line);
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  va_end(ap);
+	if (!pusb_opts || !pusb_opts->debug)
+		return ;
+	fprintf(stderr, "[%s:%03d] ", file, line);
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
 
-  va_start(ap, fmt);
-  pusb_log_syslog(LOG_DEBUG, fmt, ap);
-  va_end(ap);
+	va_start(ap, fmt);
+	pusb_log_syslog(LOG_DEBUG, fmt, ap);
+	va_end(ap);
 }
 
-void		log_error(const char *fmt, ...)
+void log_error(const char *fmt, ...)
 {
-  va_list	ap;
+	va_list	ap;
 
-  va_start(ap, fmt);
-  pusb_log_syslog(LOG_ERR, fmt, ap);
-  va_end(ap);
+	va_start(ap, fmt);
+	pusb_log_syslog(LOG_ERR, fmt, ap);
+	va_end(ap);
 
-  va_start(ap, fmt);
-  pusb_log_output(LOG_ERR, fmt, ap);
-  va_end(ap);
+	va_start(ap, fmt);
+	pusb_log_output(LOG_ERR, fmt, ap);
+	va_end(ap);
 }
 
-void		log_info(const char *fmt, ...)
+void log_info(const char *fmt, ...)
 {
-  va_list	ap;
+	va_list	ap;
 
-  va_start(ap, fmt);
-  pusb_log_syslog(LOG_NOTICE, fmt, ap);
-  va_end(ap);
+	va_start(ap, fmt);
+	pusb_log_syslog(LOG_NOTICE, fmt, ap);
+	va_end(ap);
 
-  va_start(ap, fmt);
-  pusb_log_output(LOG_NOTICE, fmt, ap);
-  va_end(ap);
+	va_start(ap, fmt);
+	pusb_log_output(LOG_NOTICE, fmt, ap);
+	va_end(ap);
 }
 
-void		pusb_log_init(t_pusb_options *opts)
+void pusb_log_init(t_pusb_options *opts)
 {
-  pusb_opts = opts;
+	pusb_opts = opts;
 }

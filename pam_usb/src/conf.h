@@ -30,35 +30,34 @@
 
 typedef struct	pusb_device
 {
-  char		name[32];
-  char		vendor[128];
-  char		model[128];
-  char		serial[128];
-  char		volume_uuid[128];
-}		t_pusb_device;
+	char		name[32];
+	char		vendor[128];
+	char		model[128];
+	char		serial[128];
+	char		volume_uuid[128];
+}				t_pusb_device;
 
-typedef struct	pusb_options
+typedef struct		pusb_options
 {
-  int		probe_timeout;
-  int		enable;
-  int		debug;
-  int		quiet;
-  int		color_log;
-  int		one_time_pad;
-  char		hostname[32];
-  char		system_pad_directory[PATH_MAX];
-  char		device_pad_directory[PATH_MAX];
-  t_pusb_device	device;
-}		t_pusb_options;
+	int				probe_timeout;
+	int				enable;
+	int				debug;
+	int				quiet;
+	int				color_log;
+	int				one_time_pad;
+	char			hostname[32];
+	char			system_pad_directory[PATH_MAX];
+	char			device_pad_directory[PATH_MAX];
+	t_pusb_device	device;
+}					t_pusb_options;
 
-struct	s_opt_list
+struct		s_opt_list
 {
-  char	*name;
-  char	*value;
+	char	*name;
+	char	*value;
 };
 
-int	pusb_conf_init(t_pusb_options *opts);
-int	pusb_conf_parse(const char *file, t_pusb_options *opts,
-			const char *user, const char *service);
+int pusb_conf_init(t_pusb_options *opts);
+int pusb_conf_parse(const char *file, t_pusb_options *opts, const char *user, const char *service);
 
 #endif /* !PUSB_CONF_H_ */

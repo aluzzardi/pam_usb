@@ -22,41 +22,41 @@
 #include "log.h"
 #include "conf.h"
 
-int		pusb_local_login(t_pusb_options *opts, const char *user)
+int pusb_local_login(t_pusb_options *opts, const char *user)
 {
-  struct utmp	utsearch;
-  struct utmp	*utent;
-  const char	*from;
-  int		i;
+	struct utmp	utsearch;
+	struct utmp	*utent;
+	const char	*from;
+	int			i;
 
-  log_debug("Checking whether the caller is local or not...\n");
-  from = ttyname(STDIN_FILENO);
-  if (!from || !(*from))
-    {
-      log_debug("Couldn't retrieve the tty name, aborting.\n");
-      return (1);
-    }
-  if (!strncmp(from, "/dev/", strlen("/dev/")))
-    from += strlen("/dev/");
-  log_debug("Authentication request from tty %s\n", from);
-  strncpy(utsearch.ut_line, from, sizeof(utsearch.ut_line));
-  setutent();
-  utent = getutline(&utsearch);
-  endutent();
-  if (!utent)
-    {
-      log_debug("No utmp entry found for tty \"%s\"\n",
-		from);
-      return (1);
-    }
-  for (i = 0; i < 4; ++i)
-    {
-      if (utent->ut_addr_v6[i] != 0)
+	log_debug("Checking whether the caller is local or not...\n");
+	from = ttyname(STDIN_FILENO);
+	if (!from || !(*from))
 	{
-	  log_error("Remote authentication request: %s\n", utent->ut_host);
-	  return (0);
+		log_debug("Couldn't retrieve the tty name, aborting.\n");
+		return (1);
 	}
-    }
-  log_debug("Caller is local (good)\n");
-  return (1);
+	if (!strncmp(from, "/dev/", strlen("/dev/")))
+		from += strlen("/dev/");
+	log_debug("Authentication request from tty %s\n", from);
+	strncpy(utsearch.ut_line, from, sizeof(utsearch.ut_line));
+	setutent();
+	utent = getutline(&utsearch);
+	endutent();
+	if (!utent)
+	{
+		log_debug("No utmp entry found for tty \"%s\"\n",
+				from);
+		return (1);
+	}
+	for (i = 0; i < 4; ++i)
+	{
+		if (utent->ut_addr_v6[i] != 0)
+		{
+			log_error("Remote authentication request: %s\n", utent->ut_host);
+			return (0);
+		}
+	}
+	log_debug("Caller is local (good)\n");
+	return (1);
 }
