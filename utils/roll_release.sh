@@ -39,7 +39,6 @@ create_release()
 	svn export $TRUNK_PATH ${SRC_PATH}
 
 	echo "* Cleaning up..."
-	find "$SRC_PATH" -type d -name ".svn" -exec rm -rf "{}" +
 	rm -rf $SRC_PATH/utils
 
 	echo "* Tagging release \"$1\""
