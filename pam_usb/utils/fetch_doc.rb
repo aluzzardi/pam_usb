@@ -11,7 +11,7 @@ require 'open-uri'
 BASE_URI = 'http://www.pamusb.org/wiki/doc/'
 DOC_PATH = '../doc/'
 DOCS = [ 'installation', 'upgrading', 'configuration', 'faq' ]
-MANS = [ 'pusb_hotplug', 'pusb_conf', 'pusb_check' ]
+MANS = [ 'pamusb-check', 'pamusb-agent', 'pamusb-conf' ]
 
 REPLACE_LIST = [
 	# Remove wiki links [[link|name]]

@@ -46,7 +46,7 @@ DOCS		:= doc/INSTALLATION doc/CONFIGURATION doc/UPGRADING doc/FAQ
 DOCS_DEST	:= $(DESTDIR)/usr/share/doc/pamusb
 
 # Man
-MANS		:= doc/pusb_conf.1.gz doc/pusb_hotplug.1.gz doc/pusb_check.1.gz
+MANS		:= doc/pamusb-conf.1.gz doc/pamusb-agent.1.gz doc/pamusb-check.1.gz
 MANS_DEST	:= $(DESTDIR)/usr/share/man/man1
 
 # Binaries
