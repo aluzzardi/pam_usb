@@ -8,13 +8,13 @@
 - Device's manufacturer properties verification. pam_usb now verifies
   device informations (vendor, product, serial number, UUID) in the
   authentication process.
-- Configuration is now handled in a central place, the pusb.conf
+- Configuration is now handled in a central place, the pamusb.conf
   configuration file. This XML file contains configuration entries for
   users, devices and services.
-- pusb_hotplug (formely usbhotplug) make use of DBUS signals (sent by HAL)
+- pamusb-agent (formely usbhotplug) make use of DBUS signals (sent by HAL)
   instead of kernel hotplugging. Also, its configuration has been merged
-  into the pusb.conf configuration file.
-- A new tool named pusb_check has been added. It can perform authentication
+  into the pamusb.conf configuration file.
+- A new tool named pamusb-check has been added. It can perform authentication
   the way the PAM module does. It can be useful for testing and scripting
   purposes.
 
