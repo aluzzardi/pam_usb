@@ -36,7 +36,7 @@ create_release()
 
 	echo "* Rolling release $1 on $BUILD_ENV..."
 
-	cp -r $TRUNK_PATH ${SRC_PATH}
+	svn export $TRUNK_PATH ${SRC_PATH}
 
 	echo "* Cleaning up..."
 	find "$SRC_PATH" -type d -name ".svn" -exec rm -rf "{}" +
