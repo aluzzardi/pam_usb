@@ -10,7 +10,7 @@ require 'open-uri'
 
 BASE_URI = 'http://www.pamusb.org/wiki/doc/'
 DOC_PATH = '../doc/'
-DOCS = [ 'installation', 'upgrading', 'configuration', 'faq' ]
+DOCS = [ 'quickstart', 'upgrading', 'configuration', 'faq' ]
 MANS = [ 'pamusb-check', 'pamusb-agent', 'pamusb-conf' ]
 
 REPLACE_LIST = [

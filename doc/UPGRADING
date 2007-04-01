@@ -31,10 +31,11 @@ free to remove them:
 # rm -rf /media/usbdisk/.auth
 
 
+
 ===== Remove configuration files =====
 
-As configuration files of pam_usb 0.4.0 aren't backward compatible and are
-located under /etc/pusb, the old /etc/pam_usb is no more needed.
+As configuration files of pam_usb 0.4.0 aren't backward compatible, the old
+/etc/pam_usb is no more needed.
 
 # rm -rf /etc/pam_usb
 
