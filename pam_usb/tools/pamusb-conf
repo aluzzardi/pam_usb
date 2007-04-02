@@ -32,6 +32,8 @@ class Device:
 		self.vendor = deviceProperties['usb_device.vendor']
 		self.product = deviceProperties['info.product']
 		self.serialNumber = deviceProperties['usb_device.serial']
+		if len(self.volumes()) < 1:
+			raise Exception, '%s does not contain any volume' % self.__udi
 
 	def __isChildOfDevice(self, udi):
 		obj = bus.get_object('org.freedesktop.Hal', udi)
@@ -66,7 +68,7 @@ class Device:
 				continue
 			vols.append({'uuid' : deviceProperties['volume.uuid'],
 				'device' : deviceProperties['block.device']})
-			return vols
+		return vols
 
 def listOptions(question, options, autodetect = True):
 	if autodetect == True and len(options) == 1:
