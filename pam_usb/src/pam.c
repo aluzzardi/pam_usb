@@ -36,7 +36,8 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	char			*conf_file = PUSB_CONF_FILE;
 	int				retval;
 
-	retval = pam_get_item(pamh, PAM_SERVICE, (const void **)&service);
+	retval = pam_get_item(pamh, PAM_SERVICE,
+			(const void **)(const void *)&service);
 	if (retval != PAM_SUCCESS)
 	{
 		log_error("Unable to retrieve the PAM service name.\n");
@@ -67,7 +68,8 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	log_info("Authentication request for user \"%s\" (%s)\n",
 			user, service);
 
-	if (pam_get_item(pamh, PAM_TTY, (const void **)&tty) == PAM_SUCCESS)
+	if (pam_get_item(pamh, PAM_TTY,
+				(const void **)(const void *)&tty) == PAM_SUCCESS)
 	{
 		if (tty && !strcmp(tty, "ssh"))
 		{
