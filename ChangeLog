@@ -1,3 +1,6 @@
+* 0.4.1
+- Fixed a security issue related to OpenSSH authentication
+
 * 0.4.0
 - Both pam_usb and its tools (adm, hotplug) have been redesigned from the
   ground up and rewritten from scratch.
