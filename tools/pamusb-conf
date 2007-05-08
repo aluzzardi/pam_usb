@@ -1,0 +1,271 @@
+#!/usr/bin/env python
+#
+# Copyright (c) 2003-2007 Andrea Luzzardi <scox@sig11.org>
+#
+# This file is part of the pam_usb project. pam_usb is free software;
+# you can redistribute it and/or modify it under the terms of the GNU General
+# Public License version 2, as published by the Free Software Foundation.
+#
+# pam_usb is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+# Place, Suite 330, Boston, MA  02111-1307  USA
+
+
+import dbus
+import sys
+import os
+from xml.dom import minidom
+
+class Device:
+	def __init__(self, udi):
+		self.__udi = udi
+		self.__findStorageDevice()
+		deviceObj = bus.get_object('org.freedesktop.Hal',
+				udi)
+		deviceProperties = deviceObj.GetAllProperties(
+				dbus_interface = 'org.freedesktop.Hal.Device')
+		self.vendor = deviceProperties['usb_device.vendor']
+		self.product = deviceProperties['info.product']
+		self.serialNumber = deviceProperties['usb_device.serial']
+		if len(self.volumes()) < 1:
+			raise Exception, '%s does not contain any volume' % self.__udi
+
+	def __isChildOfDevice(self, udi):
+		obj = bus.get_object('org.freedesktop.Hal', udi)
+		properties = obj.GetAllProperties(
+				dbus_interface = 'org.freedesktop.Hal.Device')
+		if not properties.has_key('info.parent'):
+			return False
+		if properties.has_key('info.bus') and properties['info.bus'] == 'usb_device':
+			return False
+		if properties['info.parent'] == self.__udi:
+			return True
+		return self.__isChildOfDevice(properties['info.parent'])
+
+	def __findStorageDevice(self):
+		for child in halManager.FindDeviceByCapability('storage'):
+			if self.__isChildOfDevice(child):
+				self.__storageUdi = child
+				return
+		raise Exception, '%s is not a storage device.' % self.__udi
+
+	def __repr__(self):
+		return "%s %s (%s)" % (self.vendor, self.product, self.serialNumber)
+
+	def volumes(self):
+		vols = []
+		for volume in halManager.FindDeviceByCapability('volume'):
+			deviceObj = bus.get_object('org.freedesktop.Hal',
+					volume)
+			deviceProperties = deviceObj.GetAllProperties(
+					dbus_interface = 'org.freedesktop.Hal.Device')
+			if deviceProperties['block.storage_device'] != self.__storageUdi:
+				continue
+			vols.append({'uuid' : deviceProperties['volume.uuid'],
+				'device' : deviceProperties['block.device']})
+		return vols
+
+def listOptions(question, options, autodetect = True):
+	if autodetect == True and len(options) == 1:
+		print question
+		print "* Using \"%s\" (only option)" % options[0]
+		print
+		return 0
+
+	while True:
+		try:
+			print question
+			for i in range(len(options)):
+				print "%d) %s" % (i, options[i])
+			print
+			sys.stdout.write('[%s-%s]: ' % (0, len(options) - 1))
+			optionId = int(sys.stdin.readline())
+			print
+			if optionId not in range(len(options)):
+				raise Exception
+			return optionId
+		except KeyboardInterrupt: sys.exit()
+		except Exception: pass
+		else: break
+
+def writeConf(options, doc):
+	try:
+		f = open(options['configFile'], 'w')
+		doc.writexml(f)
+		f.close()
+	except Exception, err:
+		print 'Unable to save %s: %s' % (options['configFile'], err)
+		sys.exit(1)
+	else:
+		print 'Done.'
+
+def shouldSave(options, items):
+	print "\n".join(["%s\t\t: %s" % item for item in items])
+	print
+	print 'Save to %s ?' % options['configFile']
+	sys.stdout.write('[Y/n] ')
+	response = sys.stdin.readline().strip()
+	if len(response) > 0 and response.lower() != 'y':
+		sys.exit(1)
+
+def prettifyElement(element):
+	tmp = minidom.parseString(element.toprettyxml())
+	return tmp.lastChild
+
+def addUser(options):
+	try:
+		doc = minidom.parse(options['configFile'])
+	except Exception, err:
+		print 'Unable to read %s: %s' % (options['configFile'], err)
+		sys.exit(1)
+	devSection = doc.getElementsByTagName('devices')
+	if len(devSection) == 0:
+		print 'Malformed configuration file: No <devices> section found.'
+		sys.exit(1)
+	devicesObj = devSection[0].getElementsByTagName('device')
+	if len(devicesObj) == 0:
+		print 'No devices found.'
+		print 'You must add a device (--add-device) before adding users'
+		sys.exit(1)
+
+	devices = []
+	for device in devicesObj:
+		devices.append(device.getAttribute('id'))
+	device = devices[listOptions("Which device would you like to use for authentication ?",
+		devices)]
+
+	shouldSave(options, [
+		('User', options['userName']),
+		('Device', device)
+		])
+
+	users = doc.getElementsByTagName('users')
+	user = doc.createElement('user')
+	user.attributes['id'] = options['userName']
+	e = doc.createElement('device')
+	t = doc.createTextNode(device)
+	e.appendChild(t)
+	user.appendChild(e)
+	users[0].appendChild(prettifyElement(user))
+	writeConf(options, doc)
+
+def addDevice(options):
+	devices = []
+
+	for udi in halManager.FindDeviceStringMatch('info.bus', 'usb_device'):
+		try:
+			devices.append(Device(udi))
+		except Exception, ex:
+			pass
+
+	if len(devices) == 0:
+		print 'No devices detected.'
+		sys.exit()
+	device = devices[listOptions("Please select the device you wish to add.", devices)]
+
+	volumes = device.volumes()
+	volume = volumes[listOptions("Which volume would you like to use for " \
+			"storing data ?",
+			["%s (UUID: %s)" % (volume['device'],
+				volume['uuid'] or "<UNDEFINED>")
+				for volume in volumes]
+			)]
+
+	if volume['uuid'] == '':
+		print 'WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device']
+
+	shouldSave(options,[
+		('Name', options['deviceName']),
+		('Vendor', device.vendor),
+		('Model', device.product),
+		('Serial', device.serialNumber),
+		('UUID', volume['uuid'] or "<UNDEFINED>")
+		])
+
+	try:
+		doc = minidom.parse(options['configFile'])
+	except Exception, err:
+		print 'Unable to read %s: %s' % (options['configFile'], err)
+		sys.exit(1)
+
+	devs = doc.getElementsByTagName('devices')
+	dev = doc.createElement('device')
+	dev.attributes['id'] = options['deviceName']
+
+	for name, value in (('vendor', device.vendor),
+			('model', device.product),
+			('serial', device.serialNumber),
+			('volume_uuid', volume['uuid'])):
+		if value == '':
+			continue
+		e = doc.createElement(name)
+		t = doc.createTextNode(value)
+		e.appendChild(t)
+		dev.appendChild(e)
+
+	# Disable one time pads if there's no device UUID
+	if volume['uuid'] == '':
+		e = doc.createElement('option')
+		e.setAttribute('name', 'one_time_pad')
+		e.appendChild(doc.createTextNode('false'))
+		dev.appendChild(e)
+
+	devs[0].appendChild(prettifyElement(dev))
+	writeConf(options, doc)
+
+def usage():
+	print 'Usage: %s [--help] [--config=path] [--add-user=name | --add-device=name]' % os.path.basename(__file__)
+	sys.exit(1)
+
+import getopt
+
+try:
+	opts, args = getopt.getopt(sys.argv[1:], "hd:nu:c:",
+			["help", "add-device=", "add-user=", "config="])
+except getopt.GetoptError:
+	usage()
+
+if len(args) != 0:
+	usage()
+
+options = { 'deviceName' : None, 'userName' : None,
+		'configFile' : '/etc/pamusb.conf' }
+
+for o, a in opts:
+	if o in ("-h", "--help"):
+		usage()
+	if o in ("-d", "--add-device"):
+		options['deviceName'] = a
+	if o in ("-u", "--add-user"):
+		options['userName'] = a
+	if o in ("-c", "--config"):
+		options['configFile'] = a
+
+if options['deviceName'] is not None and options['userName'] is not None:
+	print 'You cannot use both --add-user and --add-device'
+	usage()
+
+if options['deviceName'] is None and options['userName'] is None:
+	usage()
+
+if options['deviceName'] is not None:
+	bus = dbus.SystemBus()
+	halService = bus.get_object('org.freedesktop.Hal',
+			'/org/freedesktop/Hal/Manager')
+	halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
+	try:
+		addDevice(options)
+	except KeyboardInterrupt:
+		sys.exit(1)
+
+if options['userName'] is not None:
+	try:
+		addUser(options)
+	except KeyboardInterrupt:
+		sys.exit(1)
+
