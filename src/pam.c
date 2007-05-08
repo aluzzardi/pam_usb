@@ -72,7 +72,7 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 		if (tty && !strcmp(tty, "ssh"))
 		{
 			log_debug("SSH Authentication, aborting.\n");
-			return (0);
+			return (PAM_AUTH_ERR);
 		}
 	}
 	if (!pusb_local_login(&opts, user))
