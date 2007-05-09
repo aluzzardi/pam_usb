@@ -161,7 +161,7 @@ char *pusb_hal_find_item(LibHalContext *ctx,
 	for (i = 0; i < n_devices; ++i)
 	{
 		char	*key = NULL;
-		int	match = 1;
+		int		match = 1;
 
 		va_start(ap, value);
 		while ((key = va_arg(ap, char *)))
@@ -169,6 +169,8 @@ char *pusb_hal_find_item(LibHalContext *ctx,
 			char	*value = NULL;
 
 			value = va_arg(ap, char *);
+			if (!value || *value == 0x0)
+				continue ;
 			if (!pusb_hal_check_property(ctx, devices[i],
 						key, value))
 			{

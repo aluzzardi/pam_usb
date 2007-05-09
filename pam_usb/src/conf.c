@@ -107,12 +107,10 @@ static int pusb_conf_device_get_property(t_pusb_options *opts,
 
 static int pusb_conf_parse_device(t_pusb_options *opts, xmlDoc *doc)
 {
-	if (!pusb_conf_device_get_property(opts, doc, "vendor", opts->device.vendor,
-				sizeof(opts->device.vendor)))
-		return (0);
-	if (!pusb_conf_device_get_property(opts, doc, "model", opts->device.model,
-				sizeof(opts->device.model)))
-		return (0);
+	pusb_conf_device_get_property(opts, doc, "vendor", opts->device.vendor,
+				sizeof(opts->device.vendor));
+	pusb_conf_device_get_property(opts, doc, "model", opts->device.model,
+				sizeof(opts->device.model));
 	if (!pusb_conf_device_get_property(opts, doc, "serial", opts->device.serial,
 				sizeof(opts->device.serial)))
 		return (0);
