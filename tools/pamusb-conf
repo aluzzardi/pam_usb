@@ -181,10 +181,10 @@ def addDevice(options):
 
 	shouldSave(options,[
 		('Name', options['deviceName']),
-		('Vendor', device.vendor),
-		('Model', device.product),
+		('Vendor', device.vendor or "Unknown"),
+		('Model', device.product or "Unknown"),
 		('Serial', device.serialNumber),
-		('UUID', volume['uuid'] or "<UNDEFINED>")
+		('UUID', volume['uuid'] or "Unknown")
 		])
 
 	try:
