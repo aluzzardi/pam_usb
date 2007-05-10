@@ -177,7 +177,6 @@ char *pusb_hal_find_item(LibHalContext *ctx,
 				match = 0;
 				break;
 			}
-			match = 1;
 		}
 		if (match)
 		{
