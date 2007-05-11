@@ -32,8 +32,7 @@ static void pusb_log_syslog(int level, const char *format, va_list ap)
 
 static void pusb_log_output(int level, const char *format, va_list ap)
 {
-	if ((pusb_opts && !pusb_opts->quiet) ||
-			level == LOG_ERR)
+	if (pusb_opts && !pusb_opts->quiet)
 	{
 		if (pusb_opts && pusb_opts->color_log)
 		{
