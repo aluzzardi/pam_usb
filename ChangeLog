@@ -1,5 +1,7 @@
 * 0.4.1
 - Fixed a security issue related to OpenSSH authentication
+- Fixed the quiet option (now it is really quiet)
+- Support for devices without vendor/model information
 
 * 0.4.0
 - Both pam_usb and its tools (adm, hotplug) have been redesigned from the
