@@ -174,6 +174,8 @@ char *pusb_hal_find_item(LibHalContext *ctx,
 			if (!pusb_hal_check_property(ctx, devices[i],
 						key, value))
 			{
+				log_debug("%s did match, but property %s didn't (expecting \"%s\")\n",
+						property, key, value);
 				match = 0;
 				break;
 			}
