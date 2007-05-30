@@ -1,0 +1,256 @@
+====== Configuration ======
+
+
+
+
+
+===== Introduction =====
+
+* The configuration file is formatted in XML and subdivided in 4 sections:
+  - Default options, shared among every device, user and service
+  - Devices declaration and settings
+  - Users declaration and settings
+  - Services declaration and settings
+
+* The syntax is the following:
+<configuration>
+ <defaults>
+ <!-- default options -->
+ </defaults>
+
+ <devices>
+ <!-- devices definitions -->
+ </devices>
+
+ <users>
+ <!-- users definitions -->
+ </users>
+
+ <services>
+ <!-- services definitions -->
+ </services>
+</configuration>
+
+* Location of the configuration file
+
+By default, pam_usb.so and its tools will look for the configuration file
+located in /etc/pamusb.conf, but you can tell it to use a different file by
+using the -c option:
+
+# /etc/pam.d/common-auth
+auth    sufficient      pam_usb.so -c /some/other/path.conf
+auth    required        pam_unix.so nullok_secure
+
+You will also have to use the -c option when calling pam_usb's tools. For
+instance, when calling pamusb-agent:
+pamusb-agent -c /some/other/path.conf
+
+
+
+
+===== Options =====
+
+^ Name              ^ Type            ^ Default value       ^ Description  ^
+| enable        | Boolean         | true                | Enable pam_usb        
+|
+| debug         | Boolean         | false               | Enable debug messages 
+|
+| quiet         | Boolean         | false               | Quiet mode (no verbose
+output)                      |
+| color_log     | Boolean         | true                | Enable colored output 
+|
+| one_time_pad  | Boolean         | true                | Enable the use of one
+time pads                     |
+| probe_timeout | Integer         | 10                  | Time (in seconds) to
+wait for the volume to be detected|
+| hostname      | String          | Computer's hostname | Computer name. Must be
+unique accross computers using the same device |                                
+
+| system_pad_directory | String   | .pamusb             | Relative path to the
+user's home used to store one time pads |
+| device_pad_directory | String   | .pamusb             | Relative path to the
+device used to store one time pads|
+
+* Example:
+
+<configuration>
+<defaults>
+  <!-- Disable colored output by default -->
+  <option name="color_log">false</option>
+  <!-- Enable debug output -->
+  <option name="debug">true</option>
+ </defaults>
+ <users>
+   <user id="root">
+     <!-- Enable colored output for user "root" -->
+     <option name="color_log">true</option>
+   </user>
+   <user id="scox">
+     <!-- Disable debug output for user "scox" -->
+     <option name="debug">false</option>
+ </users>
+ <devices>
+   <device id="sandisk">
+     <!-- Wait 15 seconds instead of the default 10 seconds for the "sandisk"
+device to be detected -->
+     <option name="probe_timeout">15</option>
+ </devices>
+ <services>
+   <service id="su">
+     <!-- Disable pam_usb for "su" ("su" will ask for a password as usual) -->
+     <option name="enable">false<option>
+   </service>
+ </services>
+</configuration>
+
+===== Devices =====
+
+^ Name            ^ Type      ^ Description                                    ^
+Example              ^
+| id          | Attribute | Arbitrary device name                          |
+MyDevice             |
+| vendor      | Element   | device's vendor name                           |
+SanDisk Corp.        |
+| model       | Element   | device's model name                            |
+Cruzer Titanium      |
+| serial      | Element   | serial number of the device                    |
+SNDKXXXXXXXXXXXXXXXX |
+| volume_uuid | Element   | UUID of the device's volume used to store pads |
+6F6B-42FC            |
+
+
+* Example:
+
+<device id="MyDevice">
+<vendor>SanDisk Corp.</vendor>
+<model>Cruzer Titanium</model>
+<serial>SNDKXXXXXXXXXXXXXXXX</serial>
+<volume_uuid>6F6B-42FC</volume_uuid>
+</device>
+
+
+===== Users =====
+
+^ Name            ^ Type      ^ Description                                 ^
+Example     ^
+| id          | Attribute | Login of the user                           | root  
+|
+| device      | Element   | id of the device associated to the user     |
+MyDevice    |
+| agent       | Element   | Agent commands, for use with pamusb-agent   | See
+below   |
+
+* Example:
+
+<user id="scox">
+<device>MyDevice</device>
+
+<!-- When the user "scox" removes the usb device, lock the screen and pause
+beep-media-player -->
+<hotplug event="lock">gnome-screensaver-command --lock</hotplug>
+<hotplug event="lock">beep-media-player --pause</hotplug>
+
+<!-- Resume operations when the usb device is plugged back and authenticated -->
+<hotplug event="unlock">gnome-screensaver-command --deactivate</hotplug>
+<hotplug event="unlock">beep-media-player --play</hotplug>
+</user>
+
+===== Services =====
+
+^ Name ^ Type      ^ Description         ^ Example ^
+| id   | Attribute | Name of the service | su      |
+
+<service id="su">
+<!--
+   Here you can put service specific options such as "enable", "debug" etc.
+   See the options section of this document.
+-->
+</service>
+
+
+
+===== Full example =====
+
+This example demonstrates how to write a pam_usb configuration file and how to
+combine and override options.
+
+<configuration>
+<!-- Default options -->
+<defaults>
+  <!-- Enable debug output by default-->
+  <option name="debug">true</option> -->
+  <!-- Disable one time pads by default -->
+  <option name="one_time_pad">false</option> -->
+</defaults>
+
+<!-- Device settings -->
+<devices>
+  <device id="MyDevice">
+    <!-- This part was generated by pamusb-conf -->
+    <vendor>SanDisk Corp.</vendor>
+    <model>Cruzer Titanium</model>
+    <serial>SNDKXXXXXXXXXXXXXXXX</serial>
+    <volume_uuid>6F6B-42FC</volume_uuid>
+
+    <!--
+      Override the debug option previously enabled by "defaults".
+      Everytime a user associated to that device tries to authenticate,
+debugging will be disabled.
+      For other users using different devices, the debugging will still be
+enabled.
+    -->
+    <option name="debug">disable</option>
+  </device>
+</devices>
+
+<!-- User settings -->
+<users>
+
+  <!-- Authenticate user "root" with device "MyDevice". -->
+  <user id="root">
+    <device>MyDevice</device>
+
+    <!--
+      One time pads were disabled in the "defaults" section.
+      Now we want to enable them for the user "root" so we override the option:
+    -->
+   <option name="one_time_pad">true</option>
+  </user>
+
+  <!-- Authenticate user "scox" with device "MyDevice". -->
+  <user id="scox">
+    <device>MyDevice</device>
+
+    <!-- We want pam_usb to work in quiet mode when authenticating "scox", so we
+override the "quiet" option -->
+    <option name="quiet">true</option>
+
+    <!-- Agent settings, used by pamusb-agent -->
+    <hotplug event="lock">gnome-screensaver-command --lock</hotplug>
+    <hotplug event="unlock">gnome-screensaver-command --deactivate</hotplug>
+  </user>
+</users>
+
+<!-- Services settings (e.g. gdm, su, sudo...) -->
+<services>
+
+  <!-- Disable pam_usb for gdm (a password will be asked as usual) -->
+  <service id="gdm">
+    <option name="enable">false</option>
+  </service>
+
+  <!--
+    We already disabled one time pads in the defaults section, but then
+re-enabled them for the
+    user "root" in the users section.
+
+    Now we want to speed up console login for user root, so we simply override
+again the one_time_pad option
+    for the "login" (console) service.
+  -->
+  <service id="login">
+    <option name="one_time_pad">false</option>
+  </service>
+</services>
+</configuration>
+</code>
