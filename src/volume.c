@@ -47,10 +47,10 @@ static int pusb_volume_mount(t_pusb_options *opts, LibHalVolume **volume,
 	log_debug("Attempting to mount device %s with label %s\n",
 			devname, tempname);
 	if (!fs)
-		snprintf(command, sizeof(command), "pmount -s %s %s",
+		snprintf(command, sizeof(command), "pmount -A -s %s %s",
 				devname, tempname);
 	else
-		snprintf(command, sizeof(command), "pmount -s -t %s %s %s",
+		snprintf(command, sizeof(command), "pmount -A -s -t %s %s %s",
 				fs, devname, tempname);
 	log_debug("Executing \"%s\"\n", command);
 	if (system(command) != 0)
