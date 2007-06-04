@@ -24,6 +24,7 @@
 # define CONF_USER_MAXLEN 32
 # include <limits.h>
 # include <linux/limits.h>
+# include <sys/time.h>
 # ifndef PATH_MAX
 #  define PATH_MAX 4096
 # endif
@@ -39,12 +40,13 @@ typedef struct	pusb_device
 
 typedef struct		pusb_options
 {
-	int				probe_timeout;
+	time_t			probe_timeout;
 	int				enable;
 	int				debug;
 	int				quiet;
 	int				color_log;
 	int				one_time_pad;
+	time_t			pad_expiration;
 	char			hostname[32];
 	char			system_pad_directory[PATH_MAX];
 	char			device_pad_directory[PATH_MAX];

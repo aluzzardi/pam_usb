@@ -135,6 +135,49 @@ static int pusb_pad_protect(const char *user, int fd)
 	return (1);
 }
 
+static int pusb_pad_should_update(t_pusb_options *opts, const char *user)
+{
+	FILE		*f_system = NULL;
+	struct stat st;
+	time_t		now;
+	time_t		delta;
+
+	log_debug("Checking whether pads are expired or not...");
+	if (!(f_system = pusb_pad_open_system(opts, user, "r")))
+	{
+		log_debug("Unable to open system pad, pads must be generated.\n");
+		return (1);
+	}
+	if (fstat(fileno(f_system), &st) == -1)
+	{
+		fclose(f_system);
+		return (1);
+	}
+	fclose(f_system);
+
+	if (time(&now) == ((time_t)-1))
+	{
+		log_error("Unable to fetch current time.\n");
+		return (1);
+	}
+
+	delta = now - st.st_mtime;
+
+	if (delta > opts->pad_expiration)
+	{
+		log_info("Pads expired %u seconds ago, updating...\n",
+				delta - opts->pad_expiration);
+		return (1);
+	}
+	else
+	{
+		log_info("Pads were generated %u seconds ago, not updating.\n",
+				delta);
+		return (0);
+	}
+	return (1);
+}
+
 static void pusb_pad_update(t_pusb_options *opts,
 		LibHalVolume *volume,
 		const char *user)
@@ -144,12 +187,15 @@ static void pusb_pad_update(t_pusb_options *opts,
 	char	magic[1024];
 	int		i;
 
+	if (!pusb_pad_should_update(opts, user))
+		return ;
 	if (!(f_device = pusb_pad_open_device(opts, volume, user, "w+")))
 	{
 		log_error("Unable to update pads.\n");
 		return ;
 	}
 	pusb_pad_protect(user, fileno(f_device));
+
 	if (!(f_system = pusb_pad_open_system(opts, user, "w+")))
 	{
 		log_error("Unable to update pads.\n");
@@ -157,6 +203,7 @@ static void pusb_pad_update(t_pusb_options *opts,
 		return ;
 	}
 	pusb_pad_protect(user, fileno(f_system));
+
 	log_debug("Generating %d bytes unique pad...\n", sizeof(magic));
 	srand(getpid() * time(NULL));
 	for (i = 0; i < sizeof(magic); ++i)
