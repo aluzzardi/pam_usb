@@ -44,7 +44,9 @@ static void pusb_conf_options_get_from(t_pusb_options *opts,
 			&(opts->enable));
 	pusb_xpath_get_bool_from(doc, from, "option[@name='one_time_pad']",
 			&(opts->one_time_pad));
-	pusb_xpath_get_int_from(doc, from, "option[@name='probe_timeout']",
+	pusb_xpath_get_time_from(doc, from, "option[@name='pad_expiration']",
+			&(opts->pad_expiration));
+	pusb_xpath_get_time_from(doc, from, "option[@name='probe_timeout']",
 			&(opts->probe_timeout));
 }
 
@@ -136,6 +138,7 @@ int pusb_conf_init(t_pusb_options *opts)
 	opts->quiet = 0;
 	opts->color_log = 1;
 	opts->one_time_pad = 1;
+	opts->pad_expiration = 86400;
 	return (1);
 }
 

@@ -179,14 +179,66 @@ int pusb_xpath_get_bool_from(xmlDocPtr doc,
 	snprintf(xpath, xpath_size, "%s%s", base, path);
 	retval = pusb_xpath_get_bool(doc, xpath, value);
 	free(xpath);
-	if (retval)
-		log_debug("%s%s -> %s\n", base, path, *value ? "true" : "false");
+	return (retval);
+}
+
+int pusb_xpath_get_time(xmlDocPtr doc, const char *path, time_t *value)
+{
+	char	ret[64];
+	char	*last;
+	int		coef;
+
+	if (!pusb_xpath_get_string(doc, path, ret, sizeof(ret)))
+		return (0);
+
+	last = &(ret[strlen(ret) - 1]);
+	coef = 1;
+	if (*last == 's')
+		coef = 1;
+	else if (*last == 'm')
+		coef = 60;
+	else if (*last == 'h')
+		coef = 3600;
+	else if (*last == 'd')
+		coef = 3600 * 24;
+	else
+		if (!isdigit(*last))
+		{
+			log_debug("Expecting a time modifier, got %c\n", *last);
+			return (0);
+		}
+	if (!isdigit(*last))
+		*last = '\0';
+	*value = atoi(ret) * coef;
+
+	return (0);
+}
+
+int pusb_xpath_get_time_from(xmlDocPtr doc,
+		const char *base,
+		const char *path,
+		time_t *value)
+{
+	char	*xpath = NULL;
+	size_t	xpath_size;
+	int		retval;
+
+	xpath_size = strlen(base) + strlen(path) + 1;
+	if (!(xpath = malloc(xpath_size)))
+	{
+		log_error("malloc error!\n");
+		return (0);
+	}
+	memset(xpath, 0x00, xpath_size);
+	snprintf(xpath, xpath_size, "%s%s", base, path);
+	retval = pusb_xpath_get_time(doc, xpath, value);
+	free(xpath);
 	return (retval);
 }
 
 int pusb_xpath_get_int(xmlDocPtr doc, const char *path, int *value)
 {
-	char	ret[64]; /* strlen("false") + 1 */
+	char	ret[64];
 
 	if (!pusb_xpath_get_string(doc, path, ret, sizeof(ret)))
 		return (0);
@@ -213,7 +265,5 @@ int pusb_xpath_get_int_from(xmlDocPtr doc,
 	snprintf(xpath, xpath_size, "%s%s", base, path);
 	retval = pusb_xpath_get_int(doc, xpath, value);
 	free(xpath);
-	if (retval)
-		log_debug("%s%s -> %d\n", base, path, *value);
 	return (retval);
 }
