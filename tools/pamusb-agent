@@ -25,9 +25,14 @@ import dbus
 if getattr(dbus, 'version', (0,0,0)) >= (0,41,0):
 	import dbus.glib
 try:
-	import cElementTree as et
-except ImportError:
+	# Python 2.5
 	import xml.etree.ElementTree as et
+except ImportError:
+	# Python 2.4
+	try:
+		import cElementTree as et
+	except ImportError:
+		import elementtree.ElementTree as et
 
 class HotPlugDevice:
 	def __init__(self, serial):
