@@ -161,7 +161,8 @@ def addDevice(options):
 				print "\tInvalid: %s" % ex
 			pass
 		else:
-			print "\tValid"
+			if options['verbose']:
+				print "\tValid"
 
 	if len(devices) == 0:
 		print 'No devices detected.'
