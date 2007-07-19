@@ -24,7 +24,6 @@ from xml.dom import minidom
 class Device:
 	def __init__(self, udi):
 		self.__udi = udi
-		self.__findStorageDevice()
 		deviceObj = bus.get_object('org.freedesktop.Hal',
 				udi)
 		deviceProperties = deviceObj.GetAllProperties(
@@ -47,13 +46,6 @@ class Device:
 			return True
 		return self.__isChildOfDevice(properties['info.parent'])
 
-	def __findStorageDevice(self):
-		for child in halManager.FindDeviceByCapability('storage'):
-			if self.__isChildOfDevice(child):
-				self.__storageUdi = child
-				return
-		raise Exception, '%s is not a storage device.' % self.__udi
-
 	def __repr__(self):
 		return "%s %s (%s)" % (self.vendor, self.product, self.serialNumber)
 
@@ -64,7 +56,9 @@ class Device:
 					volume)
 			deviceProperties = deviceObj.GetAllProperties(
 					dbus_interface = 'org.freedesktop.Hal.Device')
-			if deviceProperties['block.storage_device'] != self.__storageUdi:
+			if deviceProperties['block.major'] != 8:
+				continue
+			if not self.__isChildOfDevice(volume):
 				continue
 			vols.append({'uuid' : deviceProperties['volume.uuid'],
 				'device' : deviceProperties['block.device']})
