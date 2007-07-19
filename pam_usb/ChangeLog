@@ -2,6 +2,10 @@
 - Added the pad_expiration option which tells pam_usb how often pads
   should be updated in order to reduce device writing.
 - Support for time options in the configuration parser (5s, 2h, 10m, etc)
+- Added the --verbose option to pamusb-conf
+- Fixed the ElementTree import statement of pamusb-agent to work with
+  Python 2.5. Thanks to Donald Hayward <liquidsunshine@gmail.com> for
+  the patch.
 
 * 0.4.1
 - Fixed a security issue related to OpenSSH authentication
