@@ -32,7 +32,7 @@ class Device:
 		self.product = deviceProperties['info.product']
 		self.serialNumber = deviceProperties['usb_device.serial']
 		if len(self.volumes()) < 1:
-			raise Exception, '%s does not contain any volume' % self.__udi
+			raise Exception, 'Device does not contain any volume'
 
 	def __isChildOfDevice(self, udi):
 		obj = bus.get_object('org.freedesktop.Hal', udi)
@@ -153,11 +153,15 @@ def addDevice(options):
 
 	for udi in halManager.FindDeviceStringMatch('info.bus', 'usb_device'):
 		try:
+			if options['verbose']:
+				print 'Inspecting %s' % udi
 			devices.append(Device(udi))
 		except Exception, ex:
 			if options['verbose']:
-				print ex
+				print "\tInvalid: %s" % ex
 			pass
+		else:
+			print "\tValid"
 
 	if len(devices) == 0:
 		print 'No devices detected.'
