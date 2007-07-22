@@ -39,7 +39,7 @@ int pusb_local_login(t_pusb_options *opts, const char *user)
 	if (!strncmp(from, "/dev/", strlen("/dev/")))
 		from += strlen("/dev/");
 	log_debug("Authentication request from tty %s\n", from);
-	strncpy(utsearch.ut_line, from, sizeof(utsearch.ut_line));
+	strncpy(utsearch.ut_line, from, sizeof(utsearch.ut_line) - 1);
 	setutent();
 	utent = getutline(&utsearch);
 	endutent();
