@@ -53,7 +53,8 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	if (argc > 1)
 		if (!strcmp(argv[0], "-c"))
 			conf_file = (char *)argv[1];
-	pusb_conf_init(&opts);
+	if (!pusb_conf_init(&opts))
+		return (PAM_AUTH_ERR);
 	if (!pusb_conf_parse(conf_file, &opts, user, service))
 		return (PAM_AUTH_ERR);
 
