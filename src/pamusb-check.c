@@ -123,7 +123,8 @@ int main(int argc, char **argv)
 		pusb_check_usage(argv[0]);
 		return (1);
 	}
-	pusb_conf_init(&opts);
+	if (!pusb_conf_init(&opts))
+		return (1);
 	if (!pusb_conf_parse(conf_file, &opts, user, service))
 		return (1);
 	if (quiet)
