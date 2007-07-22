@@ -15,7 +15,7 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <unistd.h>
+#include <sys/utsname.h>
 #include <string.h>
 #include <errno.h>
 #include "conf.h"
@@ -124,12 +124,18 @@ static int pusb_conf_parse_device(t_pusb_options *opts, xmlDoc *doc)
 
 int pusb_conf_init(t_pusb_options *opts)
 {
+	struct utsname	u;
+
 	memset(opts, 0x00, sizeof(*opts));
-	if (gethostname(opts->hostname, sizeof(opts->hostname)) == -1)
+	if (uname(&u) == -1)
 	{
-		log_error("gethostname: %s\n", strerror(errno));
+		log_error("uname: %s\n", strerror(errno));
 		return (0);
 	}
+	strncpy(opts->hostname, u.nodename, sizeof(opts->hostname));
+	if (strlen(u.nodename) > sizeof(opts->hostname))
+		log_info("Hostname \"%s\" is too long, truncating to \"%s\".\n",
+				u.nodename, opts->hostname);
 	strcpy(opts->system_pad_directory, ".pamusb");
 	strcpy(opts->device_pad_directory, ".pamusb");
 	opts->probe_timeout = 10;
