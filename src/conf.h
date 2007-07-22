@@ -47,7 +47,7 @@ typedef struct		pusb_options
 	int				color_log;
 	int				one_time_pad;
 	time_t			pad_expiration;
-	char			hostname[32];
+	char			hostname[64];
 	char			system_pad_directory[PATH_MAX];
 	char			device_pad_directory[PATH_MAX];
 	t_pusb_device	device;
