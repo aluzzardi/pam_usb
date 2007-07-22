@@ -36,6 +36,7 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	char			*conf_file = PUSB_CONF_FILE;
 	int				retval;
 
+	pusb_log_init(&opts);
 	retval = pam_get_item(pamh, PAM_SERVICE,
 			(const void **)(const void *)&service);
 	if (retval != PAM_SUCCESS)
@@ -58,7 +59,6 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	if (!pusb_conf_parse(conf_file, &opts, user, service))
 		return (PAM_AUTH_ERR);
 
-	pusb_log_init(&opts);
 	if (!opts.enable)
 	{
 		log_debug("Not enabled, exiting...\n");

@@ -123,6 +123,8 @@ int main(int argc, char **argv)
 		pusb_check_usage(argv[0]);
 		return (1);
 	}
+
+	pusb_log_init(&opts);
 	if (!pusb_conf_init(&opts))
 		return (1);
 	if (!pusb_conf_parse(conf_file, &opts, user, service))
@@ -132,7 +134,6 @@ int main(int argc, char **argv)
 		opts.quiet = 1;
 		opts.debug = 0;
 	}
-	pusb_log_init(&opts);
 	if (dump)
 	{
 		pusb_check_conf_dump(&opts, user, service);
