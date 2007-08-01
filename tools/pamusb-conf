@@ -28,26 +28,13 @@ class Device:
 				udi)
 		deviceProperties = deviceObj.GetAllProperties(
 				dbus_interface = 'org.freedesktop.Hal.Device')
-		self.vendor = deviceProperties['usb_device.vendor']
-		self.product = deviceProperties['info.product']
-		self.serialNumber = deviceProperties['usb_device.serial']
+		if deviceProperties['storage.removable'] != 1:
+			raise Exception, 'Not a removable device'
+		self.vendor = deviceProperties['info.vendor']
+		self.product = deviceProperties['storage.model']
+		self.serialNumber = deviceProperties['storage.serial']
 		if len(self.volumes()) < 1:
 			raise Exception, 'Device does not contain any volume'
-
-	def __isChildOfDevice(self, udi):
-		obj = bus.get_object('org.freedesktop.Hal', udi)
-		properties = obj.GetAllProperties(
-				dbus_interface = 'org.freedesktop.Hal.Device')
-		if not properties.has_key('info.parent'):
-			return False
-		if properties.has_key('info.bus') and properties['info.bus'] == 'usb_device':
-			return False
-		if properties['info.parent'] == self.__udi:
-			return True
-		return self.__isChildOfDevice(properties['info.parent'])
-
-	def __repr__(self):
-		return "%s %s (%s)" % (self.vendor, self.product, self.serialNumber)
 
 	def volumes(self):
 		vols = []
@@ -56,13 +43,16 @@ class Device:
 					volume)
 			deviceProperties = deviceObj.GetAllProperties(
 					dbus_interface = 'org.freedesktop.Hal.Device')
-			if deviceProperties['block.major'] != 8:
+			if deviceProperties['info.parent'] != self.__udi:
 				continue
-			if not self.__isChildOfDevice(volume):
+			if deviceProperties['volume.is_partition'] != True:
 				continue
 			vols.append({'uuid' : deviceProperties['volume.uuid'],
 				'device' : deviceProperties['block.device']})
 		return vols
+
+	def __repr__(self):
+		return "%s %s (%s)" % (self.vendor, self.product, self.serialNumber)
 
 def listOptions(question, options, autodetect = True):
 	if autodetect == True and len(options) == 1:
@@ -151,7 +141,7 @@ def addUser(options):
 def addDevice(options):
 	devices = []
 
-	for udi in halManager.FindDeviceStringMatch('info.bus', 'usb_device'):
+	for udi in halManager.FindDeviceByCapability('storage'):
 		try:
 			if options['verbose']:
 				print 'Inspecting %s' % udi

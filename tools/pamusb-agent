@@ -56,7 +56,7 @@ class HotPlugDevice:
 		halService = self.__bus.get_object('org.freedesktop.Hal',
 				'/org/freedesktop/Hal/Manager')
 		halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
-		for udi in halManager.FindDeviceStringMatch('info.bus', 'usb_device'):
+		for udi in halManager.FindDeviceByCapability('storage'):
 			self.__deviceAdded(udi)
 
 	def __registerSignals(self):
@@ -75,9 +75,9 @@ class HotPlugDevice:
 				udi)
 		deviceProperties = deviceObj.GetAllProperties(
 				dbus_interface = 'org.freedesktop.Hal.Device')
-		if not deviceProperties.has_key('usb_device.serial'):
+		if not deviceProperties.has_key('storage.serial'):
 			return
-		if deviceProperties['usb_device.serial'] != self.__serial:
+		if deviceProperties['storage.serial'] != self.__serial:
 			return
 		self.__udi = udi
 		if self.__running:
