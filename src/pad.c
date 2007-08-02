@@ -122,13 +122,13 @@ static int pusb_pad_protect(const char *user, int fd)
 	}
 	if (fchown(fd, user_ent->pw_uid, user_ent->pw_gid) == -1)
 	{
-		log_error("Unable to change owner of the pad: %s\n",
+		log_debug("Unable to change owner of the pad: %s\n",
 				strerror(errno));
 		return (0);
 	}
 	if (fchmod(fd, S_IRUSR | S_IWUSR) == -1)
 	{
-		log_error("Unable to change mode of the pad: %s\n",
+		log_debug("Unable to change mode of the pad: %s\n",
 				strerror(errno));
 		return (0);
 	}
