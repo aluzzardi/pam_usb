@@ -142,7 +142,7 @@ static int pusb_pad_should_update(t_pusb_options *opts, const char *user)
 	time_t		now;
 	time_t		delta;
 
-	log_debug("Checking whether pads are expired or not...");
+	log_debug("Checking whether pads are expired or not...\n");
 	if (!(f_system = pusb_pad_open_system(opts, user, "r")))
 	{
 		log_debug("Unable to open system pad, pads must be generated.\n");
