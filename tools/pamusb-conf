@@ -30,8 +30,12 @@ class Device:
 				dbus_interface = 'org.freedesktop.Hal.Device')
 		if deviceProperties['storage.removable'] != 1:
 			raise Exception, 'Not a removable device'
-		self.vendor = deviceProperties['info.vendor']
-		self.product = deviceProperties['storage.model']
+		self.vendor = None
+		self.product = None
+		if deviceProperties.has_key('info.vendor'):
+			self.vendor = deviceProperties['info.vendor']
+		if deviceProperties.has_key('storage.model'):
+			self.product = deviceProperties['storage.model']
 		self.serialNumber = deviceProperties['storage.serial']
 		if len(self.volumes()) < 1:
 			raise Exception, 'Device does not contain any volume'
@@ -52,7 +56,9 @@ class Device:
 		return vols
 
 	def __repr__(self):
-		return "%s %s (%s)" % (self.vendor, self.product, self.serialNumber)
+		if self.product is not None:
+			return "%s %s (%s)" % (self.vendor, self.product, self.serialNumber)
+		return self.serialNumber
 
 def listOptions(question, options, autodetect = True):
 	if autodetect == True and len(options) == 1:
@@ -192,7 +198,7 @@ def addDevice(options):
 			('model', device.product),
 			('serial', device.serialNumber),
 			('volume_uuid', volume['uuid'])):
-		if value == '':
+		if value is None or value == '':
 			continue
 		e = doc.createElement(name)
 		t = doc.createTextNode(value)
