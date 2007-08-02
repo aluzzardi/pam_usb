@@ -34,7 +34,8 @@ static int pusb_device_connected(t_pusb_options *opts, LibHalContext *ctx)
 	udi = pusb_hal_find_item(ctx,
 			"storage.serial", opts->device.serial,
 			"storage.vendor", opts->device.vendor,
-			"info.product", opts->device.model);
+			"info.product", opts->device.model,
+			NULL);
 	if (!udi)
 	{
 		/* Backward compatibility with older versions (0.4.1) */
