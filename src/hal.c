@@ -17,6 +17,8 @@
 
 #include <string.h>
 #include <stdarg.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <dbus/dbus.h>
 #include <libhal-storage.h>
 #include "log.h"
@@ -25,14 +27,26 @@ DBusConnection *pusb_hal_dbus_connect(void)
 {
 	DBusConnection	*dbus = NULL;
 	DBusError		error;
+	uid_t			real_uid;
 
 	dbus_error_init(&error);
 	if (!(dbus = dbus_bus_get(DBUS_BUS_SYSTEM, &error)))
 	{
-		log_error("Cannot connect to system bus: %s\n",
-				error.message);
-		dbus_error_free(&error);
-		return (NULL);
+		/* Workaround for https://bugs.freedesktop.org/show_bug.cgi?id=11876 */
+		if (!geteuid() && (real_uid = getuid()))
+		{
+			dbus_error_free(&error);
+			setuid(geteuid());
+			dbus = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
+			setuid(real_uid);
+		}
+		if (!dbus)
+		{
+			log_error("Cannot connect to system bus: %s\n",
+					error.message);
+			dbus_error_free(&error);
+			return (NULL);
+		}
 	}
 	return (dbus);
 }
