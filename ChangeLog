@@ -6,6 +6,12 @@
 - Fixed the ElementTree import statement of pamusb-agent to work with
   Python 2.5. Thanks to Donald Hayward <liquidsunshine@gmail.com> for
   the patch.
+- Fixed pamusb-conf to work without vendor and product name
+- Improved the device detection to work with any removable storage device.
+  Thanks to Guillermo Antonio Amaral Bastidas <me@guillermoamaral.com>
+  for providing the patch.
+- Added a workaround for a DBUS bug that prevented pam_usb to work with su.
+  https://bugs.freedesktop.org/show_bug.cgi?id=11876
 - Various minor bugfix
 
 * 0.4.1
