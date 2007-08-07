@@ -27,18 +27,20 @@ DBusConnection *pusb_hal_dbus_connect(void)
 {
 	DBusConnection	*dbus = NULL;
 	DBusError		error;
-	uid_t			real_uid;
 
 	dbus_error_init(&error);
 	if (!(dbus = dbus_bus_get(DBUS_BUS_SYSTEM, &error)))
 	{
 		/* Workaround for https://bugs.freedesktop.org/show_bug.cgi?id=11876 */
-		if (!geteuid() && (real_uid = getuid()))
+		uid_t			ruid;
+		uid_t			euid;
+
+		if (!(euid = geteuid()) && (ruid = getuid()))
 		{
 			dbus_error_free(&error);
-			setuid(geteuid());
+			setreuid(euid, euid);
 			dbus = dbus_bus_get(DBUS_BUS_SYSTEM, &error);
-			setuid(real_uid);
+			setreuid(ruid, euid);
 		}
 		if (!dbus)
 		{
