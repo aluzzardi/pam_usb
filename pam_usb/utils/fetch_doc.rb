@@ -8,7 +8,7 @@
 
 require 'open-uri'
 
-BASE_URI = 'http://www.pamusb.org/wiki/doc/'
+BASE_URI = 'http://www.pamusb.org/doc/'
 DOC_PATH = '../doc/'
 DOCS = [ 'quickstart', 'upgrading', 'configuration', 'faq' ]
 MANS = [ 'pamusb-check', 'pamusb-agent', 'pamusb-conf' ]
