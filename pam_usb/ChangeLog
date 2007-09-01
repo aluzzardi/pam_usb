@@ -12,6 +12,8 @@
   for providing the patch.
 - Added a workaround for a DBUS bug that prevented pam_usb to work with su.
   https://bugs.freedesktop.org/show_bug.cgi?id=11876
+- Disable log outputting if the application doesn't have any tty
+  attached (fixes gksudo and other software).
 - Various minor bugfix
 
 * 0.4.1
