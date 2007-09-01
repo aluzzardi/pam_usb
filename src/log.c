@@ -16,6 +16,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 #include <syslog.h>
 #include <stdarg.h>
 #include "conf.h"
@@ -32,6 +33,8 @@ static void pusb_log_syslog(int level, const char *format, va_list ap)
 
 static void pusb_log_output(int level, const char *format, va_list ap)
 {
+	if (!isatty(fileno(stdin)))
+		return ;
 	if (pusb_opts && !pusb_opts->quiet)
 	{
 		if (pusb_opts && pusb_opts->color_log)
