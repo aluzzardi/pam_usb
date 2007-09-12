@@ -72,7 +72,7 @@ static int pusb_check_perform_authentication(t_pusb_options *opts,
 
 static void pusb_check_usage(const char *name)
 {
-	fprintf(stderr, "Usage: %s [--help] [--config=path] [--service=name] [--dump] [--quiet]" \
+	fprintf(stderr, "Usage: %s [--help] [--config=path] [--service=name] [--dump] [--quiet] [--debug]" \
 			" <username>\n", name);
 }
 
@@ -84,16 +84,18 @@ int main(int argc, char **argv)
 	char			*user = NULL;
 	int				quiet = 0;
 	int				dump = 0;
+	int				debug = 0;
 	int				opt;
 	int				opt_index = 0;
 	extern char		*optarg;
-	char			*short_options = "hc:s:dq";
+	char			*short_options = "hc:s:dqD";
 	struct option	long_options[] = {
 		{ "help", 0, 0, 0},
 		{ "config", 1, 0, 0},
 		{ "service", 1, 0, 0},
 		{ "dump", 0, &dump, 1 },
 		{ "quiet", 0, &quiet, 1},
+		{ "debug", 0, &debug, 1},
 		{ 0, 0, 0, 0}
 	};
 
@@ -124,6 +126,12 @@ int main(int argc, char **argv)
 		return (1);
 	}
 
+	if (quiet && debug)
+	{
+		fprintf(stderr, "Error: You cannot use --quiet and --debug together.");
+		return (1);
+	}
+
 	pusb_log_init(&opts);
 	if (!pusb_conf_init(&opts))
 		return (1);
@@ -133,6 +141,11 @@ int main(int argc, char **argv)
 	{
 		opts.quiet = 1;
 		opts.debug = 0;
+	}
+	else if (debug)
+	{
+		opts.quiet = 0;
+		opts.debug = 1;
 	}
 	if (dump)
 	{
