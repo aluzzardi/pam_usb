@@ -6,6 +6,22 @@ using an older version of pam_usb.
 ===== Installing ====
 
 
+==== Gentoo Linux ====
+
+pam_usb 0.4.1 is currently keyword masked (~arch) on Gentoo, so you'll have to
+unmask it before installing:
+
+# echo "sys-auth/pam_usb" >> /etc/portage/package.keywords
+# emerge -av ">=sys-auth/pam_usb-0.4.1"
+
+
+==== Debian GNU/Linux ====
+
+pam_usb is available on Debian testing (lenny) and unstable (sid).
+
+# apt-get install libpam-usb pamusb-tools
+
+
 ==== Installing from sources ====
 * Step 1: Download the latest release
 * Step 2: Unpack the distribution tarball
@@ -15,7 +31,7 @@ $ cd pam_usb-<version>
 
 * Step 3: Make sure that you have installed the required dependencies
 
-pam_usb depends on libxml2, PAM and HAL. pam_usb's tools (pamusb-agent,
+pam_usb depends on libxml2, PAM, HAL and pmount. pam_usb's tools (pamusb-agent,
 pamusb-conf) depends on python, python-celementtree and python-gobject.
 
 * Step 3: Compile and install

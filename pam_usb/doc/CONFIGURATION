@@ -1,8 +1,9 @@
 ====== Configuration ======
 
-
-
-
+Configuration is done through the pamusb-conf tool, as explained in the
+[[quickstart]] section. Most users don't have to manually change pamusb.conf, 
+however if you want to change some default settings, this document explains the
+syntax of the pamusb.conf configuration file.
 
 ===== Introduction =====
 
@@ -48,6 +49,7 @@ pamusb-agent -c /some/other/path.conf
 
 
 
+
 ===== Options =====
 
 ^ Name              ^ Type            ^ Default value       ^ Description  ^
@@ -61,8 +63,10 @@ output)                      |
 |
 | one_time_pad  | Boolean         | true                | Enable the use of one
 time pads                     |
-| probe_timeout | Integer         | 10                  | Time (in seconds) to
-wait for the volume to be detected|
+| probe_timeout | Time            | 10s                 | Time to wait for the
+volume to be detected|
+| pad_expiration| Time            | 1h                  | Time between pads
+regeneration|
 | hostname      | String          | Computer's hostname | Computer name. Must be
 unique accross computers using the same device |                                
 
@@ -129,6 +133,7 @@ SNDKXXXXXXXXXXXXXXXX |
 </device>
 
 
+
 ===== Users =====
 
 ^ Name            ^ Type      ^ Description                                 ^
@@ -147,12 +152,12 @@ below   |
 
 <!-- When the user "scox" removes the usb device, lock the screen and pause
 beep-media-player -->
-<hotplug event="lock">gnome-screensaver-command --lock</hotplug>
-<hotplug event="lock">beep-media-player --pause</hotplug>
+<agent event="lock">gnome-screensaver-command --lock</agent>
+<agent event="lock">beep-media-player --pause</agent>
 
 <!-- Resume operations when the usb device is plugged back and authenticated -->
-<hotplug event="unlock">gnome-screensaver-command --deactivate</hotplug>
-<hotplug event="unlock">beep-media-player --play</hotplug>
+<agent event="unlock">gnome-screensaver-command --deactivate</agent>
+<agent event="unlock">beep-media-player --play</agent>
 </user>
 
 ===== Services =====
@@ -166,6 +171,7 @@ beep-media-player -->
    See the options section of this document.
 -->
 </service>
+
 
 
 
@@ -226,8 +232,8 @@ override the "quiet" option -->
     <option name="quiet">true</option>
 
     <!-- Agent settings, used by pamusb-agent -->
-    <hotplug event="lock">gnome-screensaver-command --lock</hotplug>
-    <hotplug event="unlock">gnome-screensaver-command --deactivate</hotplug>
+    <agent event="lock">gnome-screensaver-command --lock</agent>
+    <agent event="unlock">gnome-screensaver-command --deactivate</agent>
   </user>
 </users>
 
