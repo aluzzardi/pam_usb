@@ -27,8 +27,9 @@ create_release()
 	BUILD_ENV=`mktemp -d /tmp/build.XXXXXX`
 	SRC_PATH=${BUILD_ENV}/pam_usb-${1}
 	TARBALL=pam_usb-${1}.tar.gz
+	TAG_PATH=${TRUNK_PATH}/../../tags/${1}
 
-	if [ -d "${TRUNK_PATH}/../../tags/${1}" -o -f $TARBALL ] ; then
+	if [ -d $TAG_PATH -o -f $TARBALL ] ; then
 		rm -rf $BUILD_ENV
 		echo "! Release $1 already exists !"
 		exit
@@ -36,20 +37,21 @@ create_release()
 
 	echo "* Rolling release $1 on $BUILD_ENV..."
 
-	svn export $TRUNK_PATH ${SRC_PATH}
+	svn cp $TRUNK_PATH $TAG_PATH
+	svn export $TRUNK_PATH $SRC_PATH
 
 	echo "* Cleaning up..."
 	rm -rf $SRC_PATH/utils
 
 	echo "* Tagging release \"$1\""
 	sed -ri "s/(PUSB_VERSION) \"[^\"]*\"/\1 \"${1}\"/" ${SRC_PATH}/src/version.h
+	cp -f ${SRC_PATH}/src/version.h ${TAG_PATH}/src/version.h
 
 	echo "* Creating tarball..."
 	cd $BUILD_ENV
 	tar -zcf $TARBALL pam_usb-${1}
 	cd - > /dev/null
 
-	cp -a $SRC_PATH ${TRUNK_PATH}/../../tags/${1}
 	cp ${BUILD_ENV}/${TARBALL} .
 	rm -rf $BUILD_ENV
 
