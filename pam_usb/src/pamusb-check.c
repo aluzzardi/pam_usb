@@ -72,7 +72,7 @@ static int pusb_check_perform_authentication(t_pusb_options *opts,
 
 static void pusb_check_usage(const char *name)
 {
-	fprintf(stderr, "Usage: %s [--help] [--config=path] [--service=name] [--dump] [--quiet] [--debug]" \
+	fprintf(stderr, "Usage: %s [--help] [--debug] [--config=path] [--service=name] [--dump] [--quiet] [--debug]" \
 			" <username>\n", name);
 }
 
