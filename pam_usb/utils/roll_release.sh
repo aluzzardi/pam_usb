@@ -37,7 +37,7 @@ create_release()
 
 	echo "* Rolling release $1 on $BUILD_ENV..."
 
-	svn cp $TRUNK_PATH $TAG_PATH
+	svn cp $TRUNK_PATH/pam_usb $TAG_PATH
 	svn export $TRUNK_PATH $SRC_PATH
 
 	echo "* Cleaning up..."
