@@ -19,3 +19,9 @@ soon as you authenticate.
 
 > Q: Is my USB drive compatible with pam_usb ?
 >> A: About every USB flash drive will work with pam_usb.
+
+> Q:  I can't authenticate anymore, pam_usb gives me the following error: Pad
+checking failed. What should I do ?
+>> A: It's a machine/device synchronization issue. To get rid of that error you
+have to reset the pads of your system by removing the .pamusb folder located on
+your home (/root/.pamusb/, /home/foobar/.pamusb/, etc).

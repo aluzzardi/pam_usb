@@ -165,13 +165,13 @@ static int pusb_pad_should_update(t_pusb_options *opts, const char *user)
 
 	if (delta > opts->pad_expiration)
 	{
-		log_info("Pads expired %u seconds ago, updating...\n",
+		log_debug("Pads expired %u seconds ago, updating...\n",
 				delta - opts->pad_expiration);
 		return (1);
 	}
 	else
 	{
-		log_info("Pads were generated %u seconds ago, not updating.\n",
+		log_debug("Pads were generated %u seconds ago, not updating.\n",
 				delta);
 		return (0);
 	}
@@ -189,6 +189,7 @@ static void pusb_pad_update(t_pusb_options *opts,
 
 	if (!pusb_pad_should_update(opts, user))
 		return ;
+	log_info("Regenerating new pads...\n");
 	if (!(f_device = pusb_pad_open_device(opts, volume, user, "w+")))
 	{
 		log_error("Unable to update pads.\n");
@@ -258,10 +259,7 @@ int pusb_pad_check(t_pusb_options *opts, LibHalContext *ctx,
 		return (0);
 	retval = pusb_pad_compare(opts, volume, user);
 	if (retval)
-	{
-		log_info("Verification match, updating one time pads...\n");
 		pusb_pad_update(opts, volume, user);
-	}
 	else
 		log_error("Pad checking failed !\n");
 	pusb_volume_destroy(volume);

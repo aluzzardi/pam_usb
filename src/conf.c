@@ -144,7 +144,7 @@ int pusb_conf_init(t_pusb_options *opts)
 	opts->quiet = 0;
 	opts->color_log = 1;
 	opts->one_time_pad = 1;
-	opts->pad_expiration = 86400;
+	opts->pad_expiration = 3600;
 	return (1);
 }
 

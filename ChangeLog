@@ -3,6 +3,7 @@
   should be updated in order to reduce device writing.
 - Support for time options in the configuration parser (5s, 2h, 10m, etc)
 - Added the --verbose option to pamusb-conf
+- Added the --debug option to pamusb-check
 - Fixed the ElementTree import statement of pamusb-agent to work with
   Python 2.5. Thanks to Donald Hayward <liquidsunshine@gmail.com> for
   the patch.
