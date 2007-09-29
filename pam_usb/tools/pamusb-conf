@@ -28,7 +28,7 @@ class Device:
 				udi)
 		deviceProperties = deviceObj.GetAllProperties(
 				dbus_interface = 'org.freedesktop.Hal.Device')
-		if deviceProperties['storage.removable'] != 1:
+		if deviceProperties['storage.removable'] != 1 and deviceProperties['storage.hotpluggable'] != 1:
 			raise Exception, 'Not a removable device'
 		self.vendor = None
 		self.product = None
