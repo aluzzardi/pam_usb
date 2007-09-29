@@ -1,3 +1,6 @@
+* SVN
+- Fixed a bug in the device recognition (--add-device)
+
 * 0.4.2
 - Added the pad_expiration option which tells pam_usb how often pads
   should be updated in order to reduce device writing.
