@@ -24,35 +24,33 @@ from xml.dom import minidom
 class Device:
 	def __init__(self, udi):
 		self.__udi = udi
-		deviceObj = bus.get_object('org.freedesktop.Hal',
+		deviceObj = bus.get_object('org.freedesktop.UDisks',
 				udi)
-		deviceProperties = deviceObj.GetAllProperties(
-				dbus_interface = 'org.freedesktop.Hal.Device')
-		if deviceProperties['storage.removable'] != 1 and deviceProperties['storage.hotpluggable'] != 1:
+		#deviceProperties = deviceObj.getProperties()
+				#dbus_interface = 'org.freedesktop.UDisks.Device')
+		deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
+		if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DeviceIsRemovable') != 1:
 			raise Exception, 'Not a removable device'
 		self.vendor = None
 		self.product = None
-		if deviceProperties.has_key('info.vendor'):
-			self.vendor = deviceProperties['info.vendor']
-		if deviceProperties.has_key('storage.model'):
-			self.product = deviceProperties['storage.model']
-		self.serialNumber = deviceProperties['storage.serial']
+		self.vendor = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveVendor')
+		self.model = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveModel')
+		self.serialNumber = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveSerial')
 		if len(self.volumes()) < 1:
 			raise Exception, 'Device does not contain any volume'
 
 	def volumes(self):
 		vols = []
-		for volume in halManager.FindDeviceByCapability('volume'):
-			deviceObj = bus.get_object('org.freedesktop.Hal',
-					volume)
-			deviceProperties = deviceObj.GetAllProperties(
-					dbus_interface = 'org.freedesktop.Hal.Device')
-			if deviceProperties['info.parent'] != self.__udi:
+		for udi in halManager.get_dbus_method('EnumerateDevices')():
+			deviceObj = bus.get_object('org.freedesktop.UDisks',
+				udi)
+			deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
+			if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DeviceIsPartition') != 1:
 				continue
-			if deviceProperties['volume.is_partition'] != True:
+			if deviceProperties.Get('org.freedesktop.UDisks.Device', 'PartitionSlave') != self.__udi:
 				continue
-			vols.append({'uuid' : deviceProperties['volume.uuid'],
-				'device' : deviceProperties['block.device']})
+			vols.append({'uuid' : deviceProperties.Get('org.freedesktop.UDisks.Device', 'IdUuid'),
+				'device' : deviceProperties.Get('org.freedesktop.UDisks.Device', 'DeviceFile')})
 		return vols
 
 	def __repr__(self):
@@ -147,7 +145,7 @@ def addUser(options):
 def addDevice(options):
 	devices = []
 
-	for udi in halManager.FindDeviceByCapability('storage'):
+	for udi in halManager.get_dbus_method('EnumerateDevices')():
 		try:
 			if options['verbose']:
 				print 'Inspecting %s' % udi
@@ -254,9 +252,9 @@ if options['deviceName'] is None and options['userName'] is None:
 
 if options['deviceName'] is not None:
 	bus = dbus.SystemBus()
-	halService = bus.get_object('org.freedesktop.Hal',
-			'/org/freedesktop/Hal/Manager')
-	halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
+	halService = bus.get_object('org.freedesktop.UDisks',
+			'/org/freedesktop/UDisks')
+	halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
 	try:
 		addDevice(options)
 	except KeyboardInterrupt:
