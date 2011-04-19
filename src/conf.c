@@ -48,6 +48,8 @@ static void pusb_conf_options_get_from(t_pusb_options *opts,
 			&(opts->pad_expiration));
 	pusb_xpath_get_time_from(doc, from, "option[@name='probe_timeout']",
 			&(opts->probe_timeout));
+	pusb_xpath_get_bool_from(doc, from, "option[@name='deny_remote']",
+			&(opts->deny_remote));
 }
 
 static int pusb_conf_parse_options(t_pusb_options *opts,
@@ -145,6 +147,7 @@ int pusb_conf_init(t_pusb_options *opts)
 	opts->color_log = 1;
 	opts->one_time_pad = 1;
 	opts->pad_expiration = 3600;
+	opts->deny_remote = 1;
 	return (1);
 }
 

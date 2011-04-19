@@ -31,7 +31,7 @@
 
 typedef struct	pusb_device
 {
-	char		name[32];
+	char		name[128];
 	char		vendor[128];
 	char		model[128];
 	char		serial[128];
@@ -47,6 +47,7 @@ typedef struct		pusb_options
 	int				color_log;
 	int				one_time_pad;
 	time_t			pad_expiration;
+	int				deny_remote;
 	char			hostname[64];
 	char			system_pad_directory[PATH_MAX];
 	char			device_pad_directory[PATH_MAX];

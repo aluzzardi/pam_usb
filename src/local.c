@@ -29,6 +29,11 @@ int pusb_local_login(t_pusb_options *opts, const char *user)
 	const char	*from;
 	int			i;
 
+	if (!opts->deny_remote)
+	{
+	  log_debug("deny_remote is disabled. Skipping local check.\n");
+	  return (1);
+	}
 	log_debug("Checking whether the caller is local or not...\n");
 	from = ttyname(STDIN_FILENO);
 	if (!from || !(*from))

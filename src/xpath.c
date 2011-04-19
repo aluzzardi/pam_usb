@@ -68,7 +68,10 @@ static int pusb_xpath_strip_string(char *dest, const char *src,
 		return (0);
 
 	if ((last_char - first_char) > (size - 1))
+	{
+		log_error("Device name is too long: %s", src);
 		return (0);
+	}
 
 	memset(dest, 0x0, size);
 	strncpy(dest, &(src[first_char]), last_char - first_char + 1);
