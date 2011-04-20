@@ -53,31 +53,27 @@ class HotPlugDevice:
 		self.__callbacks.append(callback)
 
 	def __scanDevices(self):
-		halService = self.__bus.get_object('org.freedesktop.Hal',
-				'/org/freedesktop/Hal/Manager')
-		halManager = dbus.Interface(halService, 'org.freedesktop.Hal.Manager')
-		for udi in halManager.FindDeviceByCapability('storage'):
+		halService = self.__bus.get_object('org.freedesktop.UDisks',
+				'/org/freedesktop/UDisks')
+		halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
+		for udi in halManager.EnumerateDevices():
 			self.__deviceAdded(udi)
 
 	def __registerSignals(self):
+		halService = self.__bus.get_object('org.freedesktop.UDisks',
+				'/org/freedesktop/UDisks')
+		halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
 		for signal, callback in (('DeviceAdded', self.__deviceAdded),
 				('DeviceRemoved', self.__deviceRemoved)):
-			self.__bus.add_signal_receiver(callback,
-					signal,
-					'org.freedesktop.Hal.Manager',
-					'org.freedesktop.Hal',
-					'/org/freedesktop/Hal/Manager')
+			halManager.connect_to_signal(signal, callback)
 
 	def __deviceAdded(self, udi):
 		if self.__udi is not None:
 			return
-		deviceObj = self.__bus.get_object('org.freedesktop.Hal',
+		deviceObj = self.__bus.get_object('org.freedesktop.UDisks',
 				udi)
-		deviceProperties = deviceObj.GetAllProperties(
-				dbus_interface = 'org.freedesktop.Hal.Device')
-		if not deviceProperties.has_key('storage.serial'):
-			return
-		if deviceProperties['storage.serial'] != self.__serial:
+		deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
+		if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveSerial') != self.__serial:
 			return
 		self.__udi = udi
 		if self.__running:
