@@ -35,6 +35,8 @@ static void pusb_check_conf_dump(t_pusb_options *opts, const char *username,
 	fprintf(stdout, "color_log\t\t: %s\n", opts->color_log ? "true" : "false");
 	fprintf(stdout, "one_time_pad\t\t: %s\n",
 			opts->one_time_pad ? "true" : "false");
+	fprintf(stdout, "deny_remote\t\t: %s\n",
+			opts->deny_remote ? "true" : "false");
 	fprintf(stdout, "pad_expiration\t\t: %u seconds\n", (unsigned int)opts->pad_expiration);
 	fprintf(stdout, "probe_timeout\t\t: %d seconds\n", (unsigned int)opts->probe_timeout);
 	fprintf(stdout, "hostname\t\t: %s\n", opts->hostname);
