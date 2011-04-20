@@ -10,6 +10,7 @@ LIBS		:= `pkg-config --libs libxml-2.0` \
 
 # common source files
 SRCS		:= src/conf.c \
+		   src/mem.c \
 		   src/log.c \
 		   src/xpath.c \
 		   src/hal.c \

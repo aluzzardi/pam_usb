@@ -20,6 +20,7 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "mem.h"
 #include "log.h"
 #include "hal.h"
 
@@ -66,8 +67,8 @@ void pusb_hal_free_string_array(char **str_array, int length)
       return ;
 
 	for (i = 0; i < length; ++i)
-	  free(str_array[i]);
-	free(str_array);
+	  xfree(str_array[i]);
+	xfree(str_array);
 }
 
 char **pusb_hal_get_string_array_from_iter(DBusMessageIter *iter, int *num_elements)
@@ -76,7 +77,7 @@ char **pusb_hal_get_string_array_from_iter(DBusMessageIter *iter, int *num_eleme
 	char **buffer;
 
 	count = 0;
-	buffer = (char **)malloc(sizeof(char *) * 8);
+	buffer = (char **)xmalloc(sizeof(char *) * 8);
 
 	buffer[0] = NULL;
 	while (dbus_message_iter_get_arg_type(iter) == DBUS_TYPE_STRING ||
@@ -85,11 +86,11 @@ char **pusb_hal_get_string_array_from_iter(DBusMessageIter *iter, int *num_eleme
 		const char *value;
 		
 		if ((count % 8) == 0 && count != 0) {
-			buffer = realloc(buffer, sizeof (char *) * (count + 8));
+			buffer = xrealloc(buffer, sizeof (char *) * (count + 8));
 		}
 		
 		dbus_message_iter_get_basic(iter, &value);
-		buffer[count] = strdup(value);
+		buffer[count] = xstrdup(value);
 
 		dbus_message_iter_next(iter);
 		count++;
@@ -162,7 +163,7 @@ char *pusb_hal_get_string_property(DBusConnection *dbus,
 	dbus_message_iter_recurse(&reply_iter, &subiter);
 	dbus_message_iter_get_basic(&subiter, &dbus_str);
 	if (dbus_str != NULL)
-		data = strdup(dbus_str);
+		data = xstrdup(dbus_str);
 	dbus_message_unref(reply);
 	return (data);
 }
@@ -245,7 +246,7 @@ int pusb_hal_check_property(DBusConnection *dbus,
 	if (!data)
 		return (0);
 	retval = (strcmp(data, value) == 0);
-	free(data);
+	xfree(data);
 	return (retval);
 }
 
@@ -334,7 +335,7 @@ char *pusb_hal_find_item(DBusConnection *dbus,
 		}
 		if (match)
 		{
-			udi = strdup(devices[i]);
+			udi = xstrdup(devices[i]);
 			break;
 		}
 		va_end(ap);

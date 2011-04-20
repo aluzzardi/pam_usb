@@ -18,6 +18,7 @@
 #include <libxml/xpath.h>
 #include <ctype.h>
 #include <string.h>
+#include "mem.h"
 #include "xpath.h"
 #include "log.h"
 
@@ -126,17 +127,13 @@ int pusb_xpath_get_string_from(xmlDocPtr doc,
 	int		retval;
 
 	xpath_size = strlen(base) + strlen(path) + 1;
-	if (!(xpath = malloc(xpath_size)))
-	{
-		log_error("malloc error !\n");
-		return (0);
-	}
+	xpath = xmalloc(xpath_size);
 	memset(xpath, 0x00, xpath_size);
 	snprintf(xpath, xpath_size, "%s%s", base, path);
 	retval = pusb_xpath_get_string(doc, xpath, value, size);
 	if (retval)
 		log_debug("%s%s -> %s\n", base, path, value);
-	free(xpath);
+	xfree(xpath);
 	return (retval);
 }
 
@@ -173,15 +170,11 @@ int pusb_xpath_get_bool_from(xmlDocPtr doc,
 	int		retval;
 
 	xpath_size = strlen(base) + strlen(path) + 1;
-	if (!(xpath = malloc(xpath_size)))
-	{
-		log_error("malloc error!\n");
-		return (0);
-	}
+	xpath = xmalloc(xpath_size);
 	memset(xpath, 0x00, xpath_size);
 	snprintf(xpath, xpath_size, "%s%s", base, path);
 	retval = pusb_xpath_get_bool(doc, xpath, value);
-	free(xpath);
+	xfree(xpath);
 	return (retval);
 }
 
@@ -227,15 +220,11 @@ int pusb_xpath_get_time_from(xmlDocPtr doc,
 	int		retval;
 
 	xpath_size = strlen(base) + strlen(path) + 1;
-	if (!(xpath = malloc(xpath_size)))
-	{
-		log_error("malloc error!\n");
-		return (0);
-	}
+	xpath = xmalloc(xpath_size);
 	memset(xpath, 0x00, xpath_size);
 	snprintf(xpath, xpath_size, "%s%s", base, path);
 	retval = pusb_xpath_get_time(doc, xpath, value);
-	free(xpath);
+	xfree(xpath);
 	return (retval);
 }
 
@@ -259,14 +248,10 @@ int pusb_xpath_get_int_from(xmlDocPtr doc,
 	int		retval;
 
 	xpath_size = strlen(base) + strlen(path) + 1;
-	if (!(xpath = malloc(xpath_size)))
-	{
-		log_error("malloc error!\n");
-		return (0);
-	}
+	xpath = xmalloc(xpath_size);
 	memset(xpath, 0x00, xpath_size);
 	snprintf(xpath, xpath_size, "%s%s", base, path);
 	retval = pusb_xpath_get_int(doc, xpath, value);
-	free(xpath);
+	xfree(xpath);
 	return (retval);
 }

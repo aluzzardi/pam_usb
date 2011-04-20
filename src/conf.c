@@ -18,6 +18,7 @@
 #include <sys/utsname.h>
 #include <string.h>
 #include <errno.h>
+#include "mem.h"
 #include "conf.h"
 #include "xpath.h"
 #include "log.h"
@@ -71,15 +72,11 @@ static int pusb_conf_parse_options(t_pusb_options *opts,
 	for (i = 0; opt_list[i].name != NULL; ++i)
 	{
 		xpath_size = strlen(opt_list[i].name) + strlen(opt_list[i].value) + 1;
-		if (!(xpath = malloc(xpath_size)))
-		{
-			log_error("malloc error\n");
-			return (0);
-		}
+		xpath = xmalloc(xpath_size);
 		memset(xpath, 0x00, xpath_size);
 		snprintf(xpath, xpath_size, opt_list[i].name, opt_list[i].value, "");
 		pusb_conf_options_get_from(opts, xpath, doc);
-		free(xpath);
+		xfree(xpath);
 	}
 	return (1);
 }
@@ -96,16 +93,12 @@ static int pusb_conf_device_get_property(t_pusb_options *opts,
 
 	xpath_len = strlen(CONF_DEVICE_XPATH) + strlen(opts->device.name) + \
 				strlen(property) + 1;
-	if (!(xpath = malloc(xpath_len)))
-	{
-		log_error("malloc error!\n");
-		return (0);
-	}
+	xpath = xmalloc(xpath_len);
 	memset(xpath, 0x00, xpath_len);
 	snprintf(xpath, xpath_len, CONF_DEVICE_XPATH, opts->device.name,
 			property);
 	retval = pusb_xpath_get_string(doc, xpath, store, size);
-	free(xpath);
+	xfree(xpath);
 	return (retval);
 }
 

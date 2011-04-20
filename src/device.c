@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <dbus/dbus.h>
+#include "mem.h"
 #include "conf.h"
 #include "hal.h"
 #include "log.h"
@@ -42,7 +43,7 @@ static int pusb_device_connected(t_pusb_options *opts, DBusConnection *dbus)
 				opts->device.name);
 	  return (0);
 	}
-	free(udi);
+	xfree(udi);
 	log_info("Device \"%s\" is connected (good).\n", opts->device.name);
 	return (1);
 }

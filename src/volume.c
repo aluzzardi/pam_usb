@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/mount.h>
+#include "mem.h"
 #include "conf.h"
 #include "log.h"
 #include "hal.h"
@@ -79,7 +80,7 @@ static char *pusb_volume_mount_path(t_pusb_options *opts, char *udi, DBusConnect
 	{
 		log_debug("Device %s is mounted more than once\n", udi);
 	}
-	char *mount_path = strdup(mount_pathes[0]);
+	char *mount_path = xstrdup(mount_pathes[0]);
 	pusb_hal_free_string_array(mount_pathes, n_mount);
 	log_debug("Device %s is mounted on %s\n", udi, mount_path);
 	return (mount_path);
@@ -133,7 +134,7 @@ char *pusb_volume_get(t_pusb_options *opts, DBusConnection *dbus)
 	}
 	if (!pusb_volume_mount(opts, volume_udi, dbus))
 	{
-		free(volume_udi);
+		xfree(volume_udi);
 		return (NULL);
 	}
 	mount_point = pusb_volume_mount_path(opts, volume_udi, dbus);
@@ -160,5 +161,5 @@ void pusb_volume_destroy(char *mntpoint)
 		else
 			log_error("Unable to umount %s\n", mntpoint);
 	}
-	free(mntpoint);
+	xfree(mntpoint);
 }
