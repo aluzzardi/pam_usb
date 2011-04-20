@@ -22,60 +22,72 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/mount.h>
-#include <libhal-storage.h>
 #include "conf.h"
 #include "log.h"
 #include "hal.h"
 #include "volume.h"
 
-static int pusb_volume_mount(t_pusb_options *opts, LibHalVolume **volume,
-		LibHalContext *ctx)
+static int pusb_volume_mount(t_pusb_options *opts, char *udi,
+		DBusConnection *dbus)
 {
 	char		command[1024];
 	char		tempname[32];
 	const char	*devname;
-	const char	*udi;
-	const char	*fs;
 
 	snprintf(tempname, sizeof(tempname), "pam_usb%d", getpid());
-	if (!(devname = libhal_volume_get_device_file(*volume)))
+	if (!(devname = pusb_hal_get_string_property(dbus, udi, "DeviceFile")))
 	{
 		log_error("Unable to retrieve device filename\n");
 		return (0);
 	}
-	fs = libhal_volume_get_fstype(*volume);
 	log_debug("Attempting to mount device %s with label %s\n",
 			devname, tempname);
-	if (!fs)
-		snprintf(command, sizeof(command), "pmount -A -s %s %s",
-				devname, tempname);
-	else
-		snprintf(command, sizeof(command), "pmount -A -s -t %s %s %s",
-				fs, devname, tempname);
+	snprintf(command, sizeof(command), "pmount -A -s %s %s",
+			 devname, tempname);
 	log_debug("Executing \"%s\"\n", command);
 	if (system(command) != 0)
 	{
 		log_error("Mount failed\n");
 		return (0);
 	}
-	udi = libhal_volume_get_udi(*volume);
-	if (!udi)
-	{
-		log_error("Unable to retrieve volume UDI\n");
-		return (0);
-	}
-	udi = strdup(udi);
-	libhal_volume_free(*volume);
-	*volume = libhal_volume_from_udi(ctx, udi);
-	free((char *)udi);
+
 	log_debug("Mount succeeded.\n");
 	return (1);
 }
 
-static LibHalVolume	*pusb_volume_probe(t_pusb_options *opts,
-		LibHalContext *ctx)
+static char *pusb_volume_mount_path(t_pusb_options *opts, char *udi, DBusConnection* dbus)
 {
-	LibHalVolume	*volume = NULL;
+	dbus_bool_t is_mounted;
+	if (!pusb_hal_get_bool_property(dbus, udi, "DeviceIsMounted", &is_mounted))
+	{
+		return (NULL);
+	}
+	if (is_mounted != TRUE)
+	{
+		log_debug("Device %s is not mounted\n", udi);
+		return (NULL);
+	}
+
+	int n_mount;
+	char **mount_pathes = pusb_hal_get_string_array_property(dbus, udi, "DeviceMountPaths", &n_mount);
+	if (!mount_pathes)
+	{
+		log_debug("Failed to retrieve device %s mount path\n", udi);
+		return (NULL);
+	}
+	if (n_mount > 1)
+	{
+		log_debug("Device %s is mounted more than once\n", udi);
+	}
+	char *mount_path = strdup(mount_pathes[0]);
+	pusb_hal_free_string_array(mount_pathes, n_mount);
+	log_debug("Device %s is mounted on %s\n", udi, mount_path);
+	return (mount_path);
+}
+
+static char	*pusb_volume_probe(t_pusb_options *opts,
+		DBusConnection *dbus)
+{
 	int				maxtries = 0;
 	int				i;
 
@@ -92,49 +104,49 @@ static LibHalVolume	*pusb_volume_probe(t_pusb_options *opts,
 
 		if (i == 1)
 			log_info("Probing volume (this could take a while)...\n");
-		udi = pusb_hal_find_item(ctx,
-				"volume.uuid", opts->device.volume_uuid,
+		udi = pusb_hal_find_item(dbus,
+				"IdUuid", opts->device.volume_uuid,
 				NULL);
 		if (!udi)
 		{
 			usleep(250000);
 			continue;
 		}
-		volume = libhal_volume_from_udi(ctx, udi);
-		libhal_free_string(udi);
-		if (!libhal_volume_should_ignore(volume))
-			return (volume);
-		libhal_volume_free(volume);
-		usleep(250000);
+		return (udi);
 	}
 	return (NULL);
 }
 
-LibHalVolume *pusb_volume_get(t_pusb_options *opts, LibHalContext *ctx)
+char *pusb_volume_get(t_pusb_options *opts, DBusConnection *dbus)
 {
-	LibHalVolume	*volume;
+	char	*volume_udi;
+	char	*mount_point;
 
-	if (!(volume = pusb_volume_probe(opts, ctx)))
+	if (!(volume_udi = pusb_volume_probe(opts, dbus)))
 		return (NULL);
 	log_debug("Found volume %s\n", opts->device.volume_uuid);
-	if (libhal_volume_is_mounted(volume))
+	mount_point = pusb_volume_mount_path(opts, volume_udi, dbus);
+	if (mount_point)
 	{
 		log_debug("Volume is already mounted.\n");
-		return (volume);
+		return (mount_point);
 	}
-	if (!pusb_volume_mount(opts, &volume, ctx))
+	if (!pusb_volume_mount(opts, volume_udi, dbus))
 	{
-		libhal_volume_free(volume);
+		free(volume_udi);
 		return (NULL);
 	}
-	return (volume);
+	mount_point = pusb_volume_mount_path(opts, volume_udi, dbus);
+	if (!mount_point)
+	{
+		log_error("Unable to retrieve %s mount point\n", volume_udi);
+		return (NULL);
+	}
+	return (mount_point);
 }
 
-void pusb_volume_destroy(LibHalVolume *volume)
+void pusb_volume_destroy(char *mntpoint)
 {
-	const char	*mntpoint;
-
-	mntpoint = libhal_volume_get_mount_point(volume);
 	if (mntpoint && strstr(mntpoint, "pam_usb"))
 	{
 		char	command[1024];
@@ -148,5 +160,5 @@ void pusb_volume_destroy(LibHalVolume *volume)
 		else
 			log_error("Unable to umount %s\n", mntpoint);
 	}
-	libhal_volume_free(volume);
+	free(mntpoint);
 }

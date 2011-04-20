@@ -17,8 +17,9 @@
 
 #ifndef VOLUME_H_
 # define VOLUME_H_
+# include "hal.h"
 
-LibHalVolume *pusb_volume_get(t_pusb_options *opts, LibHalContext *ctx);
-void pusb_volume_destroy(LibHalVolume *volume);
+char *pusb_volume_get(t_pusb_options *opts, DBusConnection *dbus);
+void pusb_volume_destroy(char *mntpoint);
 
 #endif /* !VOLUME_H_ */

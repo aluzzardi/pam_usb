@@ -18,6 +18,6 @@
 #ifndef PUSB_VERSION_H_
 # define PUSB_VERSION_H_
 
-# define PUSB_VERSION "SVN"
+# define PUSB_VERSION "DEV"
 
 #endif /* !PUSB_VERSION_H_ */

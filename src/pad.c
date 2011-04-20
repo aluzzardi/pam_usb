@@ -24,25 +24,20 @@
 #include <sys/stat.h>
 #include <pwd.h>
 #include <time.h>
-#include <libhal-storage.h>
 #include "conf.h"
 #include "log.h"
 #include "volume.h"
 #include "pad.h"
 
 static FILE *pusb_pad_open_device(t_pusb_options *opts,
-		LibHalVolume *volume,
+		const char *mnt_point,
 		const char *user,
 		const char *mode)
 {
 	FILE		*f;
 	char		path[PATH_MAX];
-	const char	*mnt_point;
 	struct stat	sb;
 
-	mnt_point = (char *)libhal_volume_get_mount_point(volume);
-	if (!mnt_point)
-		return (NULL);
 	memset(path, 0x00, PATH_MAX);
 	snprintf(path, PATH_MAX, "%s/%s", mnt_point, opts->device_pad_directory);
 	if (stat(path, &sb) != 0)
@@ -179,7 +174,7 @@ static int pusb_pad_should_update(t_pusb_options *opts, const char *user)
 }
 
 static void pusb_pad_update(t_pusb_options *opts,
-		LibHalVolume *volume,
+		const char *volume,
 		const char *user)
 {
 	FILE	*f_device = NULL;
@@ -220,7 +215,7 @@ static void pusb_pad_update(t_pusb_options *opts,
 	log_debug("One time pads updated.\n");
 }
 
-static int pusb_pad_compare(t_pusb_options *opts, LibHalVolume *volume,
+static int pusb_pad_compare(t_pusb_options *opts, const char *volume,
 		const char *user)
 {
 	FILE	*f_device = NULL;
@@ -248,13 +243,13 @@ static int pusb_pad_compare(t_pusb_options *opts, LibHalVolume *volume,
 	return (retval == 0);
 }
 
-int pusb_pad_check(t_pusb_options *opts, LibHalContext *ctx,
+int pusb_pad_check(t_pusb_options *opts, DBusConnection *dbus,
 		const char *user)
 {
-	LibHalVolume	*volume = NULL;
-	int				retval;
+	char			*volume = NULL;
+	int				retval = 0;
 
-	volume = pusb_volume_get(opts, ctx);
+	volume = pusb_volume_get(opts, dbus);
 	if (!volume)
 		return (0);
 	retval = pusb_pad_compare(opts, volume, user);

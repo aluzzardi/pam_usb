@@ -4,9 +4,9 @@ DEBUG		:= no
 # compiler/linker options
 CC		:= gcc
 CFLAGS		:= $(CFLAGS) -Wall -fPIC `pkg-config --cflags libxml-2.0` \
-	`pkg-config --cflags hal-storage`
+	`pkg-config --cflags dbus-1`
 LIBS		:= `pkg-config --libs libxml-2.0` \
-	`pkg-config --libs hal-storage`
+	`pkg-config --libs dbus-1`
 
 # common source files
 SRCS		:= src/conf.c \
