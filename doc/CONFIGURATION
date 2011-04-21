@@ -63,6 +63,8 @@ output)                      |
 |
 | one_time_pad  | Boolean         | true                | Enable the use of one
 time pads                     |
+| deny_remote   | Boolean         | true                | Deny access from
+remote host (ssh)                  |
 | probe_timeout | Time            | 10s                 | Time to wait for the
 volume to be detected|
 | pad_expiration| Time            | 1h                  | Time between pads

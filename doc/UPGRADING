@@ -3,7 +3,7 @@
 If you're already using a pam_usb version prior to 0.4.0, you will have to
 remove the older version before installing.
 
-You do not have to do this if you're already using >=0.4.0 or Subversion.
+You do not have to do this if you're already using >=0.4.0.
 
 ===== Remove pam_usb.so from pam.d =====
 

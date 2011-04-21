@@ -25,3 +25,4 @@ checking failed. What should I do ?
 >> A: It's a machine/device synchronization issue. To get rid of that error you
 have to reset the pads of your system by removing the .pamusb folder located on
 your home (/root/.pamusb/, /home/foobar/.pamusb/, etc).
+
