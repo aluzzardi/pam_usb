@@ -1,6 +1,5 @@
 * 0.5.0
-- --add-device doesn't require a device name anymore. The
-  name is instead generated from the device signature.
+- Migrated the code base to UDisks. pam_usb doesn't depend on HAL anymore.
 - Added deny_remote option (defaults to true). If false,
   local login check will be disabled.
 - Fixed a bug in the device recognition (--add-device)
