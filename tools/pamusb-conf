@@ -26,15 +26,11 @@ class Device:
 		self.__udi = udi
 		deviceObj = bus.get_object('org.freedesktop.UDisks',
 				udi)
-		#deviceProperties = deviceObj.getProperties()
-				#dbus_interface = 'org.freedesktop.UDisks.Device')
 		deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
 		if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DeviceIsRemovable') != 1:
 			raise Exception, 'Not a removable device'
-		self.vendor = None
-		self.product = None
 		self.vendor = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveVendor')
-		self.model = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveModel')
+		self.product = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveModel')
 		self.serialNumber = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveSerial')
 		if len(self.volumes()) < 1:
 			raise Exception, 'Device does not contain any volume'
@@ -159,7 +155,7 @@ def addDevice(options):
 				print "\tValid"
 
 	if len(devices) == 0:
-		print 'No devices detected.'
+		print 'No devices detected. Try running in verbose (-v) mode to see what\'s going on.'
 		sys.exit()
 	device = devices[listOptions("Please select the device you wish to add.", devices)]
 
