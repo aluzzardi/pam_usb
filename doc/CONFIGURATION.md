@@ -247,6 +247,7 @@ Users
         <td>Element</td>
         <td>Agent commands, for use with pamusb-agent</td>
     </tr>
+</table>
 
 Example:
 
@@ -285,6 +286,7 @@ Services
 </table>
 
 Example:
+
 ```xml
 <service id="su">
     <!--
