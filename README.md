@@ -141,18 +141,23 @@ remove the device, and deactivate it when you plug the device back.
 
 GNOME (gnome-screensaver):
 
-    <user id="scox">
-      <device>MyDevice</device>
-      <agent event="lock">gnome-screensaver-command --lock</agent>
-      <agent event="unlock">gnome-screensaver-command --deactivate</agent>
-    </user>
+```xml
+<user id="scox">
+  <device>MyDevice</device>
+  <agent event="lock">gnome-screensaver-command --lock</agent>
+  <agent event="unlock">gnome-screensaver-command --deactivate</agent>
+</user>
+```
 
 KDE (kscreensaver):
-    <user id="scox">
-      <device>MyDevice</device>
-      <agent event="lock">dcop kdesktop KScreensaverIface lock</agent>
-      <agent event="unlock">dcop kdesktop KScreensaverIface quit</agent>
-    </user>
+
+```xml
+<user id="scox">
+  <device>MyDevice</device>
+  <agent event="lock">dcop kdesktop KScreensaverIface lock</agent>
+  <agent event="unlock">dcop kdesktop KScreensaverIface quit</agent>
+</user>
+```
 
 You can execute more commands by adding extra `<agent>` entries.
 
@@ -219,15 +224,17 @@ Enabling debug messages may help you find out what's wrong.
 
 To enable them, edit `/etc/pamusb.conf` and set the following option:
 
-    <defaults>
-      <option name="debug">true</option>
-    </defaults>
-
+```xml
+<defaults>
+  <option name="debug">true</option>
+</defaults>
+```
 You can enable debug messages only for a specific user, device or service.
 
-    <services>
-      <service id="sudo">
-        <option name="debug">true</option>
-      </service>
-    </services>
-
+```xml
+<services>
+  <service id="sudo">
+    <option name="debug">true</option>
+  </service>
+</services>
+```
