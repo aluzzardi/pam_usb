@@ -43,7 +43,7 @@ CONFS			:= doc/pamusb.conf
 CONFS_DEST		:= $(DESTDIR)/etc
 
 # Doc
-DOCS		:= doc/QUICKSTART doc/CONFIGURATION doc/UPGRADING doc/FAQ
+DOCS		:= doc/CONFIGURATION
 DOCS_DEST	:= $(DESTDIR)/usr/share/doc/pamusb
 
 # Man
