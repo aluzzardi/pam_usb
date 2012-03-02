@@ -1,264 +1,310 @@
-====== Configuration ======
+Configuration file reference
+============================
 
-Configuration is done through the pamusb-conf tool, as explained in the
-[[quickstart]] section. Most users don't have to manually change pamusb.conf, 
-however if you want to change some default settings, this document explains the
-syntax of the pamusb.conf configuration file.
+The configuration file is formatted in XML and subdivided in 4 sections:
 
-===== Introduction =====
+* Default options, shared among every device, user and service
+* Devices declaration and settings
+* Users declaration and settings
+* Services declaration and settings
 
-* The configuration file is formatted in XML and subdivided in 4 sections:
-  - Default options, shared among every device, user and service
-  - Devices declaration and settings
-  - Users declaration and settings
-  - Services declaration and settings
+The syntax is the following:
 
-* The syntax is the following:
+```xml
 <configuration>
- <defaults>
- <!-- default options -->
- </defaults>
+    <defaults>
+        <!-- default options -->
+    </defaults>
 
- <devices>
- <!-- devices definitions -->
- </devices>
+    <devices>
+        <!-- devices definitions -->
+    </devices>
 
- <users>
- <!-- users definitions -->
- </users>
+    <users>
+        <!-- users definitions -->
+    </users>
 
- <services>
- <!-- services definitions -->
- </services>
+    <services>
+        <!-- services definitions -->
+    </services>
 </configuration>
+```
 
-* Location of the configuration file
+Options
+-------
 
-By default, pam_usb.so and its tools will look for the configuration file
-located in /etc/pamusb.conf, but you can tell it to use a different file by
-using the -c option:
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Default</th>
+        <th>Description</th>
+    </tr>
+    
+    <tr>
+        <td>enable</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>Enable pam_usb</td>
+    </tr>
 
-# /etc/pam.d/common-auth
-auth    sufficient      pam_usb.so -c /some/other/path.conf
-auth    required        pam_unix.so nullok_secure
+    <tr>
+        <td>debug</td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>Enable debug messages</td>
+    </tr>
+    
+    <tr>
+        <td>quiet</td>
+        <td>Boolean</td>
+        <td>false</td>
+        <td>Quiet mode</td>
+    </tr>
+    
+    <tr>
+        <td>color_log</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>Enable colored output</td>
+    </tr>
+    
+    <tr>
+        <td>one_time_pad</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>Enable the use of one time pads</td>
+    </tr>
+    
+    <tr>
+        <td>deny_remote</td>
+        <td>Boolean</td>
+        <td>true</td>
+        <td>Deny access from remote host (ssh)</td>
+    </tr>
+    
+    <tr>
+        <td>probe_timeout</td>
+        <td>Time</td>
+        <td>10s</td>
+        <td>Time to wait for the volume to be detected</td>
+    </tr>
+    
+    <tr>
+        <td>pad_expiration</td>
+        <td>Time</td>
+        <td>1h</td>
+        <td>Time between pads regeneration</td>
+    </tr>
+    
+    <tr>
+        <td>hostname</td>
+        <td>String</td>
+        <td>Computer's hostname</td>
+        <td>Must be unique accross computers using the same device</td>
+    </tr>
 
-You will also have to use the -c option when calling pam_usb's tools. For
-instance, when calling pamusb-agent:
-pamusb-agent -c /some/other/path.conf
+    <tr>
+        <td>system_pad_directory</td>
+        <td>String</td>
+        <td>.pamusb</td>
+        <td>Relative path to the user's home used to store one time pads</td
+    </tr>
+    
+    <tr>
+        <td>device_pad_directory</td>
+        <td>String</td>
+        <td>.pamusb</td>
+        <td>Relative path to the device used to store one time pads</td>
+    </tr>
+</table>
 
+Example:
 
-
-
-
-===== Options =====
-
-^ Name              ^ Type            ^ Default value       ^ Description  ^
-| enable        | Boolean         | true                | Enable pam_usb        
-|
-| debug         | Boolean         | false               | Enable debug messages 
-|
-| quiet         | Boolean         | false               | Quiet mode (no verbose
-output)                      |
-| color_log     | Boolean         | true                | Enable colored output 
-|
-| one_time_pad  | Boolean         | true                | Enable the use of one
-time pads                     |
-| deny_remote   | Boolean         | true                | Deny access from
-remote host (ssh)                  |
-| probe_timeout | Time            | 10s                 | Time to wait for the
-volume to be detected|
-| pad_expiration| Time            | 1h                  | Time between pads
-regeneration|
-| hostname      | String          | Computer's hostname | Computer name. Must be
-unique accross computers using the same device |                                
-
-| system_pad_directory | String   | .pamusb             | Relative path to the
-user's home used to store one time pads |
-| device_pad_directory | String   | .pamusb             | Relative path to the
-device used to store one time pads|
-
-* Example:
-
+```xml
 <configuration>
-<defaults>
-  <!-- Disable colored output by default -->
-  <option name="color_log">false</option>
-  <!-- Enable debug output -->
-  <option name="debug">true</option>
- </defaults>
- <users>
-   <user id="root">
-     <!-- Enable colored output for user "root" -->
-     <option name="color_log">true</option>
-   </user>
-   <user id="scox">
-     <!-- Disable debug output for user "scox" -->
-     <option name="debug">false</option>
- </users>
- <devices>
-   <device id="sandisk">
-     <!-- Wait 15 seconds instead of the default 10 seconds for the "sandisk"
-device to be detected -->
-     <option name="probe_timeout">15</option>
- </devices>
- <services>
-   <service id="su">
-     <!-- Disable pam_usb for "su" ("su" will ask for a password as usual) -->
-     <option name="enable">false<option>
-   </service>
- </services>
+    <defaults>
+        <!-- Disable colored output by default -->
+        <option name="color_log">false</option>
+        <!-- Enable debug output -->
+        <option name="debug">true</option>
+    </defaults>
+ 
+    <users>
+        <user id="root">
+            <!-- Enable colored output for user "root" -->
+            <option name="color_log">true</option>
+        </user>
+
+        <user id="scox">
+             <!-- Disable debug output for user "scox" -->
+             <option name="debug">false</option>
+        </user>
+    </users>
+
+    <devices>
+        <device id="mydevice">
+            <!-- Wait 15 seconds instead of the default 10 seconds for "mydevice" to be detected -->
+            <option name="probe_timeout">15</option>
+        </device>
+    </devices>
+
+    <services>
+        <service id="su">
+            <!-- Disable pam_usb for "su" ("su" will ask for a password as usual) -->
+            <option name="enable">false<option>
+       </service>
+    </services>
 </configuration>
+```
 
-===== Devices =====
+Devices
+-------
 
-^ Name            ^ Type      ^ Description                                    ^
-Example              ^
-| id          | Attribute | Arbitrary device name                          |
-MyDevice             |
-| vendor      | Element   | device's vendor name                           |
-SanDisk Corp.        |
-| model       | Element   | device's model name                            |
-Cruzer Titanium      |
-| serial      | Element   | serial number of the device                    |
-SNDKXXXXXXXXXXXXXXXX |
-| volume_uuid | Element   | UUID of the device's volume used to store pads |
-6F6B-42FC            |
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Example</th>
+    </tr>
+    
+    <tr>
+        <td>id</td>
+        <td>Attribute</td>
+        <td>Arbitrary device name</td>
+        <td>MyDevice</td>
+    </tr>
+    
+    <tr>
+        <td>vendor</td>
+        <td>Element</td>
+        <td>device's vendor name</td>
+        <td>SanDisk Corp.</td>
+    </tr>
+    
+    <tr>
+        <td>model</td>
+        <td>Element</td>
+        <td>device's model name</td>
+        <td>Cruzer Titanium</td>
+    </tr>
+    
+    <tr>
+        <td>serial</td>
+        <td>Element</td>
+        <td>serial number of the device</td>
+        <td>SNDKXXXXXXXXXXXXXXXX</td>
+    </tr>
+    
+    <tr>
+        <td>volume_uuid</td>
+        <td>Element</td>
+        <td>UUID of the device's volume used to store pads</td>
+        <td>6F6B-42FC</td>
+    </tr>
+</table>
 
+Example:
 
-* Example:
-
+```xml
 <device id="MyDevice">
-<vendor>SanDisk Corp.</vendor>
-<model>Cruzer Titanium</model>
-<serial>SNDKXXXXXXXXXXXXXXXX</serial>
-<volume_uuid>6F6B-42FC</volume_uuid>
-</device>
-
-
-
-===== Users =====
-
-^ Name            ^ Type      ^ Description                                 ^
-Example     ^
-| id          | Attribute | Login of the user                           | root  
-|
-| device      | Element   | id of the device associated to the user     |
-MyDevice    |
-| agent       | Element   | Agent commands, for use with pamusb-agent   | See
-below   |
-
-* Example:
-
-<user id="scox">
-<device>MyDevice</device>
-
-<!-- When the user "scox" removes the usb device, lock the screen and pause
-beep-media-player -->
-<agent event="lock">gnome-screensaver-command --lock</agent>
-<agent event="lock">beep-media-player --pause</agent>
-
-<!-- Resume operations when the usb device is plugged back and authenticated -->
-<agent event="unlock">gnome-screensaver-command --deactivate</agent>
-<agent event="unlock">beep-media-player --play</agent>
-</user>
-
-===== Services =====
-
-^ Name ^ Type      ^ Description         ^ Example ^
-| id   | Attribute | Name of the service | su      |
-
-<service id="su">
-<!--
-   Here you can put service specific options such as "enable", "debug" etc.
-   See the options section of this document.
--->
-</service>
-
-
-
-
-===== Full example =====
-
-This example demonstrates how to write a pam_usb configuration file and how to
-combine and override options.
-
-<configuration>
-<!-- Default options -->
-<defaults>
-  <!-- Enable debug output by default-->
-  <option name="debug">true</option> -->
-  <!-- Disable one time pads by default -->
-  <option name="one_time_pad">false</option> -->
-</defaults>
-
-<!-- Device settings -->
-<devices>
-  <device id="MyDevice">
-    <!-- This part was generated by pamusb-conf -->
     <vendor>SanDisk Corp.</vendor>
     <model>Cruzer Titanium</model>
     <serial>SNDKXXXXXXXXXXXXXXXX</serial>
     <volume_uuid>6F6B-42FC</volume_uuid>
+</device>
+```
 
-    <!--
-      Override the debug option previously enabled by "defaults".
-      Everytime a user associated to that device tries to authenticate,
-debugging will be disabled.
-      For other users using different devices, the debugging will still be
-enabled.
-    -->
-    <option name="debug">disable</option>
-  </device>
-</devices>
+Users
+-----
 
-<!-- User settings -->
-<users>
+<table>
 
-  <!-- Authenticate user "root" with device "MyDevice". -->
-  <user id="root">
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Example</th>
+    </tr>
+    
+    <tr>
+        <td>id</td>
+        <td>Attribute</td>
+        <td>Login of the user</td>
+        <td>root</td>
+    </tr>
+    
+    <tr>
+        <td>device</td>
+        <td>Element</td>
+        <td>id of the device associated to the user</td>
+        <td>MyDevice</td>
+    </tr>
+    
+    <tr>
+        <td>agent</td>
+        <td>Element</td>
+        <td>Agent commands, for use with pamusb-agent</td>
+    </tr>
+
+Example:
+
+```xml
+<user id="scox">
     <device>MyDevice</device>
-
-    <!--
-      One time pads were disabled in the "defaults" section.
-      Now we want to enable them for the user "root" so we override the option:
-    -->
-   <option name="one_time_pad">true</option>
-  </user>
-
-  <!-- Authenticate user "scox" with device "MyDevice". -->
-  <user id="scox">
-    <device>MyDevice</device>
-
-    <!-- We want pam_usb to work in quiet mode when authenticating "scox", so we
-override the "quiet" option -->
-    <option name="quiet">true</option>
-
-    <!-- Agent settings, used by pamusb-agent -->
+    
+    <!-- When the user "scox" removes the usb device, lock the screen and pause
+    beep-media-player -->
     <agent event="lock">gnome-screensaver-command --lock</agent>
+    <agent event="lock">beep-media-player --pause</agent>
+    
+    <!-- Resume operations when the usb device is plugged back and authenticated -->
     <agent event="unlock">gnome-screensaver-command --deactivate</agent>
-  </user>
-</users>
+    <agent event="unlock">beep-media-player --play</agent>
+</user>
+```
 
-<!-- Services settings (e.g. gdm, su, sudo...) -->
-<services>
+Services
+--------
 
-  <!-- Disable pam_usb for gdm (a password will be asked as usual) -->
-  <service id="gdm">
-    <option name="enable">false</option>
-  </service>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Example</th>
+    </tr>
+    
+    <tr>
+        <td>id</td>
+        <td>Attribute</td>
+        <td>Name of the service</td>
+        <td>su</td>
+    </tr>
+</table>
 
-  <!--
-    We already disabled one time pads in the defaults section, but then
-re-enabled them for the
-    user "root" in the users section.
+Example:
+```xml
+<service id="su">
+    <!--
+       Here you can put service specific options such as "enable", "debug" etc.
+       See the options section of this document.
+    -->
+</service>
+```
 
-    Now we want to speed up console login for user root, so we simply override
-again the one_time_pad option
-    for the "login" (console) service.
-  -->
-  <service id="login">
-    <option name="one_time_pad">false</option>
-  </service>
-</services>
-</configuration>
-</code>
+Location of the configuration file
+----------------------------------
+
+By default, pam_usb.so and its tools will look for the configuration file at `/etc/pamusb.conf`. 
+
+If you want to use a different location, you will have to use the `-c` flag.
+
+    # /etc/pam.d/common-auth
+    auth    sufficient      pam_usb.so -c /some/other/path.conf
+    auth    required        pam_unix.so nullok_secure
+
+You will also have to use the -c option when calling pam_usb's tools.
+
+    pamusb-agent -c /some/other/path.conf
