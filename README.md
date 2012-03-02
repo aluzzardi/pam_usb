@@ -191,6 +191,13 @@ KDE:
     cd ~/.kde/Autostart
     ln -s /usr/bin/pamusb-agent pamusb-agent
 
+Configuration Reference
+-----------------------
+
+There are many more options available to fine tune pam_usb.
+
+Check out the [configuration reference](doc/CONFIGURATION.md).
+
 Troubleshooting
 ===============
 
