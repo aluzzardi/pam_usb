@@ -196,7 +196,7 @@ Configuration Reference
 
 There are many more options available to fine tune pam_usb.
 
-Check out the [configuration reference](doc/CONFIGURATION.md).
+Check out the [configuration reference](https://github.com/aluzzardi/pam_usb/blob/master/doc/CONFIGURATION.md).
 
 Troubleshooting
 ===============
