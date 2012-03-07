@@ -28,7 +28,9 @@ class Device:
 				udi)
 		deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
 		if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DeviceIsRemovable') != 1:
-			raise Exception, 'Not a removable device'
+                        # Workaround for removable devices with fixed media (such as SD cards)
+                        if not "mmcblk" in udi:
+                                raise Exception, 'Not a removable device'
 		self.vendor = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveVendor')
 		self.product = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveModel')
 		self.serialNumber = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveSerial')
