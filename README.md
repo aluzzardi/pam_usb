@@ -32,6 +32,10 @@ If you happen to run Ubuntu or Debian, run:
 
     # apt-get install libpam-usb pamusb-tools
 
+Gentoo (You may need to unmask `sys-auth/pam_usb` or use `--automask-write`):
+
+    # emerge pam_usb
+
 Compiling from source
 ---------------------
 
