@@ -1,5 +1,8 @@
-# Set to 'yes' to include debugging informations, e.g. DEBUG=yes make -e
+# Set to 'yes' to include debugging information, e.g. DEBUG=yes make -e
 DEBUG		:= no
+
+PREFIX		?= /usr
+LIBDIR		?= lib
 
 # compiler/linker options
 CC		:= gcc
@@ -25,7 +28,7 @@ PAM_USB_SRCS	:= src/pam.c
 PAM_USB_OBJS	:= $(PAM_USB_SRCS:.c=.o)
 PAM_USB			:= pam_usb.so
 PAM_USB_LDFLAGS	:= -shared
-PAM_USB_DEST	:= $(DESTDIR)/lib/security
+PAM_USB_DEST	:= $(DESTDIR)/$(LIBDIR)/security
 
 # pamusb-check
 PAMUSB_CHECK_SRCS	:= src/pamusb-check.c
@@ -35,7 +38,7 @@ PAMUSB_CHECK		:= pamusb-check
 # Tools
 PAMUSB_CONF		:= pamusb-conf
 PAMUSB_AGENT	:= pamusb-agent
-TOOLS_DEST		:= $(DESTDIR)/usr/bin
+TOOLS_DEST		:= $(DESTDIR)$(PREFIX)/bin
 TOOLS_SRC		:= tools
 
 # Conf
@@ -44,11 +47,11 @@ CONFS_DEST		:= $(DESTDIR)/etc
 
 # Doc
 DOCS		:= doc/CONFIGURATION.md
-DOCS_DEST	:= $(DESTDIR)/usr/share/doc/pamusb
+DOCS_DEST	:= $(DESTDIR)$(PREFIX)/share/doc/pamusb
 
 # Man
 MANS		:= doc/pamusb-conf.1.gz doc/pamusb-agent.1.gz doc/pamusb-check.1.gz
-MANS_DEST	:= $(DESTDIR)/usr/share/man/man1
+MANS_DEST	:= $(DESTDIR)$(PREFIX)/share/man/man1
 
 # Binaries
 RM		:= rm
