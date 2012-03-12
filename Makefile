@@ -1,4 +1,4 @@
-# Set to 'yes' to include debugging informations, e.g. DEBUG=yes make -e
+# Set to 'yes' to include debugging information, e.g. DEBUG=yes make -e
 DEBUG		:= no
 
 PREFIX		?= /usr
