@@ -21,7 +21,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#ifndef __GNU__
 #include <sys/mount.h>
+#endif
 #include "mem.h"
 #include "conf.h"
 #include "log.h"

@@ -23,7 +23,9 @@
 # define CONF_SERVICE_XPATH "//configuration/services/service[@id='%s']/%s"
 # define CONF_USER_MAXLEN 32
 # include <limits.h>
+#ifdef __linux__
 # include <linux/limits.h>
+#endif
 # include <sys/time.h>
 # ifndef PATH_MAX
 #  define PATH_MAX 4096
