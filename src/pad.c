@@ -22,6 +22,7 @@
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 #include <pwd.h>
 #include <time.h>
 #include "conf.h"
@@ -181,6 +182,8 @@ static void pusb_pad_update(t_pusb_options *opts,
 	FILE	*f_system = NULL;
 	char	magic[1024];
 	int		i;
+	unsigned int seed;
+	int devrandom;
 
 	if (!pusb_pad_should_update(opts, user))
 		return ;
@@ -201,7 +204,14 @@ static void pusb_pad_update(t_pusb_options *opts,
 	pusb_pad_protect(user, fileno(f_system));
 
 	log_debug("Generating %d bytes unique pad...\n", sizeof(magic));
-	srand(getpid() * time(NULL));
+	devrandom = open("/dev/random", O_RDONLY);
+	if (devrandom < 0 || read(devrandom, &seed, sizeof seed) != sizeof seed) {
+		log_debug("/dev/random seeding failed...\n");
+		seed = getpid() * time(NULL); /* low-entropy fallback */
+	}
+	if (devrandom > 0)
+		close(devrandom);
+	srand(seed);
 	for (i = 0; i < sizeof(magic); ++i)
 		magic[i] = (char)rand();
 	log_debug("Writing pad to the device...\n");
