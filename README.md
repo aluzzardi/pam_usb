@@ -9,7 +9,7 @@ Features
 --------
 
 * `Password-less authentication.` Use your USB stick for authentication, don't type passwords anymore.
-* `Device auto probing.` You don't need to mount the device, or even to configure the device location (_sda1_, _sdb1_, etc). pam\_usb.so will automatically locate the device using _HAL_ and access its data by itself.
+* `Device auto probing.` You don't need to mount the device, or even to configure the device location (_sda1_, _sdb1_, etc). pam\_usb.so will automatically locate the device using `UDisks` and access its data by itself.
 * `Two-factor authentication.` Achieve greater security by requiring both the USB stick and the password to authenticate the user.
 * `Non-intrusive.` pam\_usb doesn't require any modifications of the USB storage device to work (no additional partitions required).
 * USB Serial number, model and vendor verification.
