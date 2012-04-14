@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="pam_usb : Hardware authentication for Linux using ordinary USB Flash Drives. " />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>pam_usb</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/aluzzardi/pam_usb">Fork Me on GitHub</a>
+
+          <h1 id="project_title">pam_usb</h1>
+          <h2 id="project_tagline">Hardware authentication for Linux using ordinary USB Flash Drives. </h2>
+
+          <section id="downloads">
+            <a class="zip_download_link" href="https://github.com/aluzzardi/pam_usb/zipball/master">Download this project as a .zip file</a>
+            <a class="tar_download_link" href="https://github.com/aluzzardi/pam_usb/tarball/master">Download this project as a tar.gz file</a>
+          </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h2>Features</h2>
+
+<ul>
+<li>
+<code>Password-less authentication.</code> Use your USB stick for authentication, don't type passwords anymore.</li>
+<li>
+<code>Device auto probing.</code> You don't need to mount the device, or even to configure the device location (<em>sda1</em>, <em>sdb1</em>, etc). pam_usb.so will automatically locate the device using <code>UDisks</code> and access its data by itself.</li>
+<li>
+<code>Two-factor authentication.</code> Achieve greater security by requiring both the USB stick and the password to authenticate the user.</li>
+<li>
+<code>Non-intrusive.</code> pam_usb doesn't require any modifications of the USB storage device to work (no additional partitions required).</li>
+<li>USB Serial number, model and vendor verification.</li>
+<li>Support for <strong>One Time Pads</strong> authentication.</li>
+<li>You can use the same device accross multiple machines.</li>
+<li>Support for all kind of removable devices (SD, MMC, etc).</li>
+</ul><h2>Tools</h2>
+
+<ul>
+<li>
+<code>pamusb-agent</code>: trigger actions (such as locking the screen) upon device authentication and removal.</li>
+<li>
+<code>pamusb-conf</code>: configuration helper.</li>
+<li>
+<code>pamusb-check</code>: integrate pam_usb's authentication engine within your scripts or applications.</li>
+</ul><h2>Getting Started</h2>
+
+<ul>
+<li>
+<a href="https://wiki.github.com/aluzzardi/pam_usb/Install">Install</a> pam_usb on your system</li>
+<li>Read the <a href="https://wiki.github.com/aluzzardi/pam_usb/Getting-Started">Getting Started Guide</a>
+</li>
+<li>Have a look at the <a href="https://wiki.github.com/aluzzardi/pam_usb/Configuration">Configuration File Reference</a>
+</li>
+<li>Problem? See the <a href="https://wiki.github.com/aluzzardi/pam_usb/Troubleshooting">Troubleshooting Guide</a>
+</li>
+</ul>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">pam_usb maintained by <a href="https://github.com/aluzzardi">aluzzardi</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-942703-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+
+  </body>
+</html>
