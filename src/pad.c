@@ -71,6 +71,8 @@ static FILE *pusb_pad_open_system(t_pusb_options *opts,
 	char			path[PATH_MAX];
 	struct passwd	*user_ent = NULL;
 	struct stat		sb;
+	char   device_name[PATH_MAX];
+	char * device_name_ptr = device_name;
 
 	if (!(user_ent = getpwnam(user)) || !(user_ent->pw_dir))
 	{
@@ -93,9 +95,16 @@ static FILE *pusb_pad_open_system(t_pusb_options *opts,
 		chown(path, user_ent->pw_uid, user_ent->pw_gid);
 		chmod(path, S_IRUSR | S_IWUSR | S_IXUSR);
 	}
+	/* change slashes in device name to underscores */
+	strcpy(device_name, opts->device.name);
+	while(*device_name_ptr) {
+		if('/' == *device_name_ptr) *device_name_ptr = '_';
+		device_name_ptr++;
+	}
+
 	memset(path, 0x00, PATH_MAX);
 	snprintf(path, PATH_MAX, "%s/%s/%s.pad", user_ent->pw_dir,
-			opts->system_pad_directory, opts->device.name);
+			opts->system_pad_directory, device_name);
 	f = fopen(path, mode);
 	if (!f)
 	{
