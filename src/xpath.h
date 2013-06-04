@@ -18,6 +18,7 @@
 #ifndef PUSB_XPATH_H_
 # define PUSB_XPATH_H_
 # include <libxml/parser.h>
+# include <time.h>
 
 int pusb_xpath_get_string(xmlDocPtr doc, const char *path, char *value, size_t size);
 int pusb_xpath_get_string_from(xmlDocPtr doc, const char *base, const char *path, char *value, size_t size);

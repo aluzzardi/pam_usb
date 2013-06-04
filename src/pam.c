@@ -17,7 +17,12 @@
 
 #define PAM_SM_AUTH
 #include <security/pam_modules.h>
-#include <security/_pam_macros.h>
+#ifndef __APPLE__
+#  include <security/_pam_macros.h>
+#else
+#  include <security/pam_appl.h>
+#  include <string.h> //strcmp
+#endif
 
 #include "version.h"
 #include "conf.h"
