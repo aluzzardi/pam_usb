@@ -143,6 +143,7 @@ char *pusb_volume_get(t_pusb_options *opts, DBusConnection *dbus)
 	if (!mount_point)
 	{
 		log_error("Unable to retrieve %s mount point\n", volume_udi);
+		pusb_volume_destroy(mount_point);
 		return (NULL);
 	}
 	return (mount_point);
