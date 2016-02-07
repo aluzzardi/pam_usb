@@ -1,4 +1,7 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t; -*- */
+
 /*
+ * Copyright (c) 2016 Luka Novsak <lnovsak@gmail.com>
  * Copyright (c) 2003-2007 Andrea Luzzardi <scox@sig11.org>
  *
  * This file is part of the pam_usb project. pam_usb is free software;
@@ -15,6 +18,8 @@
  * Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "pad.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,10 +30,10 @@
 #include <fcntl.h>
 #include <pwd.h>
 #include <time.h>
+
 #include "conf.h"
 #include "log.h"
 #include "volume.h"
-#include "pad.h"
 
 static FILE *pusb_pad_open_device(t_pusb_options *opts,
 		const char *mnt_point,
@@ -262,20 +267,23 @@ static int pusb_pad_compare(t_pusb_options *opts, const char *volume,
 	return (retval == 0);
 }
 
-int pusb_pad_check(t_pusb_options *opts, DBusConnection *dbus,
+int pusb_pad_check(t_pusb_options *opts,
+		UDisksClient *udisks,
 		const char *user)
 {
-	char			*volume = NULL;
-	int				retval = 0;
+	t_pusb_volume	*volume = NULL;
+	int		retval = 0;
 
-	volume = pusb_volume_get(opts, dbus);
+	volume = pusb_volume_get(opts, udisks);
 	if (!volume)
 		return (0);
-	retval = pusb_pad_compare(opts, volume, user);
+
+	retval = pusb_pad_compare(opts, volume->mount_point, user);
 	if (retval)
-		pusb_pad_update(opts, volume, user);
+		pusb_pad_update(opts, volume->mount_point, user);
 	else
-		log_error("Pad checking failed !\n");
+		log_error("Pad checking failed!\n");
+
 	pusb_volume_destroy(volume);
 	return (retval);
 }
