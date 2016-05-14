@@ -187,6 +187,16 @@ def addDevice(options):
 		sys.exit(1)
 
 	devs = doc.getElementsByTagName('devices')
+
+	# Check that the id of the device to add is not already present in the configFile
+	for devices in devs:
+		for device in devices.getElementsByTagName("device"):
+			if device.getAttribute("id") == options['deviceName']:
+				msg =  [ '\nWARNING: A device node already exits for new device \'%s\'.',
+						 '\nTo proceed re-run --add-device using a different name or remove the existing entry in %s.' ]
+				print '\n'.join(msg) % (options['deviceName'], options['configFile'])
+				sys.exit(2)
+
 	dev = doc.createElement('device')
 	dev.attributes['id'] = options['deviceName']
 
