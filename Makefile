@@ -1,5 +1,5 @@
 # Set to 'yes' to include debugging information, e.g. DEBUG=yes make -e
-DEBUG		:= yes
+DEBUG		:= no
 
 PREFIX		?= /usr
 ARCH := $(shell getconf LONG_BIT)
