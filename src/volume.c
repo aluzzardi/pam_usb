@@ -80,7 +80,7 @@ static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts,
 		UDisksClient *udisks)
 {
 	t_pusb_volume		*volume = NULL;
-	int			maxtries = (opts->probe_timeout * 1000000) / 250000;
+	int			maxtries = (opts->probe_timeout * 1000000) / 100000;
 	int			i;
 	int			j;
 	GList			*blocks = NULL;
@@ -134,7 +134,7 @@ static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts,
 			break;
 		}
 
-		usleep(250000);
+		usleep(100000);
 		g_main_context_iteration(NULL, FALSE);
 	}
 
