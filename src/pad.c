@@ -1,7 +1,4 @@
-/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t; -*- */
-
 /*
- * Copyright (c) 2016 Luka Novsak <lnovsak@gmail.com>
  * Copyright (c) 2003-2007 Andrea Luzzardi <scox@sig11.org>
  *
  * This file is part of the pam_usb project. pam_usb is free software;
