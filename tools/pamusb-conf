@@ -15,40 +15,41 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin 
 # Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-
-import dbus
 import sys
 import os
+import gi
+
+gi.require_version('UDisks', '2.0')
+
+from gi.repository import UDisks
 from xml.dom import minidom
 
 class Device:
 	def __init__(self, udi):
 		self.__udi = udi
-		deviceObj = bus.get_object('org.freedesktop.UDisks',
-				udi)
-		deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
-		if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DeviceIsRemovable') != 1:
+		deviceObj = udisksObjectManager.get_object(udi)
+		driveObj = deviceObj.get_drive()
+		if not driveObj.get_property('removable'):
                         # Workaround for removable devices with fixed media (such as SD cards)
                         if not "mmcblk" in udi:
                                 raise Exception, 'Not a removable device'
-		self.vendor = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveVendor')
-		self.product = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveModel')
-		self.serialNumber = deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveSerial')
+		self.vendor = driveObj.get_property('vendor')
+		self.product = driveObj.get_property('model')
+		self.serialNumber = driveObj.get_property('serial')
 		if len(self.volumes()) < 1:
 			raise Exception, 'Device does not contain any volume'
 
 	def volumes(self):
 		vols = []
-		for udi in halManager.get_dbus_method('EnumerateDevices')():
-			deviceObj = bus.get_object('org.freedesktop.UDisks',
-				udi)
-			deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
-			if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DeviceIsPartition') != 1:
+		for udi in [o.get_object_path() for o in udisksObjectManager.get_objects() if o.get_block()]:
+			obj = udisks.get_object(udi)
+			blockObj = obj.get_block()
+			if blockObj.get_property('drive') != self.__udi:
 				continue
-			if deviceProperties.Get('org.freedesktop.UDisks.Device', 'PartitionSlave') != self.__udi:
+			if not obj.get_filesystem():
 				continue
-			vols.append({'uuid' : deviceProperties.Get('org.freedesktop.UDisks.Device', 'IdUuid'),
-				'device' : deviceProperties.Get('org.freedesktop.UDisks.Device', 'DeviceFile')})
+			vols.append({'uuid' : blockObj.get_property('id-uuid'),
+				'device' : blockObj.get_property('device')})
 		return vols
 
 	def __repr__(self):
@@ -143,7 +144,7 @@ def addUser(options):
 def addDevice(options):
 	devices = []
 
-	for udi in halManager.get_dbus_method('EnumerateDevices')():
+	for udi in [o.get_object_path() for o in udisksObjectManager.get_objects() if o.get_drive()]:
 		try:
 			if options['verbose']:
 				print 'Inspecting %s' % udi
@@ -259,10 +260,8 @@ if options['deviceName'] is None and options['userName'] is None:
 	usage()
 
 if options['deviceName'] is not None:
-	bus = dbus.SystemBus()
-	halService = bus.get_object('org.freedesktop.UDisks',
-			'/org/freedesktop/UDisks')
-	halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
+	udisks = UDisks.Client.new_sync()
+	udisksObjectManager = udisks.get_object_manager()
 	try:
 		addDevice(options)
 	except KeyboardInterrupt:
