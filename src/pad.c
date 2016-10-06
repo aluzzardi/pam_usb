@@ -15,8 +15,6 @@
  * Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include "pad.h"
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,6 +29,7 @@
 #include "conf.h"
 #include "log.h"
 #include "volume.h"
+#include "pad.h"
 
 static FILE *pusb_pad_open_device(t_pusb_options *opts,
 		const char *mnt_point,
