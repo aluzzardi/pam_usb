@@ -17,7 +17,7 @@
 
 #ifndef PUSB_CONF_H_
 # define PUSB_CONF_H_
-# define PUSB_CONF_FILE "/etc/security/pamusb.conf"
+# define PUSB_CONF_FILE "/etc/security/pam_usb.conf"
 # define CONF_DEVICE_XPATH "//configuration/devices/device[@id='%s']/%s"
 # define CONF_USER_XPATH "//configuration/users/user[@id='%s']/%s"
 # define CONF_SERVICE_XPATH "//configuration/services/service[@id='%s']/%s"
