@@ -238,7 +238,7 @@ if len(args) != 0:
 	usage()
 
 options = { 'deviceName' : None, 'userName' : None,
-		'configFile' : '/etc/pamusb.conf', 'verbose' : False }
+		'configFile' : '/etc/security/pam_usb.conf', 'verbose' : False }
 
 for o, a in opts:
 	if o in ("-h", "--help"):
