@@ -41,12 +41,12 @@ PAMUSB_CHECK		:= pamusb-check
 
 # Tools
 PAMUSB_CONF		:= pamusb-conf
-PAMUSB_AGENT	:= pamusb-agent
+PAMUSB_AGENT		:= pamusb-agent
 TOOLS_DEST		:= $(DESTDIR)$(PREFIX)/bin
 TOOLS_SRC		:= tools
 
 # Conf
-CONFS			:= doc/pamusb.conf
+CONFS			:= doc/pam_usb.conf
 CONFS_DEST		:= $(DESTDIR)/etc/security
 
 # Doc
