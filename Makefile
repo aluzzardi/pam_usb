@@ -92,4 +92,4 @@ deinstall	:
 		$(RM) -f $(PAM_USB_DEST)/$(PAM_USB)
 		$(RM) -f $(TOOLS_DEST)/$(PAMUSB_CHECK) $(TOOLS_DEST)/$(PAMUSB_CONF) $(TOOLS_DEST)/$(PAMUSB_AGENT)
 		$(RM) -rf $(DOCS_DEST)
-		$(RM) -f $(MANS_DEST)/pusb_*
+		$(RM) -f $(MANS_DEST)/pamusb-*\.1\.gz
