@@ -18,7 +18,6 @@
 #ifndef PUSB_OTP_H_
 # define PUSB_OTP_H_
 # include <udisks/udisks.h>
-# include "conf.h"
 
 int pusb_pad_check(t_pusb_options *opts, UDisksClient *udisks, const char *user);
 
