@@ -17,7 +17,6 @@
 
 #ifndef PUSB_DEVICE_H_
 # define PUSB_DEVICE_H_
-# include "conf.h"
 
 int pusb_device_check(t_pusb_options *opts, const char *user);
 
