@@ -1,0 +1,214 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import pwd
+import getopt
+import syslog
+import dbus
+
+import xml.etree.ElementTree as et
+
+from gi.repository import GLib
+from dbus.mainloop.glib import DBusGMainLoop
+
+
+deviceName = ''
+userName = ''
+options = ''
+events = ''
+logger = ''
+
+
+class HotPlugDevice():
+
+    def __init__(self, serial):
+        self.__uid = None
+        self.__serial = serial
+        self.__callbacks = []
+        self.__dbus_mainloop = DBusGMainLoop()
+        self.__bus = dbus.SystemBus(mainloop=self.__dbus_mainloop)
+        self.__running = False
+
+    def run(self):
+        self.__scanDevices()
+        self.__registerSignals()
+        self.__running = True
+        GLib.MainLoop().run()
+        print('Signals registered')
+    
+    def addCallback(self, callback):
+        self.__callbacks.append(callback)
+
+    def __scanDevices(self):
+        halService = self.__bus.get_object('org.freedesktop.UDisks',
+                '/org/freedesktop/UDisks')
+        halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
+        for uid in halManager.EnumerateDevices():
+            self.__deviceAdded(uid)
+
+    def __registerSignals(self):
+        halService = self.__bus.get_object('org.freedesktop.UDisks',
+                '/org/freedesktop/UDisks')
+        halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
+        for signal, callback in (('DeviceAdded', self.__deviceAdded),
+                ('DeviceRemoved', self.__deviceRemoved)):
+            halManager.connect_to_signal(signal, callback)
+
+    def __deviceAdded(self, uid):
+        if self.__uid is not None:
+            return
+        deviceObj = self.__bus.get_object('org.freedesktop.UDisks', uid)
+        deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
+        if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveSerial') != self.__serial:
+            return
+        self.__uid = uid
+        if self.__running:
+            [cb('added') for cb in self.__callbacks]
+       
+    def __deviceRemoved(self, uid):
+        if self.__uid is None:
+            return
+        if self.__uid != uid:
+            return
+        self.__uid = None
+        if self.__running:
+            [cb('removed') for cb in self.__callbacks]
+
+
+class Log(object):
+
+    def __init__(self):
+        syslog.openlog('pamusb-agent', syslog.LOG_PID | syslog.LOG_PERROR,
+                syslog.LOG_AUTH)
+
+    def info(self, message):
+        self.__logMessage(syslog.LOG_NOTICE, message)
+
+    def error(self, message):
+        self.__logMessage(syslog.LOG_ERR, message)
+
+    def __logMessage(self, priority, message):
+        syslog.syslog(priority, message)
+
+
+def usage():
+	print('Usage: {0} [--help] [--config=path] [--daemon] [--check=path]'.format(
+			os.path.basename(__file__)))
+	sys.exit(1)
+
+
+def authChangeCallback(event):
+    if event == 'removed':
+        logger.info('Device {0} has been removed, ' \
+            'locking down user {1}...'.format(deviceName, username))
+        for cmd in events['lock']:
+            os.system(cmd)
+        logger.info('Locked.')
+        return
+
+    logger.info('Device {0} has been inserted. ' \
+        'Performing verification...'.format(deviceName))
+    cmdLine = "%s --quiet --config=%s --service=pamusb-agent %s" % (
+                    options['check'], options['configFile'], username)
+    logger.info('Executing {0}'.format(cmdLine))
+    if not os.system(cmdLine):
+        logger.info('Authentication succeeded. ' \
+            'Unlocking user {0}...'.format(username))
+        for cmd in events['unlock']:
+            logger.info('Running {0}'.cmd)
+            os.system(cmd)
+        logger.info('Unlocked.')
+    else:
+        logger.info('Authentication failed for device {0}. ' \
+            'Keeping user {1} locked down.'.format(deviceName, username))
+        return
+
+
+def main():
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], 'hc:dc:',
+                ["help", "config=", "daemon", "check="])
+    except:
+        usage()
+
+    global options
+    options = {
+            'configFile': '/etc/pamusb.conf',
+            'daemon': False,
+            'check': '/usr/bin/pamusb-check'
+            }
+    if len(args) != 0:
+        usage()
+
+    for o, a in opts:
+        if o in ('-h', '--help'):
+            usage()
+        if o in ('-c', '--config'):
+            options['configFile'] = a
+        if o in ('-d', '--daemon'):
+            options['daemon'] = True
+        if o in ('-C', '--check'):
+            options['check'] = a
+
+    if not os.path.exists(options['check']):
+        print('{0} not found.'.format(options['check']))
+        print("You might specify manually pamusb-check's location using --check.")
+        usage()
+
+    global username
+    username = pwd.getpwuid(os.getuid())[0]
+
+    global logger
+    logger = Log()
+
+    doc = et.parse(options['configFile'])
+    users = doc.findall('users/user')
+    for user in users:
+        if user.get('id') == username:
+            break
+    else:
+        logger.error('User {0} not found in configuration file'.format(username))
+        sys.exit(1)
+
+    global events
+    events = {
+            'lock': [],
+            'unlock': []
+            }
+    for hotplug in user.findall('agent'):
+        events[hotplug.get('event')].append(hotplug.text)
+
+    global deviceName
+    deviceName = user.find('device').text.strip()
+
+    devices = doc.findall('devices/device')
+    for device in devices:
+        if device.get('id') == deviceName:
+            break
+    else:
+        logger.error('Device {0} not found in configurtion file'.format(deviceName))
+        sys.exit(1)
+
+    serial = device.find('serial').text.strip()
+    
+    hpDev = HotPlugDevice(serial)
+    hpDev.addCallback(authChangeCallback)
+
+    if options['daemon'] and os.fork():
+        sys.exit(0)
+
+    logger.info('pamusb-agent up and running.')
+    logger.info('Watching device {0} for user {1}'.format(deviceName, username))
+
+    try:
+        hpDev.run()
+    except Exception as e:
+        print('Keyboard Interrupt')
+        print(e)
+    
+
+    pass
+
+if __name__ == '__main__':
+    main()
