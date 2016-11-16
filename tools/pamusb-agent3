@@ -1,4 +1,21 @@
 #!/usr/bin/env python3
+#
+# Copyright (c) 2003-2007 Andrea Luzzardi <scox@sig11.org>
+#
+# Ported to Python 3 by Daniel Jankowski
+#
+# This file is part of the pam_usb project. pam_usb is free software;
+# you can redistribute it and/or modify it under the terms of the GNU General
+# Public License version 2, as published by the Free Software Foundation.
+#
+# pam_usb is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+# Place, Suite 330, Boston, MA  02111-1307  USA
 
 import os
 import sys
@@ -13,6 +30,7 @@ from gi.repository import GLib
 from dbus.mainloop.glib import DBusGMainLoop
 
 
+# some global constants needed in multiple functions
 deviceName = ''
 userName = ''
 options = ''
@@ -20,78 +38,131 @@ events = ''
 logger = ''
 
 
+# hotplug handler that registers callbacks to dbus
 class HotPlugDevice():
 
+    # initialize the handler
     def __init__(self, serial):
+        # some constants
         self.__uid = None
         self.__serial = serial
         self.__callbacks = []
+
+        # the dbus connection
         self.__dbus_mainloop = DBusGMainLoop()
         self.__bus = dbus.SystemBus(mainloop=self.__dbus_mainloop)
+        
+        # running indicator
         self.__running = False
 
+    # start loop
     def run(self):
+        # scan for devices
         self.__scanDevices()
+
+        # register callbacks to signals
         self.__registerSignals()
+
+        # start the main loop and set the running indicator
         self.__running = True
         GLib.MainLoop().run()
         print('Signals registered')
     
+    # add callbacks to the callback array
     def addCallback(self, callback):
         self.__callbacks.append(callback)
 
+    # scan for devices
     def __scanDevices(self):
+        # create dbus service to org.freedesktop.UDisks
         halService = self.__bus.get_object('org.freedesktop.UDisks',
                 '/org/freedesktop/UDisks')
+
+        # connect service through the dbus interface
         halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
+
+        # iterate through devices and add them to the deviceAdded array
         for uid in halManager.EnumerateDevices():
             self.__deviceAdded(uid)
 
     def __registerSignals(self):
+        # create dbus service to org.freedesktop.UDisks
         halService = self.__bus.get_object('org.freedesktop.UDisks',
                 '/org/freedesktop/UDisks')
+
+        # connect service through the dbus interface
         halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
+
+        # iterate through tuples of signal and callback function
         for signal, callback in (('DeviceAdded', self.__deviceAdded),
                 ('DeviceRemoved', self.__deviceRemoved)):
+            # register the callback function to their signal in dbus
             halManager.connect_to_signal(signal, callback)
 
+    # callback for the deviceAdded signal
     def __deviceAdded(self, uid):
+        # check if uids array exists
         if self.__uid is not None:
             return
+
+        # create dbus object to org.freedesktop.UDisks with the uid
         deviceObj = self.__bus.get_object('org.freedesktop.UDisks', uid)
+
+        # connect the dbus object through the interface
         deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
+
+        # check if the device has the DriveSerial property set in dbus
         if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveSerial') != self.__serial:
             return
+
+        # save the device uid to the handlers uid
         self.__uid = uid
+
+        # run the callback functions
         if self.__running:
             [cb('added') for cb in self.__callbacks]
        
+    # callback for the deviceRemoved signal
     def __deviceRemoved(self, uid):
+        # check if uids array exists
         if self.__uid is None:
             return
+
+        # check if the uid is not stored into the handlers uid
         if self.__uid != uid:
             return
+
+        # set handlers uid to none
         self.__uid = None
+
+        # run the callback functions
         if self.__running:
             [cb('removed') for cb in self.__callbacks]
 
 
+# logger object
 class Log(object):
 
+    # initialize the logger object
     def __init__(self):
+        # initialize the systemlog
         syslog.openlog('pamusb-agent', syslog.LOG_PID | syslog.LOG_PERROR,
                 syslog.LOG_AUTH)
 
+    # print info log
     def info(self, message):
         self.__logMessage(syslog.LOG_NOTICE, message)
 
+    # print error log
     def error(self, message):
         self.__logMessage(syslog.LOG_ERR, message)
 
+    # print the logs messages to the syslog with given priority
     def __logMessage(self, priority, message):
         syslog.syslog(priority, message)
 
 
+# print the help page and exit
 def usage():
 	print('Usage: {0} [--help] [--config=path] [--daemon] [--check=path]'.format(
 			os.path.basename(__file__)))
@@ -99,39 +170,59 @@ def usage():
 
 
 def authChangeCallback(event):
-    if event == 'removed':
+    if event == 'removed': # if a device is removed
+        # log information
         logger.info('Device {0} has been removed, ' \
             'locking down user {1}...'.format(deviceName, username))
+
+        # run the commands that are defined in the config file
         for cmd in events['lock']:
             os.system(cmd)
+        
+        # log, that the system is now locked
         logger.info('Locked.')
         return
 
+    # device is added to the system
+    
+    # log information
     logger.info('Device {0} has been inserted. ' \
         'Performing verification...'.format(deviceName))
+    
+    # check, if the device is authentic for the user
     cmdLine = "%s --quiet --config=%s --service=pamusb-agent %s" % (
                     options['check'], options['configFile'], username)
     logger.info('Executing {0}'.format(cmdLine))
+    
+    # if the device authenticates the user
     if not os.system(cmdLine):
+        # log that the authentication succeeded
         logger.info('Authentication succeeded. ' \
             'Unlocking user {0}...'.format(username))
+        
+        # perform unlock commands, defined in the config file
         for cmd in events['unlock']:
             logger.info('Running {0}'.cmd)
             os.system(cmd)
+        
+        # log, that the system is unlocked now
         logger.info('Unlocked.')
-    else:
+    else: # if the device is not authentic
+        # log the authentication failure
         logger.info('Authentication failed for device {0}. ' \
             'Keeping user {1} locked down.'.format(deviceName, username))
         return
 
 
 def main():
+    # get args
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'hc:dc:',
                 ["help", "config=", "daemon", "check="])
     except:
         usage()
 
+    # default options
     global options
     options = {
             'configFile': '/etc/pamusb.conf',
@@ -141,6 +232,7 @@ def main():
     if len(args) != 0:
         usage()
 
+    # parse args into options
     for o, a in opts:
         if o in ('-h', '--help'):
             usage()
@@ -151,38 +243,52 @@ def main():
         if o in ('-C', '--check'):
             options['check'] = a
 
+    # check if the pamusb-check binary exists
     if not os.path.exists(options['check']):
         print('{0} not found.'.format(options['check']))
         print("You might specify manually pamusb-check's location using --check.")
         usage()
 
+    # get the running user
     global username
     username = pwd.getpwuid(os.getuid())[0]
 
+    # initilize logger
     global logger
     logger = Log()
 
+    # parse the config file
     doc = et.parse(options['configFile'])
+    # get all users from config
     users = doc.findall('users/user')
+
+    # check if the running user is defined in the config file
     for user in users:
         if user.get('id') == username:
             break
-    else:
+    else: # if not, exit
         logger.error('User {0} not found in configuration file'.format(username))
         sys.exit(1)
 
+    # define global lock and unlock events
     global events
     events = {
             'lock': [],
             'unlock': []
             }
+
+    # set lock and unlock in global events
     for hotplug in user.findall('agent'):
         events[hotplug.get('event')].append(hotplug.text)
 
-    global deviceName
+    # get the defined device in the user section of the config file
+    global deviceName # and set it to the global deviceName
     deviceName = user.find('device').text.strip()
 
+    # find every defined device in the config file
     devices = doc.findall('devices/device')
+
+    # check if the device in the user section is defined in the config file
     for device in devices:
         if device.get('id') == deviceName:
             break
@@ -190,25 +296,30 @@ def main():
         logger.error('Device {0} not found in configurtion file'.format(deviceName))
         sys.exit(1)
 
+    # get the device serial number
     serial = device.find('serial').text.strip()
     
-    hpDev = HotPlugDevice(serial)
+    # create the hotplug object, that handles the plug and unplug callbacks
+    hpDev = HotPlugDevice(serial) # from dbus
+
+    # add the callback to the hotplug handler
     hpDev.addCallback(authChangeCallback)
 
+    # fork this program, if the daemon arg is set
     if options['daemon'] and os.fork():
         sys.exit(0)
 
+    # log and print startup information
     logger.info('pamusb-agent up and running.')
     logger.info('Watching device {0} for user {1}'.format(deviceName, username))
 
+    # run the hotplug handler
     try:
         hpDev.run()
     except Exception as e:
         print('Keyboard Interrupt')
-        print(e)
     
 
-    pass
-
+# run main, when the python file is called
 if __name__ == '__main__':
     main()
