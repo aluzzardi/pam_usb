@@ -177,6 +177,7 @@ def authChangeCallback(event):
 
         # run the commands that are defined in the config file
         for cmd in events['lock']:
+            logger.info('Running {0}'.format(cmd))
             os.system(cmd)
         
         # log, that the system is now locked
@@ -202,7 +203,7 @@ def authChangeCallback(event):
         
         # perform unlock commands, defined in the config file
         for cmd in events['unlock']:
-            logger.info('Running {0}'.cmd)
+            logger.info('Running {0}'.format(cmd))
             os.system(cmd)
         
         # log, that the system is unlocked now
