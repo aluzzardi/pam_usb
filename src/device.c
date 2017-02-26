@@ -63,8 +63,8 @@ static int pusb_device_connected(t_pusb_options *opts, UDisksClient *udisks)
 		log_error("Device \"%s\" is not connected (bad).\n",
 				opts->device.name);
 
-	g_list_foreach (objects, (GFunc) g_object_unref, NULL);
-	g_list_free (objects);
+	g_list_foreach(objects, (GFunc) g_object_unref, NULL);
+	g_list_free(objects);
 
 	return (retval);
 }

@@ -125,8 +125,8 @@ static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts,
 			}
 		}
 
-		g_list_foreach (blocks, (GFunc) g_object_unref, NULL);
-		g_list_free (blocks);
+		g_list_foreach(blocks, (GFunc) g_object_unref, NULL);
+		g_list_free(blocks);
 
 		if (volume)
 		{
