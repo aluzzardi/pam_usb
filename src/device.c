@@ -35,9 +35,6 @@ static int pusb_device_connected(t_pusb_options *opts, UDisksClient *udisks)
 	UDisksObject		*object = NULL;
 	UDisksDrive		*drive = NULL;
 
-	manager = udisks_client_get_object_manager(udisks);
-	objects = g_dbus_object_manager_get_objects(manager);
-
 	log_debug("Searching for \"%s\" in the hardware database...\n",
 			opts->device.name);
 
