@@ -39,7 +39,7 @@ int pusb_local_login(t_pusb_options *opts, const char *user)
 	if (!from || !(*from))
 	{
 		log_debug("Couldn't retrieve the tty name, aborting.\n");
-		return (1);
+		return (0);
 	}
 	if (!strncmp(from, "/dev/", strlen("/dev/")))
 		from += strlen("/dev/");
@@ -52,7 +52,7 @@ int pusb_local_login(t_pusb_options *opts, const char *user)
 	{
 		log_debug("No utmp entry found for tty \"%s\"\n",
 				from);
-		return (1);
+		return (0);
 	}
 	for (i = 0; i < 4; ++i)
 	{

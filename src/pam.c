@@ -69,7 +69,7 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	log_info("Authentication request for user \"%s\" (%s)\n",
 			user, service);
 
-	if (pam_get_item(pamh, PAM_TTY,
+/*	if (pam_get_item(pamh, PAM_TTY,
 				(const void **)(const void *)&tty) == PAM_SUCCESS)
 	{
 		if (tty && !strcmp(tty, "ssh"))
@@ -77,7 +77,7 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 			log_debug("SSH Authentication, aborting.\n");
 			return (PAM_AUTH_ERR);
 		}
-	}
+	}*/
 	if (!pusb_local_login(&opts, user))
 	{
 		log_error("Access denied.\n");
