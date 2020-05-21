@@ -118,6 +118,7 @@ static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts,
 				volume->mount_point = NULL;
 
 				mount_points = udisks_filesystem_get_mount_points(volume->filesystem);
+				log_debug("Found mount points: %s\n", *mount_points);
 				if (mount_points && *mount_points)
 					volume->mount_point = xstrdup(*mount_points);
 
