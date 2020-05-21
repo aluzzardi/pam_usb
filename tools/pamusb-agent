@@ -209,8 +209,8 @@ def userDeviceThread(user):
 		if device.get('id') == deviceName:
 			break
 
-		logger.error('Device %s not found in configuration file' % deviceName)
-		sys.exit(1)
+		logger.error('Device %s not found in configuration file.' % deviceName)
+		return 1
 
 	serial = device.find('serial').text.strip()
 
