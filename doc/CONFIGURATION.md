@@ -244,6 +244,13 @@ Users
     
     <tr>
         <td>agent</td>
+			<td>env</td>
+			<td>Element</td>
+			<td>An environment variable for the command. For multiple variables use multiple env tags</td>
+
+			<td>cmd</td>
+			<td>Element</td>
+			<td>Agent command, associated with env tags in the same agent element</td>
         <td>Element</td>
         <td>Agent commands, for use with pamusb-agent</td>
     </tr>
@@ -257,12 +264,24 @@ Example:
     
     <!-- When the user "scox" removes the usb device, lock the screen and pause
     beep-media-player -->
-    <agent event="lock">gnome-screensaver-command --lock</agent>
-    <agent event="lock">beep-media-player --pause</agent>
+    <agent event="lock">
+		<env>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus</env>
+		<env>HOME=/home/scox</env>
+		<cmd>gnome-screensaver-command --lock</cmd>
+	</agent>
+    <agent event="lock">
+		<cmd>beep-media-player --pause</cmd>
+	</agent>
     
     <!-- Resume operations when the usb device is plugged back and authenticated -->
-    <agent event="unlock">gnome-screensaver-command --deactivate</agent>
-    <agent event="unlock">beep-media-player --play</agent>
+    <agent event="unlock">
+		<env>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus</env>
+		<env>HOME=/home/scox</env>
+		<cmd>gnome-screensaver-command --deactivate</cmd>
+	</agent>
+    <agent event="unlock">
+		<cmd>beep-media-player --play</cmd>
+	</agent>
 </user>
 ```
 
@@ -299,7 +318,7 @@ Example:
 Location of the configuration file
 ----------------------------------
 
-By default, pam_usb.so and its tools will look for the configuration file at `/etc/security/pam_usb.conf`. 
+By default, pam_usb.so and its tools will look for the configuration file at `/etc/security/pam_usb.conf`.
 
 If you want to use a different location, you will have to use the `-c` flag.
 

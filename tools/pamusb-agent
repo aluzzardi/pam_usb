@@ -21,6 +21,7 @@ import pwd
 import getopt
 import signal
 import re
+import subprocess
 import syslog
 import gi
 import threading
@@ -110,6 +111,12 @@ def usage():
 			os.path.basename(__file__))
 	sys.exit(1)
 
+def runAs(uid, gid):
+	def set_id():
+		os.setuid(uid)
+		os.setgid(gid)
+	return set_id
+
 import getopt
 
 try:
@@ -149,6 +156,9 @@ users = doc.findall('users/user')
 def userDeviceThread(user):
 
 	userName = user.get('id')
+	uid = pwd.getpwnam(userName)[2]
+	gid = pwd.getpwnam(userName)[3]
+	os.environ = None
 
 	events = {
 		'lock' : [],
@@ -156,7 +166,19 @@ def userDeviceThread(user):
 	}
 
 	for hotplug in user.findall('agent'):
-		events[hotplug.get('event')].append(hotplug.text)
+		henvs = {}
+
+		for henv in hotplug.findall('env'):
+			henv_var = re.sub(r'^(.*?)=.*$', '\\1', henv.text)
+			henv_arg = re.sub(r'^.*?=(.*)$', '\\1', henv.text)
+			henvs[henv_var] = henv_arg
+
+		events[hotplug.get('event')].append(
+			{
+				'env': henvs,
+				'cmd': hotplug.find('cmd').text
+			}
+		)
 
 	deviceName = user.find('device').text.strip()
 
@@ -174,9 +196,13 @@ def userDeviceThread(user):
 		if event == 'removed':
 			logger.info('Device "%s" has been removed, ' \
 					'locking down user "%s"...' % (deviceName, userName))
-			for cmd in events['lock']:
+
+			for l in events['lock']:
+				cmd = l['cmd']
+
 				logger.info('Running "%s"' % cmd)
-				os.system(cmd)
+				subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
+
 			logger.info('Locked.')
 			return
 
@@ -188,10 +214,15 @@ def userDeviceThread(user):
 		if not os.system(cmdLine):
 			logger.info('Authentication succeeded. ' \
 					'Unlocking user "%s"...' % userName)
-			for cmd in events['unlock']:
+
+			for l in events['unlock']:
+				cmd = l['cmd']
+
 				logger.info('Running "%s"' % cmd)
-				os.system(cmd)
+				subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
+
 			logger.info('Unlocked.')
+
 		else:
 			logger.info('Authentication failed for device %s. ' \
 				'Keeping user "%s" locked down.' % (deviceName, userName))
