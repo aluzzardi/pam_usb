@@ -62,6 +62,6 @@ int pusb_local_login(t_pusb_options *opts, const char *user)
 			return (0);
 		}
 	}
-	log_debug("Caller is local (good)\n");
+	log_debug("Caller is local.\n");
 	return (1);
 }

@@ -173,7 +173,7 @@ int pusb_conf_parse(const char *file, t_pusb_options *opts,
 			sizeof(opts->device.name));
 	if (!retval || !pusb_conf_parse_device(opts, doc))
 	{
-		log_error("No device configured for user \"%s\".\n", user);
+		log_error("No authentication device configured for user \"%s\".\n", user);
 		xmlFreeDoc(doc);
 		xmlCleanupParser();
 		return (0);

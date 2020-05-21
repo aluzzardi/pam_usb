@@ -57,10 +57,10 @@ static int pusb_device_connected(t_pusb_options *opts, UDisksClient *udisks)
 	}
 
 	if (retval)
-		log_info("Device \"%s\" is connected (good).\n",
+		log_info("Authentication device \"%s\" is connected.\n",
 				opts->device.name);
 	else
-		log_error("Device \"%s\" is not connected (bad).\n",
+		log_error("Authentication device \"%s\" is not connected.\n",
 				opts->device.name);
 
 	g_list_foreach (objects, (GFunc) g_object_unref, NULL);
