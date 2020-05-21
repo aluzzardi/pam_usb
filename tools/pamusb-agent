@@ -131,9 +131,9 @@ def usage():
 
 def runAs(uid, gid):
 	def set_id():
-		os.setuid(uid)
 		os.setgid(gid)
-	return set_id
+		os.setuid(uid)
+return set_id
 
 import getopt
 
@@ -186,9 +186,9 @@ def userDeviceThread(user):
 	for hotplug in user.findall('agent'):
 		henvs = {}
 
-        if len(hotplug.findall('cmd')) != 1:
-            logger.error('one command for an agent must be determined in user "%s" configuration.' % userName)
-            return 1
+		if len(hotplug.findall('cmd')) != 1:
+			logger.error('One command for an agent must be determined in user "%s" configuration.' % userName)
+			return 1
 
 		for henv in hotplug.findall('env'):
 			henv_var = re.sub(r'^(.*?)=.*$', '\\1', henv.text)
