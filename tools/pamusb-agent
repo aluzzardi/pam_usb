@@ -19,8 +19,11 @@ import os
 import sys
 import pwd
 import getopt
+import signal
+import re
 import syslog
 import gi
+import threading
 
 gi.require_version('UDisks', '2.0')
 
@@ -138,78 +141,105 @@ if not os.path.exists(options['check']):
 	print("You might specify manually pamusb-check's location using --check.")
 	usage()
 
-username = pwd.getpwuid(os.getuid())[0]
-
 logger = Log()
 
 doc = et.parse(options['configFile'])
 users = doc.findall('users/user')
-for user in users:
-	if user.get('id') == username:
-		break
-else:
-	logger.error('User %s not found in configuration file' % username)
-	sys.exit(1)
 
-events = {
+def userDeviceThread(user):
+
+	userName = user.get('id')
+
+	events = {
 		'lock' : [],
 		'unlock' : []
-		}
+	}
 
-for hotplug in user.findall('agent'):
-	events[hotplug.get('event')].append(hotplug.text)
+	for hotplug in user.findall('agent'):
+		events[hotplug.get('event')].append(hotplug.text)
 
-deviceName = user.find('device').text.strip()
+	deviceName = user.find('device').text.strip()
 
-devices = doc.findall("devices/device")
-for device in devices:
-	if device.get('id') == deviceName:
-		break
-else:
-	logger.error('Device %s not found in configurtion file' % deviceName)
-	sys.exit(1)
+	devices = doc.findall("devices/device")
+	for device in devices:
+		if device.get('id') == deviceName:
+			break
 
-serial = device.find('serial').text.strip()
+		logger.error('Device %s not found in configuration file' % deviceName)
+		sys.exit(1)
 
-def authChangeCallback(event):
-	if event == 'removed':
-		logger.info('Device "%s" has been removed, ' \
-				'locking down user "%s"...' % (deviceName, username))
-		for cmd in events['lock']:
-			logger.info('Running "%s"' % cmd)
-			os.system(cmd)
-		logger.info('Locked.')
-		return
+	serial = device.find('serial').text.strip()
 
-	logger.info('Device "%s" has been inserted. ' \
-			'Performing verification...' % deviceName)
-	cmdLine = "%s --quiet --config=%s --service=pamusb-agent %s" % (
-			options['check'], options['configFile'], username)
-	logger.info('Executing "%s"' % cmdLine)
-	if not os.system(cmdLine):
-		logger.info('Authentication succeeded. ' \
-				'Unlocking user "%s"...' % username)
-		for cmd in events['unlock']:
-			logger.info('Running "%s"' % cmd)
-			os.system(cmd)
-		logger.info('Unlocked.')
-	else:
-		logger.info('Authentication failed for device %s. ' \
-				'Keeping user "%s" locked down.' % (deviceName, username))
+	def authChangeCallback(event):
+		if event == 'removed':
+			logger.info('Device "%s" has been removed, ' \
+					'locking down user "%s"...' % (deviceName, userName))
+			for cmd in events['lock']:
+				logger.info('Running "%s"' % cmd)
+				os.system(cmd)
+			logger.info('Locked.')
+			return
+
+		logger.info('Device "%s" has been inserted. ' \
+				'Performing verification...' % deviceName)
+		cmdLine = "%s --debug --config=%s --service=pamusb-agent %s" % (
+				options['check'], options['configFile'], userName)
+		logger.info('Executing "%s"' % cmdLine)
+		if not os.system(cmdLine):
+			logger.info('Authentication succeeded. ' \
+					'Unlocking user "%s"...' % userName)
+			for cmd in events['unlock']:
+				logger.info('Running "%s"' % cmd)
+				os.system(cmd)
+			logger.info('Unlocked.')
+		else:
+			logger.info('Authentication failed for device %s. ' \
+				'Keeping user "%s" locked down.' % (deviceName, userName))
+
+	hpDev = HotPlugDevice(serial)
+	hpDev.addCallback(authChangeCallback)
+
+	logger.info('Watching device "%s" for user "%s"' % (deviceName, userName))
+	hpDev.run()
 
 udisks = UDisks.Client.new_sync()
 udisksObjectManager = udisks.get_object_manager()
 
-hpDev = HotPlugDevice(serial)
-hpDev.addCallback(authChangeCallback)
+sysUsers= []
+validUsers = []
+
+with open('/etc/passwd', 'r') as f:
+	for line in f.readlines():
+		sysUser = re.sub(r'^(.*?):.*', '\\1', line[:-1])
+		sysUsers.append(sysUser)
+	f.close()
+
+logger.info('pamusb-agent up and running.')
+
+for userObj in users:
+	userId = userObj.get('id')
+
+	for sysUser_ in sysUsers:
+		if (userId == sysUser_ and
+		userObj not in validUsers):
+			validUsers.append(userObj)
+
+# logger.error('User %s not found in configuration file' % username)
+
+for user in validUsers:
+	threading.Thread(
+		target=userDeviceThread,
+		args=(user,)
+	).start()
 
 if options['daemon'] and os.fork():
 	sys.exit(0)
 
-logger.info('pamusb-agent up and running.')
-logger.info('Watching device "%s" for user "%s"' % (deviceName, username))
+def sig_handler(sig, frame):
+    logger.info('Stopping agent.')
+    sys.exit(0)
 
-try:
-	hpDev.run()
-except KeyboardInterrupt:
-	logger.error('Caught keyboard interruption, exiting...')
+sys_signals = ['SIGINT', 'SIGTERM', 'SIGTSTP', 'SIGTTIN', 'SIGTTOU']
+
+for i in sys_signals:
+    signal.signal(getattr(signal, i), sig_handler)
