@@ -186,6 +186,10 @@ def userDeviceThread(user):
 	for hotplug in user.findall('agent'):
 		henvs = {}
 
+        if len(hotplug.findall('cmd')) != 1:
+            logger.error('one command for an agent must be determined in user "%s" configuration.' % userName)
+            return 1
+
 		for henv in hotplug.findall('env'):
 			henv_var = re.sub(r'^(.*?)=.*$', '\\1', henv.text)
 			henv_arg = re.sub(r'^.*?=(.*)$', '\\1', henv.text)
