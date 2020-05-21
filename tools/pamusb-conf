@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #
 # Copyright (c) 2003-2007 Andrea Luzzardi <scox@sig11.org>
 #
@@ -12,7 +12,7 @@
 # details.
 #
 # You should have received a copy of the GNU General Public License along with
-# this program; if not, write to the Free Software Foundation, Inc., 51 Franklin 
+# this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
 import sys
@@ -32,12 +32,12 @@ class Device:
 		if not driveObj.get_property('removable'):
                         # Workaround for removable devices with fixed media (such as SD cards)
                         if not "mmcblk" in udi:
-                                raise Exception, 'Not a removable device'
+                                raise Exception('Not a removable device')
 		self.vendor = driveObj.get_property('vendor')
 		self.product = driveObj.get_property('model')
 		self.serialNumber = driveObj.get_property('serial')
 		if len(self.volumes()) < 1:
-			raise Exception, 'Device does not contain any volume'
+			raise Exception('Device does not contain any volume')
 
 	def volumes(self):
 		vols = []
@@ -59,17 +59,17 @@ class Device:
 
 def listOptions(question, options, autodetect = True):
 	if autodetect == True and len(options) == 1:
-		print question
-		print "* Using \"%s\" (only option)" % options[0]
-		print
+		print(question)
+		print("* Using \"%s\" (only option)" % options[0])
+		print()
 		return 0
 
 	while True:
 		try:
-			print question
+			print(question)
 			for i in range(len(options)):
-				print "%d) %s" % (i, options[i])
-			print
+				print( "%d) %s" % (i, options[i]))
+			print()
 			sys.stdout.write('[%s-%s]: ' % (0, len(options) - 1))
 			optionId = int(sys.stdin.readline())
 			print
@@ -85,16 +85,16 @@ def writeConf(options, doc):
 		f = open(options['configFile'], 'w')
 		doc.writexml(f)
 		f.close()
-	except Exception, err:
-		print 'Unable to save %s: %s' % (options['configFile'], err)
+	except Exception as err:
+		print('Unable to save %s: %s' % (options['configFile'], err))
 		sys.exit(1)
 	else:
-		print 'Done.'
+		print('Done.')
 
 def shouldSave(options, items):
-	print "\n".join(["%s\t\t: %s" % item for item in items])
-	print
-	print 'Save to %s ?' % options['configFile']
+	print("\n".join(["%s\t\t: %s" % item for item in items]))
+	print()
+	print('Save to %s ?' % options['configFile'])
 	sys.stdout.write('[Y/n] ')
 	response = sys.stdin.readline().strip()
 	if len(response) > 0 and response.lower() != 'y':
@@ -107,17 +107,17 @@ def prettifyElement(element):
 def addUser(options):
 	try:
 		doc = minidom.parse(options['configFile'])
-	except Exception, err:
-		print 'Unable to read %s: %s' % (options['configFile'], err)
+	except Exception as err:
+		print('Unable to read %s: %s' % (options['configFile'], err))
 		sys.exit(1)
 	devSection = doc.getElementsByTagName('devices')
 	if len(devSection) == 0:
-		print 'Malformed configuration file: No <devices> section found.'
+		print('Malformed configuration file: No <devices> section found.')
 		sys.exit(1)
 	devicesObj = devSection[0].getElementsByTagName('device')
 	if len(devicesObj) == 0:
-		print 'No devices found.'
-		print 'You must add a device (--add-device) before adding users'
+		print('No devices found.')
+		print('You must add a device (--add-device) before adding users')
 		sys.exit(1)
 
 	devices = []
@@ -147,18 +147,18 @@ def addDevice(options):
 	for udi in [o.get_object_path() for o in udisksObjectManager.get_objects() if o.get_drive()]:
 		try:
 			if options['verbose']:
-				print 'Inspecting %s' % udi
+				print('Inspecting %s' % udi)
 			devices.append(Device(udi))
-		except Exception, ex:
+		except Exception as ex:
 			if options['verbose']:
-				print "\tInvalid: %s" % ex
+				print("\tInvalid: %s" % ex)
 			pass
 		else:
 			if options['verbose']:
-				print "\tValid"
+				print("\tValid")
 
 	if len(devices) == 0:
-		print 'No devices detected. Try running in verbose (-v) mode to see what\'s going on.'
+		print('No devices detected. Try running in verbose (-v) mode to see what\'s going on.')
 		sys.exit()
 	device = devices[listOptions("Please select the device you wish to add.", devices)]
 
@@ -171,7 +171,7 @@ def addDevice(options):
 			)]
 
 	if volume['uuid'] == '':
-		print 'WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device']
+		print('WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device'])
 
 	shouldSave(options,[
 		('Name', options['deviceName']),
@@ -183,8 +183,8 @@ def addDevice(options):
 
 	try:
 		doc = minidom.parse(options['configFile'])
-	except Exception, err:
-		print 'Unable to read %s: %s' % (options['configFile'], err)
+	except Exception as err:
+		print('Unable to read %s: %s' % (options['configFile'], err))
 		sys.exit(1)
 
 	devs = doc.getElementsByTagName('devices')
@@ -195,7 +195,7 @@ def addDevice(options):
 			if device.getAttribute("id") == options['deviceName']:
 				msg =  [ '\nWARNING: A device node already exits for new device \'%s\'.',
 						 '\nTo proceed re-run --add-device using a different name or remove the existing entry in %s.' ]
-				print '\n'.join(msg) % (options['deviceName'], options['configFile'])
+				print('\n'.join(msg) % (options['deviceName'], options['configFile']))
 				sys.exit(2)
 
 	dev = doc.createElement('device')
@@ -223,7 +223,7 @@ def addDevice(options):
 	writeConf(options, doc)
 
 def usage():
-	print 'Usage: %s [--help] [--verbose] [--config=path] [--add-user=name | --add-device=name]' % os.path.basename(__file__)
+	print('Usage: %s [--help] [--verbose] [--config=path] [--add-user=name | --add-device=name]' % os.path.basename(__file__))
 	sys.exit(1)
 
 import getopt
@@ -253,7 +253,7 @@ for o, a in opts:
 		options['configFile'] = a
 
 if options['deviceName'] is not None and options['userName'] is not None:
-	print 'You cannot use both --add-user and --add-device'
+	print('You cannot use both --add-user and --add-device')
 	usage()
 
 if options['deviceName'] is None and options['userName'] is None:
