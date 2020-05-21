@@ -32,7 +32,7 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	t_pusb_options	opts;
 	const char		*service;
 	const char		*user;
-	const char		*tty;
+//	const char		*tty;
 	char			*conf_file = PUSB_CONF_FILE;
 	int				retval;
 
