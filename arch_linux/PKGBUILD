@@ -1,0 +1,44 @@
+# Maintainer: Pekka Helenius <fincer89 [at] hotmail [dot] com>
+
+pkgname=pam_usb
+pkgver=1
+pkgrel=1
+pkgdesc='Hardware authentication for Linux using ordinary USB Flash Drives.'
+arch=('any')
+url='http://www.pamusb.org/'
+license=('GPLv2')
+depends=('pam' 'dbus' 'python' 'python-dbus' 'python-lxml' 'python-gobject' 'udisks2')
+makedepends=('git' 'pkgconf' 'gcc' 'make' 'patch')
+options=(!emptydirs)
+backup=(
+  "etc/security/pam_usb.conf"
+)
+source=(
+  "git+https://github.com/Fincer/${pkgname}.git"
+#  "git+https://github.com/aluzzardi/${pkgname}.git"
+  "pamusb-agent.service"
+)
+sha256sums=(
+  'SKIP'
+  '6002172ffe9d51988116c9e2f34b65d3cb6c29d26cdbd4831d6307a711af7bb9'
+)
+
+pkgver() {
+  cd $pkgname
+  if [[ $(git describe) ]]; then
+    git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+  else
+    echo $(git rev-list --count HEAD).$(git rev-parse --short HEAD)
+  fi
+}
+
+build() {
+  cd $pkgname
+  make all
+}
+
+package() {
+  cd $pkgname
+  make DESTDIR=${pkgdir} PAM_USB_DEST=${pkgdir}/usr/lib/security install
+  install -Dt ${pkgdir}/usr/lib/systemd/system -m0644 ../pamusb-agent.service
+}
