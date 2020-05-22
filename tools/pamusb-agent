@@ -185,10 +185,10 @@ def userDeviceThread(user):
 
 	for hotplug in user.findall('agent'):
 		henvs = {}
+		hcmds = []
 
-		if len(hotplug.findall('cmd')) != 1:
-			logger.error('One command for an agent must be determined in user "%s" configuration.' % userName)
-			return 1
+		for hcmd in hotplug.findall('cmd'):
+			hcmds.append(hcmd.text)
 
 		for henv in hotplug.findall('env'):
 			henv_var = re.sub(r'^(.*?)=.*$', '\\1', henv.text)
@@ -198,7 +198,7 @@ def userDeviceThread(user):
 		events[hotplug.get('event')].append(
 			{
 				'env': henvs,
-				'cmd': hotplug.find('cmd').text
+				'cmd': hcmds
 			}
 		)
 
@@ -220,10 +220,10 @@ def userDeviceThread(user):
 					'locking down user "%s"...' % (deviceName, userName))
 
 			for l in events['lock']:
-				cmd = l['cmd']
+				for cmd in l['cmd']:
 
-				logger.info('Running "%s"' % cmd)
-				subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
+					logger.info('Running "%s"' % cmd)
+					subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
 
 			logger.info('Locked.')
 			return
@@ -238,12 +238,13 @@ def userDeviceThread(user):
 					'Unlocking user "%s"...' % userName)
 
 			for l in events['unlock']:
-				cmd = l['cmd']
+				for cmd in l['cmd']:
 
-				logger.info('Running "%s"' % cmd)
-				subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
+					logger.info('Running "%s"' % cmd)
+					subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
 
 			logger.info('Unlocked.')
+			return
 
 		else:
 			logger.info('Authentication failed for device %s. ' \
