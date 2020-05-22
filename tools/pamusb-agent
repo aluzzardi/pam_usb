@@ -15,22 +15,21 @@
 # this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
 # Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-import os
-import sys
-import pwd
-import getopt
-import signal
 import fcntl
-import re
-import subprocess
-import syslog
+import getopt
 import gi
+import os
+import pwd
+import re
+import signal
+import subprocess
+import sys
+import syslog
 import threading
 
 gi.require_version('UDisks', '2.0')
 
-from gi.repository import GLib
-from gi.repository import UDisks
+from gi.repository import GLib, UDisks
 
 import xml.etree.ElementTree as et
 
