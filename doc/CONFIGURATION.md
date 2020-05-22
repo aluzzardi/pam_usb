@@ -124,10 +124,10 @@ The syntax is the following:
 ### Agent
 
 
-| Name  |   Type    |                                             Description                                             |
-|-------|-----------|-----------------------------------------------------------------------------------------------------|
-| `env` | Attribute | An environment variable for the command. For multiple environment variables use multiple `env` tags |
-| `cmd` | Attribute | Agent command, associated with `env` tags in the same agent element                                 |
+| Name  |   Type    |                                             Description                                                         |
+|-------|-----------|-----------------------------------------------------------------------------------------------------------------|
+| `env` | Attribute | Environment variable for the command. For multiple environment variables use multiple `env` tags.               |
+| `cmd` | Attribute | Agent command, associated with `env` tags in the same agent element. Multiple/chained `cmd` elements supported. |
 
 ### Example:
 
@@ -141,6 +141,8 @@ The syntax is the following:
 		<env>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus</env>
 		<env>HOME=/home/scox</env>
 		<cmd>gnome-screensaver-command --lock</cmd>
+		<cmd>sleep 5</cmd>
+		<cmd>pkill -SIGSTOP -u 1000</cmd>
 	</agent>
     <agent event="lock">
 		<cmd>beep-media-player --pause</cmd>
@@ -150,6 +152,8 @@ The syntax is the following:
     <agent event="unlock">
 		<env>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus</env>
 		<env>HOME=/home/scox</env>
+		<cmd>pkill -SIGCONT -u 1000</cmd>
+		<cmd>sleep 5</cmd>
 		<cmd>gnome-screensaver-command --deactivate</cmd>
 	</agent>
     <agent event="unlock">
