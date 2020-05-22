@@ -275,11 +275,15 @@ udisksObjectManager = udisks.get_object_manager()
 sysUsers= []
 validUsers = []
 
-with open('/etc/passwd', 'r') as f:
-	for line in f.readlines():
-		sysUser = re.sub(r'^(.*?):.*', '\\1', line[:-1])
-		sysUsers.append(sysUser)
-	f.close()
+try:
+	with open('/etc/passwd', 'r') as f:
+		for line in f.readlines():
+			sysUser = re.sub(r'^(.*?):.*', '\\1', line[:-1])
+			sysUsers.append(sysUser)
+		f.close()
+except:
+	logger.error('Couldn\'t read system user names from "/etc/passwd". Process can\'t continue.')
+	sys.exit(1)
 
 logger.info('pamusb-agent up and running.')
 
