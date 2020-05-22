@@ -33,23 +33,6 @@ from gi.repository import GLib, UDisks
 
 import xml.etree.ElementTree as et
 
-def processCheck():
-
-	global filelock
-	filelock=open(os.path.realpath(__file__),'r')
-
-	try:
-		fcntl.flock(filelock,fcntl.LOCK_EX|fcntl.LOCK_NB)
-	except:
-		print('Process is already running.')
-		sys.exit(1)
-
-	if os.getuid() != 0:
-		print('Process must be run as root.')
-		sys.exit(1)
-
-processCheck()
-
 class HotPlugDevice:
 	def __init__(self, serial):
 		self.__udi = None
@@ -274,6 +257,23 @@ udisksObjectManager = udisks.get_object_manager()
 
 sysUsers= []
 validUsers = []
+
+def processCheck():
+
+	global filelock
+	filelock=open(os.path.realpath(__file__),'r')
+
+	try:
+		fcntl.flock(filelock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+	except:
+		logger.error('Process is already running.')
+		sys.exit(1)
+
+	if os.getuid() != 0:
+		logger.error('Process must be run as root.')
+		sys.exit(1)
+
+processCheck()
 
 try:
 	with open('/etc/passwd', 'r') as f:
