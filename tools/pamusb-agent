@@ -220,10 +220,11 @@ def userDeviceThread(user):
 					'locking down user "%s"...' % (deviceName, userName))
 
 			for l in events['lock']:
-				for cmd in l['cmd']:
+				if len(l['cmd']) != 0:
+					for cmd in l['cmd']:
 
-					logger.info('Running "%s"' % cmd)
-					subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
+						logger.info('Running "%s"' % cmd)
+						subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
 
 			logger.info('Locked.')
 			return
@@ -238,10 +239,11 @@ def userDeviceThread(user):
 					'Unlocking user "%s"...' % userName)
 
 			for l in events['unlock']:
-				for cmd in l['cmd']:
+				if len(l['cmd']) != 0:
+					for cmd in l['cmd']:
 
-					logger.info('Running "%s"' % cmd)
-					subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
+						logger.info('Running "%s"' % cmd)
+						subprocess.run(cmd.split(), env=l['env'], preexec_fn=runAs(uid, gid))
 
 			logger.info('Unlocked.')
 			return
