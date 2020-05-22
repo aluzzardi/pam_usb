@@ -188,12 +188,22 @@ def userDeviceThread(user):
 		hcmds = []
 
 		for hcmd in hotplug.findall('cmd'):
-			hcmds.append(hcmd.text)
+			if hcmd.text is not None:
+				hcmds.append(hcmd.text)
+			else:
+				logger.error('Ignoring empty command for user "%s".' % userName)
 
 		for henv in hotplug.findall('env'):
-			henv_var = re.sub(r'^(.*?)=.*$', '\\1', henv.text)
-			henv_arg = re.sub(r'^.*?=(.*)$', '\\1', henv.text)
-			henvs[henv_var] = henv_arg
+			if henv.text is not None:
+				henv_var = re.sub(r'^(.*?)=.*$', '\\1', henv.text)
+				henv_arg = re.sub(r'^.*?=(.*)$', '\\1', henv.text)
+
+				if henv_var != '' and henv_arg != '':
+					henvs[henv_var] = henv_arg
+				else:
+					logger.error('Ignoring invalid command environment variable for user "%s".' % userName)
+			else:
+				logger.error('Ignoring empty environment variable for user "%s".' % userName)
 
 		events[hotplug.get('event')].append(
 			{
@@ -220,6 +230,7 @@ def userDeviceThread(user):
 					'locking down user "%s"...' % (deviceName, userName))
 
 			for l in events['lock']:
+
 				if len(l['cmd']) != 0:
 					for cmd in l['cmd']:
 
@@ -239,6 +250,7 @@ def userDeviceThread(user):
 					'Unlocking user "%s"...' % userName)
 
 			for l in events['unlock']:
+
 				if len(l['cmd']) != 0:
 					for cmd in l['cmd']:
 
