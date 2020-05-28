@@ -197,10 +197,13 @@ def userDeviceThread(user):
 	deviceName = user.find('device').text.strip()
 
 	devices = doc.findall("devices/device")
+	deviceOK = False
 	for device in devices:
 		if device.get('id') == deviceName:
+			deviceOK = True
 			break
 
+	if not deviceOK:
 		logger.error('Device %s not found in configuration file.' % deviceName)
 		return 1
 
