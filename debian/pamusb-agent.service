@@ -1,0 +1,20 @@
+[Unit]
+Description=USB PAM authentication agent
+
+After=dbus.service
+
+[Service]
+ExecStart=/usr/bin/pamusb-agent
+Restart=always
+RestartSec=0
+ProtectKernelModules=True
+ProtectKernelTunables=True
+ProtectClock=True
+ProtectHostname=True
+NoNewPrivileges=True
+ProtectSystem=strict
+PrivateTmp=True
+ProtectControlGroups=true
+
+[Install]
+WantedBy=multi-user.target

@@ -6,5 +6,9 @@ debian/files
 debian/libpam-usb.debhelper.log
 debian/libpam-usb.substvars
 debian/libpam-usb/*
+debian/debhelper-build-stamp
+debian/libpam-usb.postinst.debhelper
+debian/libpam-usb.postrm.debhelper
+debian/libpam-usb.prerm.debhelper
 changelog-from-v0.5.0
 changelog-for-deb
