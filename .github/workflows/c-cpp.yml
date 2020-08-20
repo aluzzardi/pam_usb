@@ -13,5 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Install requirements
+      run: apt install libudisks2-dev libxml2-dev python
     - name: make
       run: make
