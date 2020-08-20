@@ -2,7 +2,7 @@ Source: libpam-usb
 Section: admin
 Priority: optional
 Maintainer: Tobias Bäumer <tobiasbaeumer@gmail.com>
-Build-Depends: debhelper (>= 9), libxml2-dev, libpam0g-dev, libudisks2-dev,  pkg-config, libglib2.0-dev
+Build-Depends: debhelper (>= 10), dh-systemd (>= 1.5), libxml2-dev, libpam0g-dev, libudisks2-dev, pkg-config, libglib2.0-dev
 
 Standards-Version: 3.9.8
 Homepage: https://github.com/mcdope/pam_usb
