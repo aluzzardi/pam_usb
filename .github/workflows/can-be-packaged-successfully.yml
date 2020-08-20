@@ -17,4 +17,6 @@ jobs:
       run: sudo apt install libudisks2-dev libxml2-dev python libpam0g-dev devscripts debhelper
     - name: make deb
       run: make deb
+    - name: check that deb can be installed
+      run: sudo dpkg -i ../*.deb
 
