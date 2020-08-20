@@ -95,6 +95,9 @@ deinstall	:
 		$(RM) -rf $(DOCS_DEST)
 		$(RM) -f $(MANS_DEST)/pamusb-*\.1\.gz
 
+changelog : 
+		git log --pretty=format:"%h %ad%x09%an%x09%s" --date=short 40b17fa..HEAD > changelog-from-v0.5.0
+
 deb : clean all
 	$(DEBUILD) -b -uc -us
 
