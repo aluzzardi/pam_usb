@@ -1,3 +1,9 @@
 *.o
 *.so
 pamusb-check
+debian/.debhelper/*
+debian/files
+debian/libpam-usb.debhelper.log
+debian/libpam-usb.substvars
+debian/libpam-usb/*
+
