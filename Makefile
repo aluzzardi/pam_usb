@@ -98,6 +98,9 @@ deinstall	:
 changelog : 
 		git log --pretty=format:"%h %ad%x09%an%x09%s" --date=short 40b17fa..HEAD > changelog-from-v0.5.0
 
+debchangelog : 
+		git log --pretty=format:"  * %s (%an <%ae>)" --date=short 40b17fa..HEAD > changelog-for-deb
+
 deb : clean all
 	$(DEBUILD) -b -uc -us
 
