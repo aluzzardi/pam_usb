@@ -18,5 +18,5 @@ jobs:
     - name: make deb
       run: make deb
     - name: check that deb can be installed
-      run: sudo dpkg -i ../*.deb
+      run: sudo apt install ../*.deb
 
