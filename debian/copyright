@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: libpam-usb
-Source: https://launchpad.net/~promasu/+archive/ubuntu/ppa-pamusb
+Source: https://github.com/mcdope/pam_usb
 
 Files: *
 Copyright: 2003-2016 Andrea Luzzardi and contributers <scox@sig11.org>
