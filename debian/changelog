@@ -1,0 +1,5 @@
+libpam-usb (0.6.0-5) artful; urgency=medium
+
+  * Initial release - Uses github.com/luka-n/pam_usb as source
+
+ -- Adrian Nöthlich <promasu@ox.io>  Sun, 07 Jan 2018 22:22:34 +0100
