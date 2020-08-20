@@ -1,0 +1,11 @@
+libpam-usb (0.6.0-6) focal; urgency=medium
+
+  * Re-release - Uses github.com/mcdope/pam_usb as source
+
+ -- Tobias Bäumer <tobiasbaeumer@gmail.com>  Thu, 20 Aug 2020 10:22:34 +0200
+
+libpam-usb (0.6.0-5) artful; urgency=medium
+
+  * Initial release - Uses github.com/luka-n/pam_usb as source
+
+ -- Adrian Nöthlich <promasu@ox.io>  Sun, 07 Jan 2018 22:22:34 +0100

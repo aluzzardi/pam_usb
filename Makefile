@@ -61,6 +61,7 @@ MANS_DEST	:= $(DESTDIR)$(PREFIX)/share/man/man1
 RM		:= rm
 INSTALL		:= install
 MKDIR		:= mkdir
+DEBUILD := debuild
 
 ifeq (yes, ${DEBUG})
 	CFLAGS := ${CFLAGS} -ggdb
@@ -93,3 +94,7 @@ deinstall	:
 		$(RM) -f $(TOOLS_DEST)/$(PAMUSB_CHECK) $(TOOLS_DEST)/$(PAMUSB_CONF) $(TOOLS_DEST)/$(PAMUSB_AGENT)
 		$(RM) -rf $(DOCS_DEST)
 		$(RM) -f $(MANS_DEST)/pamusb-*\.1\.gz
+
+deb : clean all
+	$(DEBUILD) -b -uc -us
+
