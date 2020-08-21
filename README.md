@@ -46,7 +46,8 @@ This repo is mainly based on community improvements from
 
 The changes since the last "official" release are documented in the file `changelog-from-v0.5.0` which you
 can generate with `make changelog`. Since it's generated from the git commits you can also view it online at
-https://github.com/mcdope/pam_usb/commits/master. 
+https://github.com/mcdope/pam_usb/commits/master. Changes from the original author up to the last official
+release can be found in `changelog-up-to-v0.5.0`.
 
 The last official release was 0.5.0 btw, some private packages used 0.6.0 to override the upstream provided 
 version but those varied in changes from 0.5.0. This repo will be released starting from 0.7.0 when "finished" 
