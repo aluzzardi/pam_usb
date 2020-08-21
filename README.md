@@ -38,6 +38,7 @@ but there was never a centralized place merging all those improvement. The goal 
 exactly that, resulting in an up-to-date version that will also be released in a (yet to be setup) PPA.
 
 This repo is mainly based on community improvements from Pekka Helenius (https://github.com/Fincer/pam_usb),
-"IGP" (https://github.com/IGP/pam_usb)", myself, and some others. See the commit history for details.
+"IGP" (https://github.com/IGP/pam_usb)", "McDope" (https://github.com/mcdope/pam_usb), and some others. 
+See the commit history for details.
 
 The changes since the last "official" release are documented in the file `changelog-from-v0.5.0`.
