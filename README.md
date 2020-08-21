@@ -37,8 +37,14 @@ unmaintained for quite some years by now. While the years passed the community c
 but there was never a centralized place merging all those improvement. The goal of this repo is to provide
 exactly that, resulting in an up-to-date version that will also be released in a (yet to be setup) PPA.
 
-This repo is mainly based on community improvements from Pekka Helenius (https://github.com/Fincer/pam_usb),
-"IGP" (https://github.com/IGP/pam_usb)", "McDope" (https://github.com/mcdope/pam_usb), and some others. 
-See the commit history for details.
+This repo is mainly based on community improvements from 
+ * Pekka Helenius (https://github.com/Fincer/pam_usb) - Agent improvements and Arch packaging support
+ * Luka Novsak (https://github.com/luka-n/pam_usb) - UDisk2 port
+ * "IGP" (https://github.com/IGP/pam_usb)" (many small improvements)
+ * "McDope" (https://github.com/mcdope/pam_usb) (this repo), 
+ * ... and others. See the commit history for details.
 
-The changes since the last "official" release are documented in the file `changelog-from-v0.5.0`.
+The changes since the last "official" release are documented in the file `changelog-from-v0.5.0`. The last
+official release was 0.5.0 btw, some private packages used 0.6.0 to override the upstream provided version
+but those varied in changes from 0.5.0. This repo will be released starting from 0.7.0 when "finished" and 
+includes the most important updates (Python3 port, UDisks2 support, other smaller ones)
