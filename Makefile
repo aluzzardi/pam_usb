@@ -2,12 +2,7 @@
 DEBUG		:= no
 
 PREFIX		?= /usr
-ARCH := $(shell getconf LONG_BIT)
-ifeq ($(ARCH),64)
-	LIBDIR		:= lib64
-else
-	LIBDIR          := lib
-endif
+LIBDIR		?= lib
 
 # compiler/linker options
 CC		:= gcc
