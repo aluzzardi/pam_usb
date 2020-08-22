@@ -91,7 +91,7 @@ static FILE *pusb_pad_open_system(t_pusb_options *opts,
     int path_max_size = (
             strlen(user_ent->pw_dir)
             + strlen(opts->system_pad_directory)
-            + strlen(device_name)
+            + sizeof(device_name)
             + PATH_MAX
             + 6 // total count of non-var-characters in format strings
     );
