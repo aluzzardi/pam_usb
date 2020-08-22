@@ -50,9 +50,13 @@ int pusb_local_login(t_pusb_options *opts, const char *user)
 	endutent();
 	if (!utent)
 	{
-		log_debug("No utmp entry found for tty \"%s\"\n",
-				from);
-		return (0);
+		if (!opts->unknown_pts_as_local) {
+			log_debug("No utmp entry found for tty \"%s\", assuming remote session\n", from);
+			return (0);
+		}
+
+		log_debug("No utmp entry found for tty \"%s\", assuming local pseudo terminal\n", from);
+		return (1);
 	}
 	for (i = 0; i < 4; ++i)
 	{

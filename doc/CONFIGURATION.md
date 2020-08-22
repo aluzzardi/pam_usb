@@ -34,19 +34,20 @@ The syntax is the following:
 
 ## Options
 
-|          Name          |  Type   |       Default       |                         Description                          |
-|------------------------|---------|---------------------|--------------------------------------------------------------|
-| `enable`               | Boolean | `true`              | Enable pam_usb                                               |
-| `debug`                | Boolean | `false`             | Enable debug messages                                        |
-| `quiet`                | Boolean | `false`             | Quiet mode                                                   |
-| `color_log`            | Boolean | `true`              | Enable colored output                                        |
-| `one_time_pad`         | Boolean | `true`              | Enable the use of one time device-associated pad files       |
-| `deny_remote`          | Boolean | `true`              | Deny access from remote host (SSH)                           |
-| `probe_timeout`        | Time    | `10s`               | Time to wait for the volume to be detected                   |
-| `pad_expiration`       | Time    | `1h`                | Time between pad file regeneration                           |
-| `hostname`             | String  | Computer's hostname | Must be unique accross computers using the same device       |
-| `system_pad_directory` | String  | `.pamusb`           | Relative path to the user's home used to store one time pads |
-| `device_pad_directory` | String  | `.pamusb`           | Relative path to the device used to store one time pad files |
+|          Name          |  Type   |       Default       |                         Description                              |
+|------------------------|---------|---------------------|------------------------------------------------------------------|
+| `enable`               | Boolean | `true`              | Enable pam_usb                                                   |
+| `debug`                | Boolean | `false`             | Enable debug messages                                            |
+| `quiet`                | Boolean | `false`             | Quiet mode                                                       |
+| `color_log`            | Boolean | `true`              | Enable colored output                                            |
+| `one_time_pad`         | Boolean | `true`              | Enable the use of one time device-associated pad files           |
+| `deny_remote`          | Boolean | `true`              | Deny access from remote host (SSH)                               |
+| `unknown_pts_as_local` | Boolean | `true`              | Assume sessions from pseudo terminals to be local if not in utmp |
+| `probe_timeout`        | Time    | `10s`               | Time to wait for the volume to be detected                       |
+| `pad_expiration`       | Time    | `1h`                | Time between pad file regeneration                               |
+| `hostname`             | String  | Computer's hostname | Must be unique accross computers using the same device           |
+| `system_pad_directory` | String  | `.pamusb`           | Relative path to the user's home used to store one time pads     |
+| `device_pad_directory` | String  | `.pamusb`           | Relative path to the device used to store one time pad files     |
 
 ### Example:
 
