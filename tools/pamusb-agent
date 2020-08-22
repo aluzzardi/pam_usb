@@ -306,18 +306,25 @@ for userObj in users:
 
 # logger.error('User %s not found in configuration file' % username)
 
+threads = []
 for user in validUsers:
-	threading.Thread(
+	t = threading.Thread(
 		target=userDeviceThread,
 		args=(user,)
-	).start()
+	)
+	t.daemon = True
+	t.start();
+	threads.append(t)
 
 if options['daemon'] and os.fork():
 	sys.exit(0)
 
 def sig_handler(sig, frame):
-    logger.info('Stopping agent.')
-    sys.exit(0)
+	logger.info('Stopping agent.')
+	for thread in threads:
+		thread.join()
+	
+	sys.exit(0)
 
 sys_signals = ['SIGINT', 'SIGTERM', 'SIGTSTP', 'SIGTTIN', 'SIGTTOU']
 
