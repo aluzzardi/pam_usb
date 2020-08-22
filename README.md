@@ -42,7 +42,9 @@ This repo is mainly based on community improvements from
  * Luka Novsak (https://github.com/luka-n/pam_usb) - UDisk2 port
  * "IGP" (https://github.com/IGP/pam_usb)" (many small improvements)
  * "McDope" (https://github.com/mcdope/pam_usb) (this repo), 
- * ... and others. See the commit history for details.
+ * ... and others. 
+ 
+See the commit history for details. You can find a list of all contributors in the `AUTHORS` file. 
 
 The changes since the last "official" release are documented in the file `changelog-from-v0.5.0` which you
 can generate with `make changelog`. Since it's generated from the git commits you can also view it online at
