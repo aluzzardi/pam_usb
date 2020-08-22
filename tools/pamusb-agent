@@ -115,7 +115,7 @@ def runAs(uid, gid):
 	def set_id():
 		os.setgid(gid)
 		os.setuid(uid)
-return set_id
+	return set_id
 
 import getopt
 
