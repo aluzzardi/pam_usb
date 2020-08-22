@@ -37,11 +37,18 @@ static FILE *pusb_pad_open_device(t_pusb_options *opts,
 		const char *mode)
 {
 	FILE		*f;
-	char		path[PATH_MAX];
+    int path_max_size = (
+            strlen(mnt_point)
+            + strlen(user)
+            + strlen(opts->hostname)
+            + PATH_MAX
+            + 7 // total count of non-var-characters in format strings
+    );
+	char		path[path_max_size];
 	struct stat	sb;
 
-	memset(path, 0x00, PATH_MAX);
-	snprintf(path, PATH_MAX, "%s/%s", mnt_point, opts->device_pad_directory);
+	memset(path, 0x00, path_max_size);
+	snprintf(path, path_max_size, "%s/%s", mnt_point, opts->device_pad_directory);
 	if (stat(path, &sb) != 0)
 	{
 		log_debug("Directory %s does not exist, creating one.\n", path);
@@ -51,9 +58,9 @@ static FILE *pusb_pad_open_device(t_pusb_options *opts,
 					strerror(errno));
 			return (NULL);
 		}
-		memset(path, 0x00, PATH_MAX);
+		memset(path, 0x00, path_max_size);
 	}
-	snprintf(path, PATH_MAX, "%s/%s/%s.%s.pad", mnt_point,
+	snprintf(path, path_max_size, "%s/%s/%s.%s.pad", mnt_point,
 			opts->device_pad_directory, user, opts->hostname);
 	f = fopen(path, mode);
 	if (!f)
@@ -69,10 +76,9 @@ static FILE *pusb_pad_open_system(t_pusb_options *opts,
 		const char *mode)
 {
 	FILE			*f;
-	char			path[PATH_MAX];
 	struct passwd	*user_ent = NULL;
 	struct stat		sb;
-	char   device_name[PATH_MAX];
+    char device_name[sizeof(opts->device.name)];
 	char * device_name_ptr = device_name;
 
 	if (!(user_ent = getpwnam(user)) || !(user_ent->pw_dir))
@@ -81,8 +87,18 @@ static FILE *pusb_pad_open_system(t_pusb_options *opts,
 				strerror(errno));
 		return (0);
 	}
-	memset(path, 0x00, PATH_MAX);
-	snprintf(path, PATH_MAX, "%s/%s", user_ent->pw_dir,
+
+    int path_max_size = (
+            strlen(user_ent->pw_dir)
+            + strlen(opts->system_pad_directory)
+            + strlen(device_name)
+            + PATH_MAX
+            + 6 // total count of non-var-characters in format strings
+    );
+    char path[path_max_size];
+
+	memset(path, 0x00, path_max_size);
+	snprintf(path, path_max_size, "%s/%s", user_ent->pw_dir,
 			opts->system_pad_directory);
 	if (stat(path, &sb) != 0)
 	{
@@ -103,8 +119,8 @@ static FILE *pusb_pad_open_system(t_pusb_options *opts,
 		device_name_ptr++;
 	}
 
-	memset(path, 0x00, PATH_MAX);
-	snprintf(path, PATH_MAX, "%s/%s/%s.pad", user_ent->pw_dir,
+	memset(path, 0x00, path_max_size);
+	snprintf(path, path_max_size, "%s/%s/%s.pad", user_ent->pw_dir,
 			opts->system_pad_directory, device_name);
 	f = fopen(path, mode);
 	if (!f)
