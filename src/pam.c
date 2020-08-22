@@ -32,7 +32,6 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 	t_pusb_options	opts;
 	const char		*service;
 	const char		*user;
-//	const char		*tty;
 	char			*conf_file = PUSB_CONF_FILE;
 	int				retval;
 
@@ -65,19 +64,9 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 		return (PAM_IGNORE);
 	}
 
-	//log_info("pam_usb v%s\n", PUSB_VERSION);
 	log_info("Authentication request for user \"%s\" (%s)\n",
 			user, service);
 
-/*	if (pam_get_item(pamh, PAM_TTY,
-				(const void **)(const void *)&tty) == PAM_SUCCESS)
-	{
-		if (tty && !strcmp(tty, "ssh"))
-		{
-			log_debug("SSH Authentication, aborting.\n");
-			return (PAM_AUTH_ERR);
-		}
-	}*/
 	if (!pusb_local_login(&opts, user))
 	{
 		log_error("Access denied.\n");
@@ -106,7 +95,6 @@ int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags,
 	t_pusb_options	opts;
 	const char		*service;
 	const char		*user;
-	//const char		*tty;
 	char			*conf_file = PUSB_CONF_FILE;
 	int				retval;
 
