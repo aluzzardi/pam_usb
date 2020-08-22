@@ -47,9 +47,16 @@ static int pusb_device_connected(t_pusb_options *opts, UDisksClient *udisks)
 		if (udisks_object_peek_drive(object))
 		{
 			drive = udisks_object_get_drive(object);
-			retval = strcmp(udisks_drive_get_serial(drive), opts->device.serial) == 0 &&
-					strcmp(udisks_drive_get_vendor(drive), opts->device.vendor) == 0 &&
-					strcmp(udisks_drive_get_model(drive), opts->device.model) == 0;
+			retval = strcmp(udisks_drive_get_serial(drive), opts->device.serial) == 0;
+			
+			if (strcmp(opts->device.vendor, "Generic") != 0) {
+				retval = retval && strcmp(udisks_drive_get_vendor(drive), opts->device.vendor) == 0;
+			}
+
+			if (strcmp(opts->device.model, "Generic") != 0) {
+				retval = retval && strcmp(udisks_drive_get_model(drive), opts->device.model) == 0;
+			}
+			
 			g_object_unref(drive);
 			if (retval)
 				break;

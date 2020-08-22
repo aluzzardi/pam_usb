@@ -173,10 +173,35 @@ def addDevice(options):
 	if volume['uuid'] == '':
 		print('WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device'])
 
+	vendor = product = 'Generic'
+	if hasattr(device, 'vendor'):
+		vendor = device.vendor
+	else:
+		msg =  [ 
+			'------------------------------------------------------------------------------------------',
+			'WARNING:\tThe device you want to use has no vendor name.',
+			'\t\tThis makes using it less secure since the vendor won\'t be checked anymore!',
+			'------------------------------------------------------------------------------------------'
+		]
+		
+		print('\n'.join(msg))
+	
+	if hasattr(device, 'product'):
+		product = device.product
+	else:
+		msg =  [ 
+			'------------------------------------------------------------------------------------------',
+			'WARNING:\tThe device you want to use has no product name.',
+			'\t\tThis makes using it less secure since the vendor won\'t be checked anymore!',
+			'------------------------------------------------------------------------------------------'
+		]
+		
+		print('\n'.join(msg))
+
 	shouldSave(options,[
 		('Name', options['deviceName']),
-		('Vendor', device.vendor or "Unknown"),
-		('Model', device.product or "Unknown"),
+		('Vendor', vendor),
+		('Model', product),
 		('Serial', device.serialNumber),
 		('UUID', volume['uuid'] or "Unknown")
 		])
@@ -201,8 +226,15 @@ def addDevice(options):
 	dev = doc.createElement('device')
 	dev.attributes['id'] = options['deviceName']
 
-	for name, value in (('vendor', device.vendor),
-			('model', device.product),
+	vendor = product = 'Generic'
+	if hasattr(device, 'vendor'):
+		vendor = device.vendor
+	
+	if hasattr(device, 'product'):
+		product = device.product
+
+	for name, value in (('vendor', vendor),
+			('model', product),
 			('serial', device.serialNumber),
 			('volume_uuid', volume['uuid'])):
 		if value is None or value == '':
