@@ -5,8 +5,6 @@ After=dbus.service
 
 [Service]
 ExecStart=/usr/bin/pamusb-agent
-Restart=always
-RestartSec=0
 ProtectKernelModules=True
 ProtectKernelTunables=True
 ProtectClock=True
