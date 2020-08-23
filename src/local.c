@@ -38,8 +38,13 @@ int pusb_local_login(t_pusb_options *opts, const char *user)
 	from = ttyname(STDIN_FILENO);
 	if (!from || !(*from))
 	{
-		log_debug("Couldn't retrieve the tty name, aborting.\n");
-		return (0);
+		if (!opts->unknown_pts_as_local) {
+			log_debug("Couldn't retrieve the tty name, aborting.\n");
+			return (0);
+		}
+
+		log_debug("Couldn't retrieve the tty name, assuming local pseudo terminal\n");
+		return (1);
 	}
 	if (!strncmp(from, "/dev/", strlen("/dev/")))
 		from += strlen("/dev/");
