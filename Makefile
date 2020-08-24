@@ -52,6 +52,11 @@ DOCS_DEST	:= $(DESTDIR)$(PREFIX)/share/doc/pam_usb
 MANS		:= doc/pamusb-conf.1.gz doc/pamusb-agent.1.gz doc/pamusb-check.1.gz
 MANS_DEST	:= $(DESTDIR)$(PREFIX)/share/man/man1
 
+# PAM config
+PAM_CONF		:= debian/pam-configs/libpam-usb
+PAM_CONF_DEST 	:= $(DESTDIR)$(PREFIX)/share/pam-configs
+PAM_AUTH_UPDATE := pam-auth-update
+
 # Binaries
 RM		:= rm
 INSTALL		:= install
@@ -77,19 +82,21 @@ clean		:
 		$(RM) -f $(PAM_USB) $(PAMUSB_CHECK) $(OBJS) $(PAMUSB_CHECK_OBJS) $(PAM_USB_OBJS)
 
 install		: all
-		$(MKDIR) -p $(CONFS_DEST) $(DOCS_DEST) $(MANS_DEST) $(TOOLS_DEST) $(PAM_USB_DEST)
+		$(MKDIR) -p $(CONFS_DEST) $(DOCS_DEST) $(MANS_DEST) $(TOOLS_DEST) $(PAM_USB_DEST) $(PAM_CONF_DEST)
 		$(INSTALL) -m755 $(PAM_USB) $(PAM_USB_DEST)
 		$(INSTALL) -m755 $(PAMUSB_CHECK) $(TOOLS_SRC)/$(PAMUSB_CONF) $(TOOLS_SRC)/$(PAMUSB_AGENT) $(TOOLS_DEST)
 		$(INSTALL) -b -m644 $(CONFS) $(CONFS_DEST)
 		$(INSTALL) -m644 $(DOCS) $(DOCS_DEST)
 		$(INSTALL) -m644 $(MANS) $(MANS_DEST)
+		$(INSTALL) -m644 $(PAM_CONF) $(PAM_CONF_DEST)/libpam-usb
 
 deinstall	:
 		$(RM) -f $(PAM_USB_DEST)/$(PAM_USB)
-		$(RM) -f $(TOOLS_DEST)/$(PAMUSB_CHECK) $(TOOLS_DEST)/$(PAMUSB_CONF) $(TOOLS_DEST)/$(PAMUSB_AGENT)
+		$(RM) -f $(TOOLS_DEST)/$(PAMUSB_CHECK) $(TOOLS_DEST)/$(PAMUSB_CONF) $(TOOLS_DEST)/$(PAMUSB_AGENT) $(PAM_CONF_DEST)/$(PAM_CONF)
 		$(RM) -rf $(DOCS_DEST)
 		$(RM) -f $(MANS_DEST)/pamusb-*\.1\.gz
-
+		$(RM) -f $(PAM_CONF_DEST)/$(PAM_CONF)
+		
 changelog : 
 		git log --pretty=format:"%h %ad%x09%an%x09%s" --date=short 40b17fa..HEAD > changelog-from-v0.5.0
 

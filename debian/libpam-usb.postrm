@@ -1,0 +1,26 @@
+#!/bin/sh
+
+set -e
+
+# @todo: remember to keep this updated, sourced from the *.debhelper scripts
+
+if [ "$1" = "remove" ]; then
+	if [ -x "/usr/bin/deb-systemd-helper" ]; then
+		deb-systemd-helper mask 'pamusb-agent.service' >/dev/null || true
+	fi
+    
+fi
+
+if [ "$1" = "purge" ]; then
+	if [ -x "/usr/bin/deb-systemd-helper" ]; then
+		deb-systemd-helper purge 'pamusb-agent.service' >/dev/null || true
+		deb-systemd-helper unmask 'pamusb-agent.service' >/dev/null || true
+	fi
+fi
+
+pam-auth-update --package
+if [ -d /run/systemd/system ]; then
+    systemctl --system daemon-reload >/dev/null || true
+fi
+
+exit 0
