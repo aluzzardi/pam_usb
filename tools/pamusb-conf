@@ -92,13 +92,14 @@ def writeConf(options, doc):
 		print('Done.')
 
 def shouldSave(options, items):
-	print("\n".join(["%s\t\t: %s" % item for item in items]))
-	print()
-	print('Save to %s ?' % options['configFile'])
-	sys.stdout.write('[Y/n] ')
-	response = sys.stdin.readline().strip()
-	if len(response) > 0 and response.lower() != 'y':
-		sys.exit(1)
+	if options['yes'] is False:
+		print("\n".join(["%s\t\t: %s" % item for item in items]))
+		print()
+		print('Save to %s ?' % options['configFile'])
+		sys.stdout.write('[Y/n] ')
+		response = sys.stdin.readline().strip()
+		if len(response) > 0 and response.lower() != 'y':
+			sys.exit(1)
 
 def prettifyElement(element):
 	tmp = minidom.parseString(element.toprettyxml())
@@ -160,15 +161,23 @@ def addDevice(options):
 	if len(devices) == 0:
 		print('No devices detected. Try running in verbose (-v) mode to see what\'s going on.')
 		sys.exit()
-	device = devices[listOptions("Please select the device you wish to add.", devices)]
+	
+	if options['deviceNumber'] is None:
+		device = devices[listOptions("Please select the device you wish to add.", devices)]
+	else:
+		device = devices[int(options['deviceNumber'])]
 
 	volumes = device.volumes()
-	volume = volumes[listOptions("Which volume would you like to use for " \
-			"storing data ?",
-			["%s (UUID: %s)" % (volume['device'],
-				volume['uuid'] or "<UNDEFINED>")
-				for volume in volumes]
-			)]
+
+	if options['volumeNumber'] is None:
+		volume = volumes[listOptions("Which volume would you like to use for " \
+				"storing data ?",
+				["%s (UUID: %s)" % (volume['device'],
+					volume['uuid'] or "<UNDEFINED>")
+					for volume in volumes]
+				)]
+	else:
+		volume = volumes[int(options['volumeNumber'])]
 
 	if volume['uuid'] == '':
 		print('WARNING: No UUID detected for device %s. One time pads will be disabled.' % volume['device'])
@@ -255,14 +264,14 @@ def addDevice(options):
 	writeConf(options, doc)
 
 def usage():
-	print('Usage: %s [--help] [--verbose] [--config=path] [--add-user=name | --add-device=name]' % os.path.basename(__file__))
+	print('Usage: %s [--help] [--verbose] [--yes] [--config=path] [--add-user=name | --add-device=name [[--device=number] [--volume=number]]]' % os.path.basename(__file__))
 	sys.exit(1)
 
 import getopt
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], "hvd:nu:c:",
-			["help", "verbose", "add-device=", "add-user=", "config="])
+	opts, args = getopt.getopt(sys.argv[1:], "hvd:nu:c:y",
+			["help", "verbose", "add-device=", "add-user=", "config=", "yes", "device=", "volume="])
 except getopt.GetoptError:
 	usage()
 
@@ -270,7 +279,7 @@ if len(args) != 0:
 	usage()
 
 options = { 'deviceName' : None, 'userName' : None,
-		'configFile' : '/etc/security/pam_usb.conf', 'verbose' : False }
+		'configFile' : '/etc/security/pam_usb.conf', 'verbose' : False, 'yes' : False, 'deviceNumber' : None, 'volumeNumber' : None }
 
 for o, a in opts:
 	if o in ("-h", "--help"):
@@ -283,6 +292,12 @@ for o, a in opts:
 		options['userName'] = a
 	if o in ("-c", "--config"):
 		options['configFile'] = a
+	if o in ("-y", "--yes"):
+		options['yes'] = True
+	if o in ("--device"):
+		options['deviceNumber'] = a
+	if o in ("--volume"):
+		options['volumeNumber'] = a
 
 if options['deviceName'] is not None and options['userName'] is not None:
 	print('You cannot use both --add-user and --add-device')
