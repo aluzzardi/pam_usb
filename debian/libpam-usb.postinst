@@ -2,6 +2,9 @@
 
 set -e
 
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
 # @todo: remember to keep this updated, sourced from the *.debhelper scripts
 
 if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-deconfigure" ] || [ "$1" = "abort-remove" ] ; then
@@ -30,7 +33,73 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
     fi
     
     pam-auth-update --package
-fi
 
+    db_fset libpam-usb/setupdevice seen false
+    echo "Dbg: fset ret $RET / err $?"
+    db_input critical libpam-usb/setupdevice || false
+    echo "Dbg: input ret $RET / err $?"
+    db_go
+    echo "Dbg: go ret $RET / err $?"
+    db_get libpam-usb/setupdevice || false
+    echo "Dbg: get ret $RET / err $?"
+    if [ "$RET" = "false" ]; then
+        echo "No initial configuration requested, make sure to setup your pam_usb.conf!"
+        exit -1
+    else
+        echo "Dbg: Entered else"
+        # get devices, show question, get input
+        DEVICEOPTIONS=`pamusb-conf --list-devices`
+        #DEVICEOPTIONS=[]
+        #count=0
+        #echo "$DEVICEOPTIONS_RAW" | while read -r a; do DEVICEOPTIONS[$count]="$a" && count=$((count+1)); done
+        db_subst libpam-usb/device choices $DEVICEOPTIONS
+        echo "Dbg: subst ret $RET / err $?"
+        db_fset libpam-usb/device seen false
+        echo "Dbg: fset ret $RET / err $?"
+        db_input critical libpam-usb/device || false
+        echo "Dbg: input ret $RET / err $?"
+        db_go
+        echo "Dbg: go ret $RET / err $?"
+        db_get libpam-usb/device
+        echo "Dbg: get ret $RET / err $?"
+        if [ "$RET" = "false" ]; then
+            exit 2
+        fi
+        CHOOSEN_DEVICE=$RET
+        echo "Dbg: CHOOSEN_DEVICE=$RET"
+
+        # get volumes for choosen device, show question, get input
+        db_get libpam-usb/device
+        CHOOSEN_DEVICE=$RET
+        VOLUMEOPTIONS_RAW=`pamusb-conf --list-volumes --device=$CHOOSEN_DEVICE`
+        #VOLUMEOPTIONS=[]
+        #count=0
+        #echo "$VOLUMEOPTIONS_RAW" | while read -r a; do VOLUMEOPTIONS[$count]=$a && count=$((count+1)); done
+        db_subst libpam-usb/volume choices $VOLUMEOPTIONS_RAW
+        db_fset libpam-usb/volume seen false
+        db_input critical libpam-usb/volume || false
+        db_go
+        db_get libpam-usb/volume
+        if [ "$RET" = "false" ]; then
+            exit 3
+        fi
+        CHOOSEN_VOLUME=$RET
+
+        # get users, show chooser, get input
+        USEROPTIONS_RAW=`getent passwd | cut -d: -f1 | tr '\n' ','`
+        #USEROPTIONS=[]
+        #count=0
+        #echo "$USEROPTIONS_RAW" | while read -r a; do USEROPTIONS[$count]=$a && count=$((count+1)); done
+        db_subst libpam-usb/user choices $USEROPTIONS_RAW
+        db_fset libpam-usb/user seen false
+        db_input critical libpam-usb/user || false
+        db_go
+        db_get libpam-usb/user
+        if [ "$RET" = "false" ]; then
+            exit 4
+        fi
+        CHOOSEN_USER=$RET
+    fi
+fi
 
 exit 0

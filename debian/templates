@@ -1,0 +1,22 @@
+Template: libpam-usb/setupdevice
+Type: boolean
+Description: Do you have an USB-Device connected you want to setup?
+ test
+
+Template: libpam-usb/device
+Type: select
+Choices: ${DEVICEOPTIONS}
+Description: Which device you want to setup for authentication use?
+ test
+
+Template: libpam-usb/volume
+Type: select
+Choices: ${VOLUMEOPTIONS}
+Description: Which volume on the choosen device you want to use?
+ test
+
+Template: libpam-usb/user
+Type: select
+Choices: ${USEROPTIONS}
+Description: Which user will use this device to authenticate?
+ test

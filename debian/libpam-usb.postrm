@@ -2,6 +2,9 @@
 
 set -e
 
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
 # @todo: remember to keep this updated, sourced from the *.debhelper scripts
 
 if [ "$1" = "remove" ]; then
@@ -19,6 +22,7 @@ if [ "$1" = "purge" ]; then
 fi
 
 pam-auth-update --package
+db_purge
 if [ -d /run/systemd/system ]; then
     systemctl --system daemon-reload >/dev/null || true
 fi

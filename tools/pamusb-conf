@@ -157,14 +157,14 @@ def listAvailableDevicesAndVolumes(options):
 
 	if options['deviceNumber'] is None:
 		for i in range(len(devices)):
-			print( "%d) %s" % (i, devices[i]))
+			print( "\"%d) %s\"" % (i, devices[i]), end=',')
 	else:
 		device = devices[int(options['deviceNumber'])]
 		volumes = device.volumes()
 		
 		for i in range(len(volumes)):
 			volume = volumes[i];
-			print( "%d) %s [%s]" % (i, volume['uuid'], volume['device']))
+			print( "\"%d) %s [%s]\"" % (i, volume['uuid'], volume['device']), end=',')
 	
 	sys.exit(0)
 
