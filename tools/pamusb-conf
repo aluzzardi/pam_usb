@@ -30,9 +30,9 @@ class Device:
 		deviceObj = udisksObjectManager.get_object(udi)
 		driveObj = deviceObj.get_drive()
 		if not driveObj.get_property('removable'):
-                        # Workaround for removable devices with fixed media (such as SD cards)
-                        if not "mmcblk" in udi:
-                                raise Exception('Not a removable device')
+			# Workaround for removable devices with fixed media (such as SD cards)
+			if not "mmcblk" in udi:
+				raise Exception('Not a removable device')
 		self.vendor = driveObj.get_property('vendor')
 		self.product = driveObj.get_property('model')
 		self.serialNumber = driveObj.get_property('serial')
@@ -45,6 +45,8 @@ class Device:
 			obj = udisks.get_object(udi)
 			blockObj = obj.get_block()
 			if blockObj.get_property('drive') != self.__udi:
+				continue
+			if blockObj.get_property('read-only'):
 				continue
 			if not obj.get_filesystem():
 				continue
