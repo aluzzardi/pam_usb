@@ -144,33 +144,6 @@ def addUser(options):
 	users[0].appendChild(prettifyElement(user))
 	writeConf(options, doc)
 
-def listAvailableDevicesAndVolumes(options):
-	devices = []
-
-	for udi in [o.get_object_path() for o in udisksObjectManager.get_objects() if o.get_drive()]:
-		try:
-			devices.append(Device(udi))
-		except Exception as ex:
-			pass
-
-	if len(devices) == 0:
-		print('No devices detected.')
-		sys.exit(0)
-
-	if options['deviceNumber'] is None:
-		for i in range(len(devices)):
-			print( "\"%d) %s\"" % (i, devices[i]), end=',')
-	else:
-		device = devices[int(options['deviceNumber'])]
-		volumes = device.volumes()
-		
-		for i in range(len(volumes)):
-			volume = volumes[i];
-			print( "\"%d) %s [%s]\"" % (i, volume['uuid'], volume['device']), end=',')
-	
-	sys.exit(0)
-
-
 def addDevice(options):
 	devices = []
 
@@ -300,7 +273,7 @@ import getopt
 
 try:
 	opts, args = getopt.getopt(sys.argv[1:], "hvd:nu:c:y",
-			["help", "verbose", "add-device=", "add-user=", "config=", "yes", "device=", "volume=", "list-devices", "list-volumes"])
+			["help", "verbose", "add-device=", "add-user=", "config=", "yes", "device=", "volume="])
 except getopt.GetoptError:
 	usage()
 
@@ -327,15 +300,6 @@ for o, a in opts:
 		options['deviceNumber'] = a
 	if o in ("--volume"):
 		options['volumeNumber'] = a
-	if o in ("--list-devices"):
-		options['listDevices'] = True
-	if o in ("--list-volumes"):
-		options['listVolumes'] = True
-
-if options['listDevices'] is True or options['listVolumes'] is True:
-	udisks = UDisks.Client.new_sync()
-	udisksObjectManager = udisks.get_object_manager()
-	listAvailableDevicesAndVolumes(options)
 
 if options['deviceName'] is not None and options['userName'] is not None:
 	print('You cannot use both --add-user and --add-device')
