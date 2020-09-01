@@ -67,21 +67,27 @@ then
     # echo "Debug: CHOICES build! Result: $CHOICES"
     # echo
 
-    # Initiate device choosing debconf, making sure it get shown
-    db_subst libpam-usb/device CHOICES "<Skip>, $CHOICES"
-    # echo "Dbg: subst device ret $RET / err $?"
-    db_fset libpam-usb/device seen false
-    # echo "Dbg: fset device ret $RET / err $?"
-    db_input high libpam-usb/device || false
-    # echo "Dbg: input device ret $RET / err $?"
+    if [ "$CHOICES" != "" ]
+    then
+        # Initiate device choosing debconf, making sure it get shown
+        db_subst libpam-usb/device CHOICES "<Skip>, $CHOICES"
+        # echo "Dbg: subst device ret $RET / err $?"
+        db_fset libpam-usb/device seen false
+        # echo "Dbg: fset device ret $RET / err $?"
+        db_input high libpam-usb/device || false
+        # echo "Dbg: input device ret $RET / err $?"
 
-    # Initiate user choosing debconf, making sure it get shown
-    db_subst libpam-usb/user USER_CHOICES "<Skip>, $USER_CHOICES"
-    # echo "Dbg: subst user ret $RET / err $?"
-    db_fset libpam-usb/user seen false
-    # echo "Dbg: fset user ret $RET / err $?"
-    db_input high libpam-usb/user || false
-    # echo "Dbg: input user ret $RET / err $?"
+        # Initiate user choosing debconf, making sure it get shown
+        db_subst libpam-usb/user USER_CHOICES "<Skip>, $USER_CHOICES"
+        # echo "Dbg: subst user ret $RET / err $?"
+        db_fset libpam-usb/user seen false
+        # echo "Dbg: fset user ret $RET / err $?"
+        db_input high libpam-usb/user || false
+        # echo "Dbg: input user ret $RET / err $?"
+    else
+        db_set libpam-usb/device "<Skip>"
+        db_set libpam-usb/user "<Skip>"
+    fi
 fi
 
 db_go
