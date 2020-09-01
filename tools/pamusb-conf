@@ -126,8 +126,11 @@ def addUser(options):
 	devices = []
 	for device in devicesObj:
 		devices.append(device.getAttribute('id'))
-	device = devices[listOptions("Which device would you like to use for authentication ?",
-		devices)]
+
+	if options['deviceNumber'] is None:
+		device = devices[listOptions("Which device would you like to use for authentication ?", devices)]
+	else:
+		device = devices[int(options['deviceNumber'])]
 
 	shouldSave(options, [
 		('User', options['userName']),
