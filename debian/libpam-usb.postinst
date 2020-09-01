@@ -30,37 +30,41 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
     
     pam-auth-update --package
 
-    db_get libpam-usb/device || false
-    # echo "Debug: get device ret $RET / err $?"
-    if [ "$RET" = "<Skip>" ]; then
-        exit 0
+    ALREADY_CONFIGED=`cat /etc/security/pam_usb.conf 2>&1 | grep "<device id=" | grep -v "MyDevice" | wc -l`
+    if [ "$ALREADY_CONFIGED" = "0" ]
+    then
+        db_get libpam-usb/device || false
+        # echo "Debug: get device ret $RET / err $?"
+        if [ "$RET" = "<Skip>" ]; then
+            exit 0
+        fi
+        DEVICE_RET=$RET
+
+        db_get libpam-usb/user || false
+        # echo "Debug: get user ret $RET / err $?"
+        if [ "$RET" = "<Skip>" ]; then
+            exit 0
+        fi
+        USER_RET=$RET
+
+        CHOOSEN_DEVICE=`echo $DEVICE_RET | awk -F" " '{ print $2 }'`
+        CHOOSEN_VOLUME=`echo $DEVICE_RET | awk -F"Volume " '{ print $2 }' | awk -F" " '{ print $1 }'`
+        DEVICE_NAME=`echo $DEVICE_RET | awk -F"(" '{ print $2 }' | awk -F")" '{ print $1 }'`
+        CHOOSEN_USER=$USER_RET
+        # echo "Debug: CHOOSEN_DEVICE=$CHOOSEN_DEVICE"
+        # echo "Debug: CHOOSEN_VOLUME=$CHOOSEN_VOLUME"
+        # echo "Debug: DEVICE_NAME=$DEVICE_NAME"
+        # echo "Debug: CHOOSEN_USER=$CHOOSEN_USER"
+
+        # COMMAND_DEVICE="pamusb-conf --add-device=\"$DEVICE_NAME\" --device=$CHOOSEN_DEVICE --volume=$CHOOSEN_VOLUME --yes"
+        # echo "Debug: COMMAND_DEVICE=$COMMAND_DEVICE"
+
+        # COMMAND_USER="pamusb-conf --add-user=$CHOOSEN_USER --yes"
+        # echo "Debug: COMMAND_USER=$COMMAND_USER"
+
+        pamusb-conf --add-device="$DEVICE_NAME" --device=$CHOOSEN_DEVICE --volume=$CHOOSEN_VOLUME --yes
+        pamusb-conf --add-user=$CHOOSEN_USER --yes
     fi
-    DEVICE_RET=$RET
-
-    db_get libpam-usb/user || false
-    # echo "Debug: get user ret $RET / err $?"
-    if [ "$RET" = "<Skip>" ]; then
-        exit 0
-    fi
-    USER_RET=$RET
-
-    CHOOSEN_DEVICE=`echo $DEVICE_RET | awk -F" " '{ print $2 }'`
-    CHOOSEN_VOLUME=`echo $DEVICE_RET | awk -F"Volume " '{ print $2 }' | awk -F" " '{ print $1 }'`
-    DEVICE_NAME=`echo $DEVICE_RET | awk -F"(" '{ print $2 }' | awk -F")" '{ print $1 }'`
-    CHOOSEN_USER=$USER_RET
-    # echo "Debug: CHOOSEN_DEVICE=$CHOOSEN_DEVICE"
-    # echo "Debug: CHOOSEN_VOLUME=$CHOOSEN_VOLUME"
-    # echo "Debug: DEVICE_NAME=$DEVICE_NAME"
-    # echo "Debug: CHOOSEN_USER=$CHOOSEN_USER"
-
-    # COMMAND_DEVICE="pamusb-conf --add-device=\"$DEVICE_NAME\" --device=$CHOOSEN_DEVICE --volume=$CHOOSEN_VOLUME --yes"
-    # echo "Debug: COMMAND_DEVICE=$COMMAND_DEVICE"
-
-    # COMMAND_USER="pamusb-conf --add-user=$CHOOSEN_USER --yes"
-    # echo "Debug: COMMAND_USER=$COMMAND_USER"
-
-    pamusb-conf --add-device="$DEVICE_NAME" --device=$CHOOSEN_DEVICE --volume=$CHOOSEN_VOLUME --yes
-    pamusb-conf --add-user=$CHOOSEN_USER --yes
 fi
 
 exit 0
