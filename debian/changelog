@@ -1,11 +1,22 @@
-libpam-usb (0.6.0-6) focal; urgency=medium
+libpam-usb (0.7.0) focal; urgency=medium
 
   * Re-release - Uses github.com/mcdope/pam_usb as source
+  * Ported to Python 3
+  * pamusb-agent is now a systemd unit
+  * pamusb-agent config can now hold environment vars
+  * pamusb-conf got new options for automation
+    (--list-devices, --list-volumes, --device, --volume, --yes)
+  * pamusb-conf now properly ignores read-only media (like optical drives)
+  * Support for devices lacking vendor and/or model
+  * PAM module gets installed using libpam-runtime/pam-auth-update
+  * Using debconf to create fully working config on install
+  * Documentation / example config updated
+  * Wiki (https://github.com/mcdope/pam_usb/wiki) updated
 
  -- Tobias Bäumer <tobiasbaeumer@gmail.com>  Thu, 20 Aug 2020 10:22:34 +0200
 
 libpam-usb (0.6.0-5) artful; urgency=medium
 
-  * Initial release - Uses github.com/luka-n/pam_usb as source
+  * Initial release - Uses github.com/luka-n/pam_usb as source (0.5.0, ported to UDisks2)
 
  -- Adrian Nöthlich <promasu@ox.io>  Sun, 07 Jan 2018 22:22:34 +0100
