@@ -106,3 +106,6 @@ debchangelog :
 deb : clean all
 	$(DEBUILD) -b -uc -us
 
+launchpad-deb : clean all
+	$(DEBUILD) -S -I -uc -us 
+
