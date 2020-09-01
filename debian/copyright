@@ -7,7 +7,7 @@ Copyright: 2003-2016 Andrea Luzzardi and contributers <scox@sig11.org>
 License: GPL-2
 
 Files: debian/*
-Copyright: 2018 Adrian Nöthlich <promasu@ox.io>
+Copyright: 2018 Adrian Nöthlich <promasu@ox.io>, 2020 Tobias Bäumer <tobiasbaeumer@gmail.com>
 License: GPL-2+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

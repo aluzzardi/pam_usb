@@ -1,6 +1,5 @@
-#!/bin/sh
-
-set -e
+#!/bin/sh -e
+. /usr/share/debconf/confmodule
 
 # @todo: remember to keep this updated, sourced from the *.debhelper scripts
 
@@ -8,7 +7,6 @@ if [ "$1" = "remove" ]; then
 	if [ -x "/usr/bin/deb-systemd-helper" ]; then
 		deb-systemd-helper mask 'pamusb-agent.service' >/dev/null || true
 	fi
-    
 fi
 
 if [ "$1" = "purge" ]; then
@@ -16,6 +14,7 @@ if [ "$1" = "purge" ]; then
 		deb-systemd-helper purge 'pamusb-agent.service' >/dev/null || true
 		deb-systemd-helper unmask 'pamusb-agent.service' >/dev/null || true
 	fi
+	db_purge
 fi
 
 pam-auth-update --package

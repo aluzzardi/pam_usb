@@ -30,9 +30,9 @@ class Device:
 		deviceObj = udisksObjectManager.get_object(udi)
 		driveObj = deviceObj.get_drive()
 		if not driveObj.get_property('removable'):
-                        # Workaround for removable devices with fixed media (such as SD cards)
-                        if not "mmcblk" in udi:
-                                raise Exception('Not a removable device')
+			# Workaround for removable devices with fixed media (such as SD cards)
+			if not "mmcblk" in udi:
+				raise Exception('Not a removable device')
 		self.vendor = driveObj.get_property('vendor')
 		self.product = driveObj.get_property('model')
 		self.serialNumber = driveObj.get_property('serial')
@@ -45,6 +45,8 @@ class Device:
 			obj = udisks.get_object(udi)
 			blockObj = obj.get_block()
 			if blockObj.get_property('drive') != self.__udi:
+				continue
+			if blockObj.get_property('read-only'):
 				continue
 			if not obj.get_filesystem():
 				continue
@@ -124,8 +126,11 @@ def addUser(options):
 	devices = []
 	for device in devicesObj:
 		devices.append(device.getAttribute('id'))
-	device = devices[listOptions("Which device would you like to use for authentication ?",
-		devices)]
+
+	if options['deviceNumber'] is None:
+		device = devices[listOptions("Which device would you like to use for authentication ?", devices)]
+	else:
+		device = devices[int(options['deviceNumber'])]
 
 	shouldSave(options, [
 		('User', options['userName']),
@@ -279,7 +284,7 @@ if len(args) != 0:
 	usage()
 
 options = { 'deviceName' : None, 'userName' : None,
-		'configFile' : '/etc/security/pam_usb.conf', 'verbose' : False, 'yes' : False, 'deviceNumber' : None, 'volumeNumber' : None }
+		'configFile' : '/etc/security/pam_usb.conf', 'verbose' : False, 'yes' : False, 'deviceNumber' : None, 'volumeNumber' : None, 'listDevices' : False, 'listVolumes' : False }
 
 for o, a in opts:
 	if o in ("-h", "--help"):

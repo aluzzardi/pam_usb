@@ -1,0 +1,13 @@
+Template: libpam-usb/device
+Type: select
+Choices: ${CHOICES}
+Description: Which device and volume you want to setup for authentication use?
+ Select the device and volume you want to setup. It's totally safe to use a drive
+ that already contains data.
+
+Template: libpam-usb/user
+Type: select
+Choices: ${USER_CHOICES}
+Description: Which user will use this device to authenticate?
+ Select the user that should be able to authenticate using this device. You can 
+ later add additional users by running "pamusb-conf --add-user <username>"
