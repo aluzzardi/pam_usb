@@ -62,10 +62,10 @@ if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ] || [ "$1" = "abort-decon
         # COMMAND_USER="pamusb-conf --add-user=$CHOOSEN_USER --yes"
         # echo "Debug: COMMAND_USER=$COMMAND_USER"
 
-        pamusb-conf --add-device="$DEVICE_NAME" --device=$CHOOSEN_DEVICE --volume=$CHOOSEN_VOLUME --yes
+        pamusb-conf --add-device="$DEVICE_NAME" --device=$CHOOSEN_DEVICE --volume=$CHOOSEN_VOLUME --yes 2>&1 > /dev/null
 
         # For users the device index is config based, not drive based!
-        pamusb-conf --add-user=$CHOOSEN_USER --device=0 --yes
+        pamusb-conf --add-user=$CHOOSEN_USER --device=0 --yes 2>&1 > /dev/null
     fi
 fi
 
