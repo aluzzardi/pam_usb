@@ -8,6 +8,8 @@ Homepage: https://github.com/mcdope/pam_usb
 
 Package: libpam-usb
 Architecture: any
+Multi-Arch: same
+Pre-Depends: libpam-runtime (>= 1.0.1-6~), ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}, python3, udisks2
 Description: Adds auth over usb-stick to pam
  Provides a new pam module, pam_usb.so, that can be used in pam.d/common-auth
