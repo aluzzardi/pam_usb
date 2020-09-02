@@ -1,3 +1,22 @@
+* 0.7.0
+- Re-release - Uses github.com/mcdope/pam_usb as source
+  (note that some of these changes were already in 0.6.0)
+- Ported to Python 3
+- pamusb-agent is now a systemd unit
+- pamusb-agent config can now hold environment vars
+- pamusb-conf got new options for automation
+  (--list-devices, --list-volumes, --device, --volume, --yes)
+- pamusb-conf now properly ignores read-only media (like optical drives)
+- Support for devices lacking vendor and/or model
+- PAM module gets installed using libpam-runtime/pam-auth-update
+- Using debconf to create fully working config on install
+- Documentation / example config updated
+- Wiki (https://github.com/mcdope/pam_usb/wiki) updated
+
+* 0.6.0
+- Never officially released, used by some packaged version to override 
+  upstream version.
+
 * 0.5.0
 - Migrated the code base to UDisks. pam_usb doesn't depend on HAL anymore.
 - Added deny_remote option (defaults to true). If false,
