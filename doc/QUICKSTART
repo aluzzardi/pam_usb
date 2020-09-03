@@ -1,0 +1,111 @@
+Getting Started
+===============
+
+**Note: If you installed by using the debian package and answered the configuration questions you already have a working setup. If you skipped the questions you will still already have the PAM module itself already setup. Continue with "Setting up Devices and Users" in that case.**
+
+Setting up pam_usb requires the following, [[once pam_usb is installed|Install]]:
+
+1. Set up devices and users
+2. Configuring PAM for system authentication
+3. (Optional) Configuring `pamusb-agent` to run programs when the device is inserted or removed
+
+Setting up Devices and Users
+----------------------------
+
+Once you've connected your USB device to the computer, use pamusb-conf to add it to the configuration file:
+
+    # pamusb-conf --add-device MyDevice
+    Please select the device you wish to add.
+    * Using "SanDisk Corp. Cruzer Titanium (SNDKXXXXXXXXXXXXXXXX)" (only option)
+    Which volume would you like to use for storing data ?
+    * Using "/dev/sda1 (UUID: <6F6B-42FC>)" (only option)
+    Name            : MyDevice
+    Vendor          : SanDisk Corp.
+    Model           : Cruzer Titanium
+    Serial          : SNDKXXXXXXXXXXXXXXXX
+    Volume UUID     : 6F6B-42FC (/dev/sda1)
+    Save to /etc/security/pam_usb.conf ?
+    [Y/n] y
+    Done.
+
+Note that `MyDevice` can be any arbitrary name you'd like. Also, you can add as many devices as you want.
+
+Next, configure users you want to be able to authenticate with pam_usb:
+
+    # pamusb-conf --add-user root      
+    Which device would you like to use for authentication ?
+    * Using "MyDevice" (only option)
+    User            : root
+    Device          : MyDevice
+    Save to /etc/security/pam_usb.conf ?
+    [Y/n] y
+    Done.
+
+Check the configuration
+-----------------------
+
+You can run `pamusb-check` anytime to check if everything is correctly worked.
+This tool will simulate an authentication request (requires your device to be connected, otherwise it will fail).
+
+    # pamusb-check root
+    * Authentication request for user "root" (pamusb-check)
+    * Device "MyDevice" is connected (good).
+    * Performing one time pad verification...
+    * Verification match, updating one time pads...
+    * Access granted.
+
+
+Setting up the PAM module
+-------------------------
+
+To add pam_usb into the system authentication process, we need to edit `/etc/pam.d/common-auth`
+    
+    NOTE: If you are using RedHat, Arch or Fedora this file can be known as /etc/pam/system-auth.
+
+Your default PAM common-auth configuration should include the following line:
+
+    auth    required        pam_unix.so nullok_secure
+
+This is a current standard which uses passwords to authenticate a user.
+
+Alter your /etc/pam.d/common-auth configuration to:
+
+    auth    sufficient      pam_usb.so
+    auth    required        pam_unix.so nullok_secure
+
+The `sufficient` keyword means that if pam_usb allows the authentication, then no password will be asked.
+If the authentication fails, then the default password-based authentication will be used as fallback.
+
+If you change it to `required`, it means that *both* the USB flash drive and the password will be required to grant
+access to the system.
+
+At this point, you should be able to authenticate with the relevant USB device plugged-in.
+
+    scox $ su
+    * pam_usb v.SVN
+    * Authentication request for user "root" (su)
+    * Device "MyDevice" is connected (good).
+    * Performing one time pad verification...
+    * Verification match, updating one time pads...
+    * Access granted.
+
+Agent
+-----
+
+The pam_usb agent (pamusb-agent) allows you to automatically execute commands
+upon locking and unlocking events. Those events are generated when you insert or
+remove your authentication device.
+To configure the commands, you have to edit pam_usb's configuration file
+(/etc/security/pam_usb.conf) and add agent entries into your user section.
+
+For instance, you could automatically start your screensaver as soon as you
+remove the device, and deactivate it when you plug the device back.
+
+You can find details in [the "Agent" section of Configuration](https://github.com/mcdope/pam_usb/wiki/Configuration#agent)
+
+Fine Tuning
+-----------
+
+There are many options available to configure pam_usb.
+
+Check out the [[configuration reference|Configuration]].
