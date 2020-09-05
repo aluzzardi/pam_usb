@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+pam-auth-update --package --remove usb
+
+#DEBHELPER#
+
+exit 0
