@@ -1,16 +1,16 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# Config templates translations for libpam-usb packaging
+# Copyright (C) 2020 Tobias Bäumer
 # This file is distributed under the same license as the libpam-usb package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Tobias Bäumer <tobiasbaeumer@gmail.com>, 2020.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: libpam-usb\n"
-"Report-Msgid-Bugs-To: libpam-usb@packages.debian.org\n"
+"Report-Msgid-Bugs-To: tobiasbaeumer@gmail.com\n"
 "POT-Creation-Date: 2020-09-01 21:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Last-Translator: Tobias Bäumer <tobiasbaeumer@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
 "MIME-Version: 1.0\n"
