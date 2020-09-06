@@ -20,3 +20,108 @@ libpam-usb (0.6.0-5) artful; urgency=medium
   * Initial release - Uses github.com/luka-n/pam_usb as source (0.5.0, ported to UDisks2)
 
  -- Adrian Nöthlich <promasu@ox.io>  Sun, 07 Jan 2018 22:22:34 +0100
+
+libpam-usb (0.5.0-4) unstable; urgency=low
+
+  * Attempt to fix FTBFS on hurd.
+  * Make this depending on udisks on linux-any only.
+  * Increase entropy of generated pad files (Closes: #658700);
+    thanks to Toby Speight for the patch.
+  * Add config file for pam-auth-update (Closes: #658967);
+    thanks to Petter Reinholdtsen for the report.
+    - Add libpam-runtime (>= 1.0.1-6~) on Pre-Depends due to the use of the
+      pam-auth-update tool in the maintainer scripts.
+  * Add NEWS file to inform users about the need for rewriting their config
+    files after the upgrade to the latest upstream release 0.5.0; thanks
+    to Toby Speight for having pointed this out. (Closes: #658013)
+
+ -- Alessio Treglia <alessio@debian.org>  Wed, 08 Feb 2012 16:23:16 +0100
+
+libpam-usb (0.5.0-3) unstable; urgency=low
+
+  * Move tools back to /usr/bin, they don't actually need superuser
+    privileges to work; pamusb-conf needs to run as root whe used to
+    update the system-wide configuration file.
+  * Small improvements to the buildsystem.
+
+ -- Alessio Treglia <alessio@debian.org>  Mon, 30 Jan 2012 19:12:27 +0100
+
+libpam-usb (0.5.0-2) unstable; urgency=low
+
+  * Attempt to fix FTBFS on non-Linux architectures.
+
+ -- Alessio Treglia <alessio@debian.org>  Mon, 30 Jan 2012 12:20:12 +0100
+
+libpam-usb (0.5.0-1) unstable; urgency=low
+
+  * Re-introduce this in Debian (Closes: #657742)
+  * New upstream release:
+    - Migrated the code base to UDisks. pam_usb doesn't depend
+      on HAL anymore.
+    - Added deny_remote option (defaults to true). If false,
+      local login check will be disabled.
+    - Fixed a bug in the device recognition (--add-device)
+  * Build with MultiArch.
+  * Add VCS tags
+  * Bump Standards.
+  * Switch to DH 7.
+  * Set package format to 3.0 (quilt).
+  * Update debian/copyright.
+  * Fix small spelling mistakes.
+  * Install tools into /usr/sbin
+  * Rename pamusb-tools to pamusb-common and install all tools into
+    pamusb-common.
+
+ -- Alessio Treglia <alessio@debian.org>  Sat, 28 Jan 2012 19:13:17 +0100
+
+libpam-usb (0.4.2-1.1) unstable; urgency=low
+
+  * Non-maintainer upload, to drop Python 2.4; thanks to Luca Falavigna for the
+    report and to Jakub Wilk for the patch; Closes: #562454
+    - debian/control
+      + bump Depends on python >= 2.5 and drop python-celementtree
+
+ -- Sandro Tosi <morph@debian.org>  Tue, 12 Jan 2010 01:10:31 +0100
+
+libpam-usb (0.4.2-1) unstable; urgency=low
+
+  * New upstream version 0.4.2:
+      - Fixed the ElementTree import statement of pamusb-agent to work with
+        Python 2.5.
+      - Improved the device detection to work with any removable storage
+        device.
+      - Added a workaround for a DBUS bug that prevented pam_usb to work
+        with su.
+      - Disable log outputting if the application doesn't have any tty
+        attached (fixes gksudo and other software).
+  * Missing dependency: pmount (Closes: #442449)
+  * debian/watch fails to report upstream's version (Closes: #450005)
+  * Package description could be improved (Closes: #459315)
+  * Updated Standards-Version, no changes needed.
+  * Changing maintainer email.
+
+ -- Jose Parrella <bureado@debian.org>  Sat, 21 Jun 2008 10:15:51 -0430
+
+libpam-usb (0.4.1-1) unstable; urgency=low
+
+  * New upstream version 0.4.1:
+      - Fixed a security issue related to OpenSSH authentication
+      - Fixed the quiet option (now it is really quiet)
+      - Support for devices without vendor/model information
+  * Upgraded to Standards-Version: 3.7.2.2
+  * Adding dbus, hal and libpam-usb as dependencies for pamusb-tools.
+
+ -- Jose Parrella <joseparrella@cantv.net>  Wed, 15 Aug 2007 10:43:43 -0400
+
+libpam-usb (0.4.0-2) unstable; urgency=low
+
+  * Adding python-dbus as a dependency for pamusb-tools
+   (Closes: #423540)
+
+ -- Jose Parrella <joseparrella@cantv.net>  Sun, 17 Jun 2007 22:03:46 +0100
+
+libpam-usb (0.4.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #420199)
+
+ -- Jose Parrella <joseparrella@cantv.net>  Sat, 21 Apr 2007 10:31:27 -0400

@@ -101,6 +101,10 @@ The syntax is the following:
 | `serial`      | Element   | Serial number of the device                    | `SNDKXXXXXXXXXXXXXXXX` |
 | `volume_uuid` | Element   | UUID of the device's volume used to store pads | `6F6B-42FC`            |
 
+### Note:
+Some cheap devices don't report a vendor and/or model. To use these devices you can use "Generic" for these values, then it won't be checked.
+Be aware that this reduces security if you have `one_time_pads` disabled since the device containing the volume won't be checked anymore (but these attributes could be faked with a custom firmware anyway).
+
 ### Example:
 
 ```xml
@@ -124,6 +128,10 @@ The syntax is the following:
 
 ### Agent
 
+The agent is to be run as system service. If you installed by using the debian package it will automatically be configured as
+systemd service unit. In case you use another init / service management you will need to set it up yourself before any event
+configuration will take effect.
+
 
 | Name  |   Type    |                                             Description                                                         |
 |-------|-----------|-----------------------------------------------------------------------------------------------------------------|
@@ -136,30 +144,29 @@ The syntax is the following:
 <user id="scox">
     <device>MyDevice</device>
 
-    <!-- When the user "scox" removes the usb device, lock the screen and pause
-    beep-media-player -->
+    <!-- When the user "scox" removes the usb device, lock the screen and pause beep-media-player -->
     <agent event="lock">
-		<env>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus</env>
-		<env>HOME=/home/scox</env>
-		<cmd>gnome-screensaver-command --lock</cmd>
-		<cmd>sleep 5</cmd>
-		<cmd>pkill -SIGSTOP -u 1000</cmd>
-	</agent>
+        <env>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus</env>
+        <env>HOME=/home/scox</env>
+        <cmd>gnome-screensaver-command --lock</cmd>
+        <cmd>sleep 5</cmd>
+        <cmd>pkill -SIGSTOP -u 1000</cmd>
+    </agent>
     <agent event="lock">
-		<cmd>beep-media-player --pause</cmd>
-	</agent>
+        <cmd>beep-media-player --pause</cmd>
+    </agent>
 
     <!-- Resume operations when the usb device is plugged back and authenticated -->
     <agent event="unlock">
-		<env>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus</env>
-		<env>HOME=/home/scox</env>
-		<cmd>pkill -SIGCONT -u 1000</cmd>
-		<cmd>sleep 5</cmd>
-		<cmd>gnome-screensaver-command --deactivate</cmd>
-	</agent>
+        <env>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus</env>
+        <env>HOME=/home/scox</env>
+        <cmd>pkill -SIGCONT -u 1000</cmd>
+        <cmd>sleep 5</cmd>
+        <cmd>gnome-screensaver-command --deactivate</cmd>
+    </agent>
     <agent event="unlock">
-		<cmd>beep-media-player --play</cmd>
-	</agent>
+        <cmd>beep-media-player --play</cmd>
+    </agent>
 </user>
 ```
 
@@ -241,5 +248,5 @@ By default, this command creates directory `$HOME/.pamusb/` with a protected dev
 delete `$HOME/.pamusb/<devicename>.pad` file. The created `.pad` file can't be used with a new partition UUIDs for the same or any USB block device.
 
 * **7)** Unmount the USB block device.
-* **8)** Add proper PAM configuration into `/etc/pam.d/system-auth` as described above. For testing purposes, it's highly recommended to start with `sufficient` PAM option before possibly moving to `required` or `requisite` option since you can bypass faulty `pam_usb` configurations.
+* **8)** Add proper PAM configuration into `/etc/pam.d/common-auth` as described in [Getting Started](https://github.com/mcdope/pam_usb/wiki/Getting-Started#setting-up-the-pam-module). For testing purposes, it's highly recommended to start with `sufficient` PAM option before possibly moving to `required` or `requisite` option since you can bypass faulty `pam_usb` configurations.
 * **9)** Test the device/user configuration by running `sudo echo "pam_usb test"`. The USB block device must be attached (mount not required) and the user must have proper configuration in `/etc/security/pam_usb.conf` file.

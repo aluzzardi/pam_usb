@@ -1,0 +1,4 @@
+tar-ignore = .idea
+tar-ignore = .vscode
+tar-ignore = arch_linux
+tar-ignore = .github

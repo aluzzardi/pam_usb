@@ -22,7 +22,11 @@ License: GPL-2
  Public License version 2 can be found in "/usr/share/common-licenses/GPL-2".
 
 Files: debian/*
-Copyright: 2018 Adrian Nöthlich <promasu@ox.io>, 2020 Tobias Bäumer <tobiasbaeumer@gmail.com>
+Copyright:
+ - 2020, Tobias Bäumer <tobiasbaeumer@gmail.com>
+ - 2018, Adrian Nöthlich <promasu@ox.io>
+ - 2012 Alessio Treglia <alessio@debian.org>
+ - 2007, Jose Parrella <joseparrella@cantv.net>
 License: GPL-2+
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by

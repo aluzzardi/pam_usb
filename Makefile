@@ -45,7 +45,7 @@ CONFS			:= doc/pam_usb.conf
 CONFS_DEST		:= $(DESTDIR)/etc/security
 
 # Doc
-DOCS		:= doc/CONFIGURATION.md
+DOCS		:= doc/CONFIGURATION doc/QUICKSTART
 DOCS_DEST	:= $(DESTDIR)$(PREFIX)/share/doc/pam_usb
 
 # Man
@@ -53,7 +53,7 @@ MANS		:= doc/pamusb-conf.1.gz doc/pamusb-agent.1.gz doc/pamusb-check.1.gz
 MANS_DEST	:= $(DESTDIR)$(PREFIX)/share/man/man1
 
 # PAM config
-PAM_CONF		:= debian/pam-configs/libpam-usb
+PAM_CONF		:= debian/pam-auth-update/usb
 PAM_CONF_DEST 	:= $(DESTDIR)$(PREFIX)/share/pam-configs
 PAM_AUTH_UPDATE := pam-auth-update
 
