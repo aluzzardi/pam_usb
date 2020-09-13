@@ -25,10 +25,10 @@ Tools
 
 Getting Started
 ----------------
-* [Install](https://github.com/aluzzardi/pam_usb/wiki/Install) pam_usb on your system
-* Read the [Getting Started Guide](https://github.com/aluzzardi/pam_usb/wiki/Getting-Started)
-* Have a look at the [Configuration File Reference](https://github.com/aluzzardi/pam_usb/wiki/Configuration)
-* Problem? See the [Troubleshooting Guide](https://github.com/aluzzardi/pam_usb/wiki/Troubleshooting)
+* [Install](https://github.com/mcdope/pam_usb/wiki/Install) pam_usb on your system
+* Read the [Getting Started Guide](https://github.com/mcdope/pam_usb/wiki/Getting-Started)
+* Have a look at the [Configuration File Reference](https://github.com/mcdope/pam_usb/wiki/Configuration)
+* Problem? See the [Troubleshooting Guide](https://github.com/mcdope/pam_usb/wiki/Troubleshooting)
 
 History of this PAM module
 ----------------
@@ -46,11 +46,6 @@ This repo is mainly based on community improvements from
  
 See the commit history for details. You can find a list of all contributors in the `AUTHORS` file. 
 
-The changes since the last "official" release are documented in the file `changelog-from-v0.5.0` which you
-can generate with `make changelog`. Since it's generated from the git commits you can also view it online at
-https://github.com/mcdope/pam_usb/commits/master. Changes from the original author up to the last official
-release can be found in `changelog-up-to-v0.5.0`.
-
 The last official release was 0.5.0 btw, some private packages used 0.6.0 to override the upstream provided 
-version but those varied in changes from 0.5.0. This repo will be released starting from 0.7.0 when "finished" 
-and includes the most important updates (Python3 port, UDisks2 support, other smaller ones).
+version but those varied in changes from 0.5.0. This repo will be released starting from 0.7.0 when ready
+and includes all updates I'm aware of (Python3 port, UDisks2 support, other smaller ones) or did myself.

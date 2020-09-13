@@ -8,13 +8,13 @@
   (--list-devices, --list-volumes, --device, --volume, --yes)
 - pamusb-conf now properly ignores read-only media (like optical drives)
 - Support for devices lacking vendor and/or model
-- PAM module gets installed using libpam-runtime/pam-auth-update
-- Using debconf to create fully working config on install
+- [Debian] PAM module gets installed using libpam-runtime/pam-auth-update
+- [Debian] Using debconf to create fully working config on install
 - Documentation / example config updated
 - Wiki (https://github.com/mcdope/pam_usb/wiki) updated
 
 * 0.6.0
-- Never officially released, used by some packaged version to override 
+- Never officially released, used by some packaged versions to override 
   upstream version.
 
 * 0.5.0
