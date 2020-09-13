@@ -107,5 +107,9 @@ deb : clean all
 	$(DEBUILD) -b -uc -us
 
 launchpad-deb : clean all
-	$(DEBUILD) -S -I -uc -us 
+	$(DEBUILD) -S -I -uc -us
+	debsign -S -kC14ADD29D26E887C `ls -t ../*.changes | head -1`
+
+launchpad-upload : launchpad-deb
+	dput ppa:tobiasbaeumer/libpam-usb `ls -t ../*.changes | head -1`
 
