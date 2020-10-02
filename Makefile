@@ -106,6 +106,9 @@ debchangelog :
 deb : clean all
 	$(DEBUILD) -b -uc -us
 
+deb-sign : deb
+	debsign -S -kC14ADD29D26E887C `ls -t ../*.changes | head -1`
+
 launchpad-deb : clean all
 	$(DEBUILD) -S -I -uc -us
 
