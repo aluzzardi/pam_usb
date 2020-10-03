@@ -107,4 +107,4 @@ deb : clean all
 	$(DEBUILD) -b -uc -us
 
 deb-sign : deb
-	debsign -S -kC14ADD29D26E887C `ls -t ../*.changes | head -1`
+	debsign -S -k$(APT_SIGNING_KEY) `ls -t ../*.changes | head -1`
