@@ -108,13 +108,3 @@ deb : clean all
 
 deb-sign : deb
 	debsign -S -kC14ADD29D26E887C `ls -t ../*.changes | head -1`
-
-launchpad-deb : clean all
-	$(DEBUILD) -S -I -uc -us
-
-launchpad-sign : launchpad-deb
-	debsign -S -kC14ADD29D26E887C `ls -t ../*.changes | head -1`
-
-launchpad-upload : launchpad-deb launchpad-sign
-	dput ppa:tobiasbaeumer/libpam-usb `ls -t ../*.changes | head -1`
-
