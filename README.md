@@ -35,7 +35,8 @@ History of this PAM module
 This software was initially created by Andrea Luzzardi (https://github.com/aluzzardi/pam_usb/) but is
 unmaintained for quite some years by now. While the years passed the community continued to work on it
 but there was never a centralized place merging all those improvement. The goal of this repo is to provide
-exactly that, resulting in an up-to-date version that will also be released in a (yet to be setup) PPA.
+exactly that, resulting in an up-to-date version. See [Install](https://github.com/mcdope/pam_usb/wiki/Install)
+for installation instructions and download options for prebuilt binaries.
 
 This repo is mainly based on community improvements from 
  * Pekka Helenius (https://github.com/Fincer/pam_usb) - Agent improvements and Arch packaging support
