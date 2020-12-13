@@ -36,11 +36,6 @@ jobs:
         # a pull request then we can checkout the head.
         fetch-depth: 2
 
-    # If this run was triggered by a pull request event, then checkout
-    # the head of the pull request instead of the merge commit.
-    - run: git checkout HEAD^2
-      if: ${{ github.event_name == 'pull_request' }}
-
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
@@ -55,7 +50,7 @@ jobs:
     # 📚 https://git.io/JvXDl
       
     - name: Install requirements
-      run: sudo apt install libudisks2-dev libxml2-dev python libpam0g-dev
+      run: sudo apt install libudisks2-dev libxml2-dev python libpam0g-dev devscripts debhelper dh-systemd dkms pkg-config gir1.2-glib-2.0 libglib2.0-dev
     - name: make
       run: make
     #- run: |
