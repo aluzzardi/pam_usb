@@ -123,6 +123,13 @@ def addUser(options):
 		print('You must add a device (--add-device) before adding users')
 		sys.exit(1)
 
+	alreadyConfiguredUsers = doc.getElementsByTagName('user')
+	if len(alreadyConfiguredUsers) > 0:
+		for user in alreadyConfiguredUsers:
+			if user.getAttribute('id') == options['userName']:
+				print('This user is already added to the configuration, to edit it you need to do it manually currently - sorry.')
+				sys.exit(1)
+
 	devices = []
 	for device in devicesObj:
 		devices.append(device.getAttribute('id'))
