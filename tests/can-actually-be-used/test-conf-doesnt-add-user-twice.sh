@@ -4,5 +4,4 @@
 # @todo: check if the numbering used in debconf is correct after all
 
 echo -e "Test:\t\t\tpamusb-conf doesn't add user(s) twice"
-echo -en "pamusb-conf output:\t" # to fake the unhideable python output as expected output :P
 sudo pamusb-conf --add-user=`whoami` --device=0 --yes | grep "already added" > /dev/null && echo -e "Result:\t\t\tPASSED!" || exit 1
