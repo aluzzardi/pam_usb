@@ -18,16 +18,20 @@ then
         # echo "\tDebug: OBJ_PATH=$OBJ_PATH"
         
         # Get volume count on drive
-        VOLUME_COUNT=`udisksctl info -b /dev/$DRIVE | grep -o -i "'/org/freedesktop/UDisks2/block_devices" | wc -l`
+        # VOLUME_COUNT=`udisksctl info -b /dev/$DRIVE | grep -o -i "'/org/freedesktop/UDisks2/block_devices" | wc -l`
+        # @todo: udisksctl output changed somewhere between focal and groovy, volumes are now given on multiple lines instead of array-like
+        #        which is quite ugly to parse. But this is ugly (as well as the whole loop below) - should be refactored
+        VOLUME_COUNT=`ls -l /dev/$DRIVE* | wc -l`
+        VOLUME_COUNT=$((VOLUME_COUNT-1)) # subtract main device file
         # echo "\tDebug: VOLUME_COUNT=$VOLUME_COUNT"
 
         # Check if drive is removable
-        IS_REMOVABLE=`udisksctl info -p $OBJ_PATH | grep -o "Removable:                  true" | wc -l`
+        IS_REMOVABLE=`udisksctl info -p $OBJ_PATH | tr -s ' ' | grep -o " Removable: true" | wc -l`
         # echo "\tDebug: IS_REMOVABLE=$IS_REMOVABLE"
 
         if [ "$IS_REMOVABLE" = "1" ] 
         then
-            # echo '\t\tDebug: drive is removable, storing for debconf usage'
+            # echo "\t\tDebug: drive is removable, storing for debconf usage"
             DRIVENAME=`echo $OBJ_PATH | sed -e "s/drives\///g" | sed -e "s/_/ /g"`
             # echo "\t\tDebug: DRIVENAME=$DRIVENAME"
 
@@ -35,6 +39,7 @@ then
             # Iterate over each volume for $DRIVE
             for VOLUME in `seq 0 $VOLUME_COUNT`
             do
+                # echo "\t\t\tDebug: handling volume $VOLUME of $VOLUME_COUNT"
                 # this if is to filter the seq end, else we would end up with a "fake" volume
                 if [ "$VOLUME" != "$VOLUME_COUNT" ] 
                 then
@@ -51,13 +56,18 @@ then
                     # echo "\t\t\tDebug: CHOICES=$CHOICES"
 
                     PARTITION_NUMBER=$((PARTITION_NUMBER+1))
+                # else
+                    # echo "\t\t\tDebug: volume $VOLUME skipped because of filtering"
                 fi
             done
 
             DRIVE_NUMBER=$((DRIVE_NUMBER+1))
+        # else
+            # echo "\tDebug: not removable"
         fi
     done
 
+    # echo "Debug: CHOICES before trailingcommacut: $CHOICES"
     # reverse to cut trailing comma, reverse again
     CHOICES=`echo $CHOICES | rev | cut -c 1- | rev`
     # get users from passwd, filter by uid, take only first field, sort, unique only, replace newline with comma, replace comma with comma+space, reverse, cut last chars, reverse again
@@ -71,23 +81,25 @@ then
     then
         # Initiate device choosing debconf, making sure it get shown
         db_subst libpam-usb/device CHOICES "<Skip>, $CHOICES"
-        # echo "Dbg: subst device ret $RET / err $?"
+        # echo "Debug: subst device ret $RET / err $?"
         db_fset libpam-usb/device seen false
-        # echo "Dbg: fset device ret $RET / err $?"
+        # echo "Debug: fset device ret $RET / err $?"
         db_input high libpam-usb/device || false
-        # echo "Dbg: input device ret $RET / err $?"
+        # echo "Debug: input device ret $RET / err $?"
 
         # Initiate user choosing debconf, making sure it get shown
         db_subst libpam-usb/user USER_CHOICES "<Skip>, $USER_CHOICES"
-        # echo "Dbg: subst user ret $RET / err $?"
+        # echo "Debug: subst user ret $RET / err $?"
         db_fset libpam-usb/user seen false
-        # echo "Dbg: fset user ret $RET / err $?"
+        # echo "Debug: fset user ret $RET / err $?"
         db_input high libpam-usb/user || false
-        # echo "Dbg: input user ret $RET / err $?"
+        # echo "Debug: input user ret $RET / err $?"
     else
         db_set libpam-usb/device "<Skip>"
         db_set libpam-usb/user "<Skip>"
     fi
+# else
+    # echo "Debug: already configured"
 fi
 
 db_go
