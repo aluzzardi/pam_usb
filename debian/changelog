@@ -1,3 +1,13 @@
+libpam-usb (0.7.1) focal; urgency=medium
+
+  * Added missing dependencies
+  * Fix volume count detection in configure scripts
+  * Fix NVMe volume handling in configure scripts
+  * Fix pamusb-conf allowing to add multiple devices per user
+  * Add rudimentary automated testing
+
+ -- Tobias Bäumer <tobiasbaeumer@gmail.com>  Thu, 31 Dec 2020 11:52:34 +0200
+
 libpam-usb (0.7.0) focal; urgency=medium
 
   * Re-release - Uses github.com/mcdope/pam_usb as source

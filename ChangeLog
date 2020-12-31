@@ -1,3 +1,10 @@
+* 0.7.1
+- [Debian] Added missing dependencies
+- [Debian] Fix volume count detection in configure scripts for later versions of udisksctl
+- [Debian] Fix NVMe volume handling in configure scripts
+- Fix pamusb-conf allowing to add multiple devices per user
+- Add rudimentary automated testing
+
 * 0.7.0
 - Re-release - Uses github.com/mcdope/pam_usb as source
   (note that some of these changes were already in 0.6.0)
