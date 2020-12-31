@@ -1,3 +1,5 @@
+![Build](https://github.com/mcdope/pam_usb/workflows/Can%20be%20built%20successfully/badge.svg) ![Debian packaging](https://github.com/mcdope/pam_usb/workflows/Can%20be%20packaged%20successfully/badge.svg) ![Functional testing](https://github.com/mcdope/pam_usb/workflows/Build%20&%20test%20on%20own%20server/badge.svg)
+
 pam\_usb
 ========
 
