@@ -3,7 +3,7 @@ Upstream-Name: libpam-usb
 Source: https://github.com/mcdope/pam_usb
 
 Files: *
-Copyright: 2003-2016 Andrea Luzzardi and contributers <scox@sig11.org>
+Copyright: 2003-2016 Andrea Luzzardi and contributors <scox@sig11.org>
 License: GPL-2
  This package is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
