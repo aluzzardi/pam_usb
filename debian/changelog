@@ -1,4 +1,4 @@
-libpam-usb (0.7.1) focal; urgency=medium
+libpam-usb (0.7.1) unstable; urgency=medium
 
   * Added missing dependencies
   * Fix volume count detection in configure scripts
@@ -8,7 +8,7 @@ libpam-usb (0.7.1) focal; urgency=medium
 
  -- Tobias Bäumer <tobiasbaeumer@gmail.com>  Thu, 31 Dec 2020 11:52:34 +0200
 
-libpam-usb (0.7.0) focal; urgency=medium
+libpam-usb (0.7.0) unstable; urgency=medium
 
   * Re-release - Uses github.com/mcdope/pam_usb as source
   * Ported to Python 3
@@ -25,7 +25,7 @@ libpam-usb (0.7.0) focal; urgency=medium
 
  -- Tobias Bäumer <tobiasbaeumer@gmail.com>  Thu, 20 Aug 2020 10:22:34 +0200
 
-libpam-usb (0.6.0-5) artful; urgency=medium
+libpam-usb (0.6.0-5) unstable; urgency=medium
 
   * Initial release - Uses github.com/luka-n/pam_usb as source (0.5.0, ported to UDisks2)
 
