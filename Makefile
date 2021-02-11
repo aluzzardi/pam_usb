@@ -61,7 +61,7 @@ PAM_AUTH_UPDATE := pam-auth-update
 RM		:= rm
 INSTALL		:= install
 MKDIR		:= mkdir
-DEBUILD := debuild
+DEBUILD := debuild -b -uc -us --lintian-opts --profile debian
 
 ifeq (yes, ${DEBUG})
 	CFLAGS := ${CFLAGS} -ggdb
@@ -104,7 +104,7 @@ debchangelog :
 		git log --pretty=format:"  * %s (%an <%ae>)" --date=short 40b17fa..HEAD > changelog-for-deb
 
 deb : clean all
-	$(DEBUILD) -b -uc -us
+	$(DEBUILD)
 
 deb-sign : deb
 	debsign -S -k$(APT_SIGNING_KEY) `ls -t ../*.changes | head -1`
