@@ -1,3 +1,12 @@
+libpam-usb (0.7.2) unstable; urgency=high
+
+  * Works with libpam >= 1.4.0 / installs to correct target directory
+  * Fix Lintian error 'bad-distribution-in-changes-file' on non-Ubuntu
+  * Fix spelling error in debian/copyright
+  * Change default value for unknown_pts_as_local to false
+
+ -- Tobias Bäumer <tobiasbaeumer@gmail.com>  Fri, 12 Feb 2021 23:52:34 +0100
+
 libpam-usb (0.7.1) unstable; urgency=medium
 
   * Added missing dependencies
