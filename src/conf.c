@@ -150,7 +150,7 @@ int pusb_conf_init(t_pusb_options *opts)
 	opts->one_time_pad = 1;
 	opts->pad_expiration = 3600;
 	opts->deny_remote = 1;
-	opts->unknown_pts_as_local = 1;
+	opts->unknown_pts_as_local = 0;
 	return (1);
 }
 
