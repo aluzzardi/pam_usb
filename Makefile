@@ -2,7 +2,14 @@
 DEBUG		:= no
 
 PREFIX		?= /usr
-LIBDIR		?= lib
+ARCH := $(shell uname -m)
+
+ifeq ($(ARCH), x86_64)
+	LIBDIR ?= lib/x86_64-linux-gnu
+endif
+ifeq ($(ARCH), i686)
+	LIBDIR ?= lib
+endif
 
 # compiler/linker options
 CC		:= gcc
