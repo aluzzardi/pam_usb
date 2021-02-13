@@ -1,3 +1,10 @@
+libpam-usb (0.7.3) unstable; urgency=high
+
+  * Reworked deny_remote option
+  * Removed unknown_pts_as_local option (not needed anymore)
+
+ -- Tobias Bäumer <tobiasbaeumer@gmail.com>  Sat, 13 Feb 2021 22:23:34 +0100
+
 libpam-usb (0.7.2) unstable; urgency=high
 
   * Works with libpam >= 1.4.0 / installs to correct target directory
