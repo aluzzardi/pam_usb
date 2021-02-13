@@ -1,6 +1,6 @@
 /**
  * Source: https://gist.github.com/fclairamb/a16a4237c46440bdb172
- * Original Author: Florent Clairambault (@fclairamb)
+ * Original Author: Florent Clairambault (@fclairamb) [MIT licensed]
  *
  * Modifications: removed main(), added header file
  */
