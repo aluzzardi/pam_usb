@@ -18,7 +18,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <utmp.h>
 #include "log.h"
 #include "conf.h"
 #include "process.h"
