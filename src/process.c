@@ -1,5 +1,8 @@
 /**
  * Source: https://gist.github.com/fclairamb/a16a4237c46440bdb172
+ * Original Author: Florent Clairambault (@fclairamb)
+ *
+ * Modifications: removed main(), added header file
  */
 
 #include <stdio.h>
