@@ -21,56 +21,31 @@
 #include <utmp.h>
 #include "log.h"
 #include "conf.h"
+#include "process.h"
 
 int pusb_local_login(t_pusb_options *opts, const char *user)
 {
-	struct utmp	utsearch;
-	struct utmp	*utent;
-	const char	*from;
-	int			i;
-
 	if (!opts->deny_remote)
 	{
 	  log_debug("deny_remote is disabled. Skipping local check.\n");
 	  return (1);
 	}
+
 	log_debug("Checking whether the caller is local or not...\n");
-	from = ttyname(STDIN_FILENO);
-	if (!from || !(*from))
-	{
-		if (!opts->unknown_pts_as_local) {
-			log_debug("Couldn't retrieve the tty name, aborting.\n");
-			return (0);
-		}
+	
+	pid_t pid = getpid();
+	while (pid != 0) {
+		char name[BUFSIZ];
+		get_process_name(pid, name);
+		log_debug("    Checking pid %6d (%s)...\n", pid, name);
+		get_process_parent_id(pid, & pid);
 
-		log_debug("Couldn't retrieve the tty name, assuming local pseudo terminal\n");
-		return (1);
-	}
-	if (!strncmp(from, "/dev/", strlen("/dev/")))
-		from += strlen("/dev/");
-	log_debug("Authentication request from tty %s\n", from);
-	strncpy(utsearch.ut_line, from, sizeof(utsearch.ut_line) - 1);
-	setutent();
-	utent = getutline(&utsearch);
-	endutent();
-	if (!utent)
-	{
-		if (!opts->unknown_pts_as_local) {
-			log_debug("No utmp entry found for tty \"%s\", assuming remote session\n", from);
+		if (strstr(name, "sshd") != NULL || strstr(name, "telnetd") != NULL) {
+			log_error("One of the parent processes found to be a remote access daemon, denying.\n");
 			return (0);
 		}
+	}
 
-		log_debug("No utmp entry found for tty \"%s\", assuming local pseudo terminal\n", from);
-		return (1);
-	}
-	for (i = 0; i < 4; ++i)
-	{
-		if (utent->ut_addr_v6[i] != 0)
-		{
-			log_error("Remote authentication request: %s\n", utent->ut_host);
-			return (0);
-		}
-	}
-	log_debug("Caller is local.\n");
+	log_debug("No remote daemons found in parent process list, seems to be local request - allowing.\n");
 	return (1);
 }
