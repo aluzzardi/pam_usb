@@ -1,3 +1,13 @@
+* 0.7.3
+- Reworked deny_remote option
+- Removed unknown_pts_as_local option (not needed anymore)
+
+* 0.7.2
+- Works with libpam >= 1.4.0 / installs to correct target directory
+- Fix Lintian error 'bad-distribution-in-changes-file' on non-Ubuntu
+- Fix spelling error in debian/copyright
+- Change default value for unknown_pts_as_local to false
+
 * 0.7.1
 - [Debian] Added missing dependencies
 - [Debian] Fix volume count detection in configure scripts for later versions of udisksctl
