@@ -51,8 +51,6 @@ static void pusb_conf_options_get_from(t_pusb_options *opts,
 			&(opts->probe_timeout));
 	pusb_xpath_get_bool_from(doc, from, "option[@name='deny_remote']",
 			&(opts->deny_remote));
-	pusb_xpath_get_bool_from(doc, from, "option[@name='unknown_pts_as_local']",
-			&(opts->unknown_pts_as_local));
 }
 
 static int pusb_conf_parse_options(t_pusb_options *opts,
@@ -150,7 +148,6 @@ int pusb_conf_init(t_pusb_options *opts)
 	opts->one_time_pad = 1;
 	opts->pad_expiration = 3600;
 	opts->deny_remote = 1;
-	opts->unknown_pts_as_local = 0;
 	return (1);
 }
 
