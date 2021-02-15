@@ -70,7 +70,7 @@ RM		:= rm
 INSTALL		:= install
 MKDIR		:= mkdir
 DEBUILD := debuild -b -uc -us --lintian-opts --profile debian
-MANCOMPILE := gzip -k
+MANCOMPILE := gzip -kf
 
 ifeq (yes, ${DEBUG})
 	CFLAGS := ${CFLAGS} -ggdb
