@@ -1,0 +1,52 @@
+.TH pamusb-conf 1 "September 12, 2007" "" "PAM_USB"
+
+.SH NAME
+\fBpamusb-conf \fP- pam_usb configuration tool
+.SH SYNOPSIS
+.nf
+.fam C
+\fBpamusb-conf\fP [\fB--help\fP] [\fB--verbose\fP] [\fB--config\fP=path] [\fB--add-user\fP=name |
+\fB--add-device\fP=name]
+.fam T
+.fi
+.SH DESCRIPTION
+\fBpamusb-conf\fP is a tool designed to help generating the pamusb.conf configuration
+file.
+.SH OPTIONS
+.TP
+.B
+\fB--help\fP, \fB-h\fP
+Show summary of options.
+.TP
+.B
+\fB--verbose\fP, \fB-v\fP
+Verbose output
+.TP
+.B
+\fB--config\fP, \fB-c\fP
+Use the given configuration file (defaults to
+/etc/pamusb.conf).
+.TP
+.B
+\fB--add-device\fP, \fB-d\fP
+Add a device
+.TP
+.B
+\fB--add-user\fP, \fB-u\fP
+Add a user
+.TP
+.B
+\fB--yes\fP, \fB-y\fP
+Assume "yes" as answer for every question
+.TP
+.B
+\fB--device\fR (only in combination with --add-device)
+Use the given device index (starting at 0)
+.TP
+.B
+\fB--device\fR (only in combination with --add-device)
+Use the given volume index (starting at 0)
+.SH BUGS
+Please send bug reports to the pam_usb mailing list.
+.SH AUTHOR
+Andrea Luzzardi <scox@sig11.org>
