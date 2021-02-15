@@ -1,0 +1,101 @@
+.TH pamusb-check 1 "September 12, 2007" "" "PAM_USB"
+
+.SH NAME
+\fBpamusb-check \fP- check if current pam_usb configuration authenticates given user
+.SH SYNOPSIS
+.nf
+.fam C
+Usage: \fIpamusb-check\fP [\fB--help\fP] [\fB--debug\fP] [\fB--config\fP=path] [\fB--service\fP=name] [\fB--dump\fP]
+[\fB--quiet\fP] <username>
+.fam T
+.fi
+.SH DESCRIPTION
+\fIpamusb-check\fP can simulate authentication through the pam_usb engine.
+It is useful for both testing purposes (to check the pam_usb configuration
+without having to try with a
+real program), but also for scripting. \fIpamusb-check\fP's exit code is 0 if the
+authentication was successful, 1 otherwise.
+It is used by pamusb-agent to check the device.
+.SH EXAMPLES
+$ \fIpamusb-check\fP scox
+.IP \(bu 3
+Authentication request for user "scox" (\fIpamusb-check\fP)
+.IP \(bu 3
+Device "creative" is connected (good).
+.IP \(bu 3
+Access granted.
+.PP
+$ \fIpamusb-check\fP \fB--service\fP=su scox
+.IP \(bu 3
+Authentication request for user "scox" (su)
+.IP \(bu 3
+Device "creative" is connected (good).
+.IP \(bu 3
+Access granted.
+.PP
+$ \fIpamusb-check\fP \fB--dump\fP scox
+.PP
+Configuration dump for user scox (service: \fIpamusb-check\fP):
+.TP
+.B
+enable
+: true
+.TP
+.B
+debug
+: false
+.TP
+.B
+quiet
+: false
+.TP
+.B
+color_log
+: true
+.TP
+.B
+one_time_pad
+: true
+.TP
+.B
+probe_timeout
+: 10
+.TP
+.B
+hostname
+: helium
+.TP
+.B
+system_pad_directory
+: .pamusb
+.TP
+.B
+device_pad_directory
+: .pamusb
+.SH OPTIONS
+.TP
+.B
+\fB--help\fP, \fB-h\fP
+Show summary of options.
+.TP
+.B
+\fB--debug\fP, \fB-D\fP
+Shows debug messages.
+.TP
+.B
+\fB--config\fP, \fB-c\fP
+Use the given configuration file (defaults to /etc/pamusb.conf).
+\fB--service\fP, \fB-s\fP Service name to be used for authentication (defaults to
+\fIpamusb-check\fP)
+.TP
+.B
+\fB--dump\fP, \fB-d\fP
+Dump the configuration, but do not try to authenticate
+.TP
+.B
+\fB--quiet\fP, \fB-q\fP
+Quiet mode
+.SH BUGS
+Please send bug reports to the pam_usb mailing list.
+.SH AUTHOR
+Andrea Luzzardi <scox@sig11.org>
