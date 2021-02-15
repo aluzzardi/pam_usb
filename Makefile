@@ -70,12 +70,13 @@ RM		:= rm
 INSTALL		:= install
 MKDIR		:= mkdir
 DEBUILD := debuild -b -uc -us --lintian-opts --profile debian
+MANCOMPILE := gzip -k
 
 ifeq (yes, ${DEBUG})
 	CFLAGS := ${CFLAGS} -ggdb
 endif
 
-all		: $(PAM_USB) $(PAMUSB_CHECK)
+all		: manpages $(PAM_USB) $(PAMUSB_CHECK)
 
 $(PAM_USB)	: $(OBJS) $(PAM_USB_OBJS)
 		$(CC) -o $(PAM_USB) $(PAM_USB_LDFLAGS) $(LDFLAGS) $(OBJS) $(PAM_USB_OBJS) $(LIBS)
@@ -87,7 +88,10 @@ $(PAMUSB_CHECK)	: $(OBJS) $(PAMUSB_CHECK_OBJS)
 		${CC} -c ${CFLAGS} $< -o $@
 
 clean		:
-		$(RM) -f $(PAM_USB) $(PAMUSB_CHECK) $(OBJS) $(PAMUSB_CHECK_OBJS) $(PAM_USB_OBJS)
+		$(RM) -f $(MANS) $(PAM_USB) $(PAMUSB_CHECK) $(OBJS) $(PAMUSB_CHECK_OBJS) $(PAM_USB_OBJS)
+
+manpages:
+		$(MANCOMPILE) ./doc/*.1
 
 install		: all
 		$(MKDIR) -p $(CONFS_DEST) $(DOCS_DEST) $(MANS_DEST) $(TOOLS_DEST) $(PAM_USB_DEST) $(PAM_CONF_DEST)
