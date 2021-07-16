@@ -216,6 +216,10 @@ static void pusb_pad_update(t_pusb_options *opts,
 	pusb_pad_protect(user, fileno(f_system));
 
 	log_debug("Generating %d bytes unique pad...\n", sizeof(magic));
+	/**
+	 * In case you wonder, how I did, if this should use /dev/urandom instead: no, /dev/random is correct in this case
+	 * See https://crypto.stackexchange.com/a/35032
+	 */
 	devrandom = open("/dev/random", O_RDONLY);
 	if (devrandom < 0 || read(devrandom, &seed, sizeof seed) != sizeof seed) {
 		log_debug("/dev/random seeding failed...\n");
@@ -231,9 +235,10 @@ static void pusb_pad_update(t_pusb_options *opts,
 	log_debug("Writing pad to the system...\n");
 	fwrite(magic, sizeof(char), sizeof(magic), f_device);
 	log_debug("Synchronizing filesystems...\n");
+	fsync(f_system);
+	fsync(f_device);
 	fclose(f_system);
 	fclose(f_device);
-	sync();
 	log_debug("One time pads updated.\n");
 }
 
