@@ -1,8 +1,13 @@
 # Set to 'yes' to include debugging information, e.g. DEBUG=yes make -e
-DEBUG		:= no
+DEBUG		:= yes
 
 PREFIX		?= /usr
-LIBDIR		?= lib
+ARCH := $(shell getconf LONG_BIT)
+ifeq ($(ARCH),64)
+	LIBDIR		:= lib64
+else
+	LIBDIR          := lib
+endif
 
 # compiler/linker options
 CC		:= gcc
@@ -43,11 +48,11 @@ TOOLS_SRC		:= tools
 
 # Conf
 CONFS			:= doc/pamusb.conf
-CONFS_DEST		:= $(DESTDIR)/etc
+CONFS_DEST		:= $(DESTDIR)/etc/security
 
 # Doc
 DOCS		:= doc/CONFIGURATION.md
-DOCS_DEST	:= $(DESTDIR)$(PREFIX)/share/doc/pamusb
+DOCS_DEST	:= $(DESTDIR)$(PREFIX)/share/doc/pam_usb
 
 # Man
 MANS		:= doc/pamusb-conf.1.gz doc/pamusb-agent.1.gz doc/pamusb-check.1.gz
