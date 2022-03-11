@@ -1,4 +1,7 @@
+/* -*- mode: c; c-file-style: "bsd"; indent-tabs-mode: t; -*- */
+
 /*
+ * Copyright (c) 2016 Luka Novsak <lnovsak@gmail.com>
  * Copyright (c) 2003-2007 Andrea Luzzardi <scox@sig11.org>
  *
  * This file is part of the pam_usb project. pam_usb is free software;
@@ -18,56 +21,74 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <dbus/dbus.h>
-#include "mem.h"
+
+#include <udisks/udisks.h>
+
 #include "conf.h"
-#include "hal.h"
 #include "log.h"
 #include "pad.h"
 #include "device.h"
 
-static int pusb_device_connected(t_pusb_options *opts, DBusConnection *dbus)
+static int pusb_device_connected(t_pusb_options *opts, UDisksClient *udisks)
 {
-	char	*udi = NULL;
+	GDBusObjectManager	*manager = udisks_client_get_object_manager(udisks);
+	GList			*objects = g_dbus_object_manager_get_objects(manager);
+	int			retval = 0;
+	int			i;
+	UDisksObject		*object = NULL;
+	UDisksDrive		*drive = NULL;
+
+	manager = udisks_client_get_object_manager(udisks);
+	objects = g_dbus_object_manager_get_objects(manager);
 
 	log_debug("Searching for \"%s\" in the hardware database...\n",
 			opts->device.name);
-	udi = pusb_hal_find_item(dbus,
-			"DriveSerial", opts->device.serial,
-			"DriveVendor", opts->device.vendor,
-			"DriveModel", opts->device.model,
-			NULL);
-	if (!udi)
+
+	for (i = 0; i < g_list_length(objects); ++i)
 	{
-	  log_error("Device \"%s\" is not connected.\n",
-				opts->device.name);
-	  return (0);
+		object = UDISKS_OBJECT(g_list_nth(objects, i)->data);
+		if (udisks_object_peek_drive(object))
+		{
+			drive = udisks_object_get_drive(object);
+			retval = strcmp(udisks_drive_get_serial(drive), opts->device.serial) == 0 &&
+					strcmp(udisks_drive_get_vendor(drive), opts->device.vendor) == 0 &&
+					strcmp(udisks_drive_get_model(drive), opts->device.model) == 0;
+			g_object_unref(drive);
+			if (retval)
+				break;
+		}
 	}
-	xfree(udi);
-	log_info("Device \"%s\" is connected (good).\n", opts->device.name);
-	return (1);
+
+	if (retval)
+		log_info("Device \"%s\" is connected (good).\n",
+				opts->device.name);
+	else
+		log_error("Device \"%s\" is not connected (bad).\n",
+				opts->device.name);
+
+	g_list_foreach (objects, (GFunc) g_object_unref, NULL);
+	g_list_free (objects);
+
+	return (retval);
 }
 
-int pusb_device_check(t_pusb_options *opts,
-		const char *user)
+int pusb_device_check(t_pusb_options *opts, const char *user)
 {
-	DBusConnection	*dbus = NULL;
-	int				retval = 0;
+	UDisksClient	*udisks = NULL;
+	int		retval = 0;
 
-	log_debug("Connecting to HAL...\n");
-	if (!(dbus = pusb_hal_dbus_connect()))
-		return (0);
+	udisks = udisks_client_new_sync(NULL, NULL);
 
-	if (!pusb_device_connected(opts, dbus))
+	if (!pusb_device_connected(opts, udisks))
 	{
-		pusb_hal_dbus_disconnect(dbus);
+		g_object_unref(udisks);
 		return (0);
 	}
 
 	if (opts->one_time_pad)
 	{
 		log_info("Performing one time pad verification...\n");
-		retval = pusb_pad_check(opts, dbus, user);
+		retval = pusb_pad_check(opts, udisks, user);
 	}
 	else
 	{
@@ -75,6 +96,6 @@ int pusb_device_check(t_pusb_options *opts,
 		retval = 1;
 	}
 
-	pusb_hal_dbus_disconnect(dbus);
+	g_object_unref(udisks);
 	return (retval);
 }

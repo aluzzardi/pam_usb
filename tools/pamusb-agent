@@ -20,10 +20,13 @@ import sys
 import pwd
 import getopt
 import syslog
-import gobject
-import dbus
-if getattr(dbus, 'version', (0,0,0)) >= (0,41,0):
-	import dbus.glib
+import gi
+
+gi.require_version('UDisks', '2.0')
+
+from gi.repository import GLib
+from gi.repository import UDisks
+
 try:
 	# Python 2.5
 	import xml.etree.ElementTree as et
@@ -39,41 +42,46 @@ class HotPlugDevice:
 		self.__udi = None
 		self.__serial = serial
 		self.__callbacks = []
-		self.__bus = dbus.SystemBus()
 		self.__running = False
 
 	def run(self):
 		self.__scanDevices()
 		self.__registerSignals()
 		self.__running = True
-		gobject.MainLoop().run()
+		GLib.MainLoop().run()
 		print 'signals registered'
 
 	def addCallback(self, callback):
 		self.__callbacks.append(callback)
 
 	def __scanDevices(self):
-		halService = self.__bus.get_object('org.freedesktop.UDisks',
-				'/org/freedesktop/UDisks')
-		halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
-		for udi in halManager.EnumerateDevices():
-			self.__deviceAdded(udi)
+		for udi in udisksObjectManager.get_objects():
+			if udi.get_block():
+				device = udisks.get_drive_for_block(udi.get_block())
+				if device:
+					self.__deviceAdded(device)
 
 	def __registerSignals(self):
-		halService = self.__bus.get_object('org.freedesktop.UDisks',
-				'/org/freedesktop/UDisks')
-		halManager = dbus.Interface(halService, 'org.freedesktop.UDisks')
-		for signal, callback in (('DeviceAdded', self.__deviceAdded),
-				('DeviceRemoved', self.__deviceRemoved)):
-			halManager.connect_to_signal(signal, callback)
+		for signal, callback in (('object-added', self.__objectAdded),
+				('object-removed', self.__objectRemoved)):
+			udisksObjectManager.connect(signal, callback)
+
+	def __objectAdded(self, _, udi):
+		if udi.get_block():
+			device = udisks.get_drive_for_block(udi.get_block())
+			if device:
+				self.__deviceAdded(device)
+
+	def __objectRemoved(self, _, udi):
+		if udi.get_block():
+			device = udisks.get_drive_for_block(udi.get_block())
+			if device:
+				self.__deviceRemoved(device)
 
 	def __deviceAdded(self, udi):
 		if self.__udi is not None:
 			return
-		deviceObj = self.__bus.get_object('org.freedesktop.UDisks',
-				udi)
-		deviceProperties = dbus.Interface(deviceObj, dbus.PROPERTIES_IFACE)
-		if deviceProperties.Get('org.freedesktop.UDisks.Device', 'DriveSerial') != self.__serial:
+		if udi.get_property('serial') != self.__serial:
 			return
 		self.__udi = udi
 		if self.__running:
@@ -196,6 +204,9 @@ def authChangeCallback(event):
 	else:
 		logger.info('Authentication failed for device %s. ' \
 				'Keeping user "%s" locked down.' % (deviceName, username))
+
+udisks = UDisks.Client.new_sync()
+udisksObjectManager = udisks.get_object_manager()
 
 hpDev = HotPlugDevice(serial)
 hpDev.addCallback(authChangeCallback)
