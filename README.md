@@ -25,7 +25,7 @@ Tools
 
 Getting Started
 ----------------
-* [Install](https://wiki.github.com/aluzzardi/pam_usb/Install) pam_usb on your system
-* Read the [Getting Started Guide](https://wiki.github.com/aluzzardi/pam_usb/Getting-Started)
-* Have a look at the [Configuration File Reference](https://wiki.github.com/aluzzardi/pam_usb/Configuration)
-* Problem? See the [Troubleshooting Guide](https://wiki.github.com/aluzzardi/pam_usb/Troubleshooting)
+* [Install](https://github.com/aluzzardi/pam_usb/wiki/Install) pam_usb on your system
+* Read the [Getting Started Guide](https://github.com/aluzzardi/pam_usb/wiki/Getting-Started)
+* Have a look at the [Configuration File Reference](https://github.com/aluzzardi/pam_usb/wiki/Configuration)
+* Problem? See the [Troubleshooting Guide](https://github.com/aluzzardi/pam_usb/wiki/Troubleshooting)
