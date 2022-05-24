@@ -27,6 +27,7 @@
 #include "conf.h"
 #include "process.h"
 #include "tmux.h"
+#include "mem.h"
 
 int pusb_is_tty_local(char *tty)
 {
@@ -34,10 +35,10 @@ int pusb_is_tty_local(char *tty)
 	struct utmpx	*utent;
 
 	if (strstr(tty, "/dev/") != NULL) {
-		tty += strlen("/dev/");
+		tty += 5; // cut "/dev/"
 	}
 
-	strncpy(utsearch.ut_line, tty, sizeof(utsearch.ut_line) - 1);
+	snprintf(utsearch.ut_line, sizeof(utsearch.ut_line), "%s", tty);
 
 	setutxent();
 	utent = getutxline(&utsearch);
@@ -78,12 +79,12 @@ char *pusb_get_tty_from_display_server(const char *display)
 	if (d_proc == NULL)
 		return NULL;
 
-	char *expected_core = (char *)malloc(12);
-	char *cmdline_path = (char *)malloc(32);
-	char *cmdline = (char *)malloc(4096);
-	char *fd_path = (char *)malloc(32);
-	char *link_path = (char *)malloc(32);
-	char *fd_target = (char *)malloc(32);
+	char *expected_core = (char *)xmalloc(12);
+	char *cmdline_path = (char *)xmalloc(32);
+	char *cmdline = (char *)xmalloc(4096);
+	char *fd_path = (char *)xmalloc(32);
+	char *link_path = (char *)xmalloc(32);
+	char *fd_target = (char *)xmalloc(32);
 
 	sprintf(expected_core, "-core %s", display);
 
@@ -152,12 +153,12 @@ char *pusb_get_tty_by_xorg_display(const char *display, const char *user)
 
 	setutxent();
 	while ((utent = getutxent())) {
-		if (strncmp(utent->ut_host, display, strlen(display)) == 0
-			&& strncmp(utent->ut_user, user, strlen(user)) == 0
+		if (strncmp(utent->ut_host, display, strnlen(display, sizeof(display))) == 0
+			&& strncmp(utent->ut_user, user, strnlen(user, sizeof(user))) == 0
 			&& (
-				strncmp(utent->ut_line, "tty", strlen("tty")) == 0
-				|| strncmp(utent->ut_line, "console", strlen("console")) == 0
-				|| strncmp(utent->ut_line, "pts", strlen("pts")) == 0
+				strncmp(utent->ut_line, "tty", sizeof(utent->ut_line)) == 0
+				|| strncmp(utent->ut_line, "console", sizeof(utent->ut_line)) == 0
+				|| strncmp(utent->ut_line, "pts", sizeof(utent->ut_line)) == 0
 			)
 		) {
 			endutxent();
@@ -251,7 +252,7 @@ int pusb_local_login(t_pusb_options *opts, const char *user, const char *service
 	}
 
 	const char	*session_tty;
-	const char	*display = getenv("DISPLAY");
+	char	*display = getenv("DISPLAY");
 
 	if (local_request == 0 && strstr(name, "tmux") != NULL && tmux_pid != 0) {
 		char *tmux_client_tty = pusb_tmux_get_client_tty(tmux_pid);
@@ -275,12 +276,14 @@ int pusb_local_login(t_pusb_options *opts, const char *user, const char *service
 		if (strstr(display, ".0") != NULL) {
 			// DISPLAY contains not only display but also default screen, truncate screen part in this case
 			log_debug("	DISPLAY contains screen, truncating...\n");
-			memset(display + strlen(display) - 2, 0, 2);
+			char display_tmp[sizeof(display)];
+			snprintf(display_tmp, sizeof(display) - 2, "%s", display);
+			snprintf(display, strnlen(display_tmp, sizeof(display_tmp)), "%s", display_tmp);
 		}
 
 		local_request = pusb_is_tty_local((char *) display);
 
-		char *xorg_tty = (char *)malloc(32);
+		char *xorg_tty = (char *)xmalloc(32);
 		if (local_request == 0)
 		{
 			log_debug("	Trying to get tty from display server\n");
@@ -314,7 +317,7 @@ int pusb_local_login(t_pusb_options *opts, const char *user, const char *service
 		log_debug("	Trying to get tty by loginctl\n");
 
 
-		char *loginctl_tty = (char *)malloc(32);
+		char *loginctl_tty = (char *)xmalloc(32);
 		loginctl_tty = pusb_get_tty_by_loginctl();
 		if (loginctl_tty != 0)
 		{

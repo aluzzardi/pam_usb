@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "process.h"
+#include "mem.h"
 
 /**
  * Get a process name from its PID.
@@ -88,7 +89,7 @@ char *pusb_get_process_envvar(pid_t pid, char *var)
 	char buffer[BUFSIZ];
 	sprintf(buffer, "/proc/%d/environ", pid);
 	FILE* fp = fopen(buffer, "r");
-	char *variable_content = (char *)malloc(BUFSIZ);
+	char *variable_content = (char *)xmalloc(BUFSIZ);
 	if (fp) {
 		size_t size = fread(buffer, sizeof (char), sizeof (buffer), fp);
 		fclose(fp);
@@ -100,8 +101,8 @@ char *pusb_get_process_envvar(pid_t pid, char *var)
 			variable_content = strtok(buffer, "#");
 			while (variable_content != NULL)
 			{
-				if (strncmp(var, variable_content, strlen(var)) == 0) {
-					return variable_content + strlen(var) + 1;
+				if (strncmp(var, variable_content, strnlen(var, sizeof(var))) == 0) {
+					return variable_content + strnlen(var, sizeof(var)) + 1;
 				}
 
 				variable_content = strtok(NULL, "#");

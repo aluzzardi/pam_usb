@@ -134,12 +134,12 @@ int pusb_conf_init(t_pusb_options *opts)
 		log_error("uname: %s\n", strerror(errno));
 		return (0);
 	}
-	strncpy(opts->hostname, u.nodename, sizeof(opts->hostname) - 1);
-	if (strlen(u.nodename) > sizeof(opts->hostname))
+	snprintf(opts->hostname, sizeof(opts->hostname), "%s", u.nodename);
+	if (strnlen(u.nodename, sizeof(u.nodename)) > sizeof(opts->hostname))
 		log_info("Hostname \"%s\" is too long, truncating to \"%s\".\n",
 				u.nodename, opts->hostname);
-	strcpy(opts->system_pad_directory, ".pamusb");
-	strcpy(opts->device_pad_directory, ".pamusb");
+	snprintf(opts->system_pad_directory, sizeof(opts->system_pad_directory), "%s", ".pamusb");
+	snprintf(opts->device_pad_directory, sizeof(opts->device_pad_directory), "%s", ".pamusb");
 	opts->probe_timeout = 10;
 	opts->enable = 1;
 	opts->debug = 0;
@@ -161,7 +161,7 @@ int pusb_conf_parse(const char *file, t_pusb_options *opts,
 
 	log_debug("Parsing settings...\n",
 			user, service);
-	if (strlen(user) > CONF_USER_MAXLEN)
+	if (strnlen(user, sizeof(user)) > CONF_USER_MAXLEN)
 	{
 		log_error("Username \"%s\" is too long (max: %d).\n", user,
 				CONF_USER_MAXLEN);

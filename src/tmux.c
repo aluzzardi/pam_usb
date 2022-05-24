@@ -21,6 +21,7 @@
 #include <regex.h>
 #include "log.h"
 #include "process.h"
+#include "mem.h"
 
 char *pusb_tmux_get_client_tty(pid_t env_pid)
 {
@@ -28,7 +29,7 @@ char *pusb_tmux_get_client_tty(pid_t env_pid)
     if (tmux_details == NULL) {
         log_debug("		No TMUX env var, checking parent process in case this is a sudo request\n");
 
-        tmux_details = (char *)malloc(BUFSIZ);
+        tmux_details = (char *)xmalloc(BUFSIZ);
         tmux_details = pusb_get_process_envvar(env_pid, "TMUX");
 
         if (tmux_details == NULL) {
@@ -44,7 +45,7 @@ char *pusb_tmux_get_client_tty(pid_t env_pid)
     log_debug("		Got tmux_socket_path: %s\n", tmux_socket_path);
 
     char get_tmux_session_details_cmd[64];
-    sprintf(get_tmux_session_details_cmd, "tmux -S %s list-clients -t \\$%s", tmux_socket_path, tmux_client_id);
+    sprintf(get_tmux_session_details_cmd, "tmux -S \"%s\" list-clients -t \"\\$%s\"", tmux_socket_path, tmux_client_id);
     log_debug("		Built get_tmux_session_details_cmd: %s\n", get_tmux_session_details_cmd);
 
     char buf[BUFSIZ];
@@ -57,7 +58,7 @@ char *pusb_tmux_get_client_tty(pid_t env_pid)
     char *tmux_client_tty = NULL;
     if (fgets(buf, BUFSIZ, fp) != NULL) {
         tmux_client_tty = strtok(buf, ":");
-        tmux_client_tty += strlen("/dev/");
+        tmux_client_tty += 5; // cut "/dev/"
         log_debug("		Got tmux_client_tty: %s\n", tmux_client_tty);
 
         if (pclose(fp)) {

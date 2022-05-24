@@ -17,14 +17,14 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: false
       matrix:
         # Override automatic language detection by changing the below list
         # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
-        language: ['cpp', 'python']
+        language: ['cpp']
         # Learn more...
         # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
 
@@ -38,7 +38,7 @@ jobs:
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
         # If you wish to specify custom queries, you can do so here or in a config file.
@@ -50,7 +50,7 @@ jobs:
     # 📚 https://git.io/JvXDl
       
     - name: Install requirements
-      run: sudo apt install libudisks2-dev libxml2-dev python libpam0g-dev pkg-config gir1.2-glib-2.0 libglib2.0-dev
+      run: sudo apt install libudisks2-dev libxml2-dev python-is-python3 libpam0g-dev pkg-config gir1.2-glib-2.0 libglib2.0-dev
     - name: make
       run: make
     #- run: |
@@ -58,4 +58,4 @@ jobs:
     #   make release
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2

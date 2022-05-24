@@ -37,25 +37,34 @@ static FILE *pusb_pad_open_device(t_pusb_options *opts,
 		const char *mode)
 {
 	FILE		*f;
-	char		path[PATH_MAX];
+	char		path_devpad[(sizeof(mnt_point) + sizeof(opts->device_pad_directory) + 2)];
+	char		path_userpad[(
+		sizeof(mnt_point) +
+		sizeof(opts->device_pad_directory) +
+		sizeof(opts->hostname) +
+		sizeof(user) +
+		7
+	)];
 	struct stat	sb;
 
-	memset(path, 0x00, PATH_MAX);
-	snprintf(path, PATH_MAX, "%s/%s", mnt_point, opts->device_pad_directory);
-	if (stat(path, &sb) != 0)
+	memset(path_devpad, 0x00, sizeof(path_devpad));
+	memset(path_userpad, 0x00, sizeof(path_userpad));
+
+	snprintf(path_devpad, sizeof(path_devpad), "%s/%s", mnt_point, opts->device_pad_directory);
+	if (stat(path_devpad, &sb) != 0)
 	{
-		log_debug("Directory %s does not exist, creating one.\n", path);
-		if (mkdir(path, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
+		log_debug("Directory %s does not exist, creating one.\n", path_devpad);
+		if (mkdir(path_devpad, S_IRUSR | S_IWUSR | S_IXUSR) != 0)
 		{
-			log_debug("Unable to create directory %s: %s\n", path,
+			log_debug("Unable to create directory %s: %s\n", path_devpad,
 					strerror(errno));
 			return (NULL);
 		}
-		memset(path, 0x00, PATH_MAX);
 	}
-	snprintf(path, PATH_MAX, "%s/%s/%s.%s.pad", mnt_point,
+
+	snprintf(path_userpad, sizeof(path_userpad), "%s/%s/%s.%s.pad", mnt_point,
 			opts->device_pad_directory, user, opts->hostname);
-	f = fopen(path, mode);
+	f = fopen(path_userpad, mode);
 	if (!f)
 	{
 		log_debug("Cannot open device file: %s\n", strerror(errno));
@@ -69,10 +78,9 @@ static FILE *pusb_pad_open_system(t_pusb_options *opts,
 		const char *mode)
 {
 	FILE			*f;
-	char			path[PATH_MAX];
 	struct passwd	*user_ent = NULL;
 	struct stat		sb;
-	char   device_name[PATH_MAX];
+	char   device_name[128];
 	char * device_name_ptr = device_name;
 
 	if (!(user_ent = getpwnam(user)) || !(user_ent->pw_dir))
@@ -82,8 +90,10 @@ static FILE *pusb_pad_open_system(t_pusb_options *opts,
 				strerror(errno));
 		return (0);
 	}
-	memset(path, 0x00, PATH_MAX);
-	snprintf(path, PATH_MAX, "%s/%s", user_ent->pw_dir,
+
+	char path[(sizeof(user_ent->pw_dir) + sizeof(opts->system_pad_directory) + sizeof(device_name) + 1)];
+	memset(path, 0x00, sizeof(path));
+	snprintf(path, sizeof(path), "%s/%s", user_ent->pw_dir,
 			opts->system_pad_directory);
 	if (stat(path, &sb) != 0)
 	{
@@ -94,18 +104,22 @@ static FILE *pusb_pad_open_system(t_pusb_options *opts,
 					strerror(errno));
 			return (NULL);
 		}
-		chown(path, user_ent->pw_uid, user_ent->pw_gid);
+
+		if(chown(path, user_ent->pw_uid, user_ent->pw_gid) != 0) {
+			log_error("Unable to chown directory %s: %s\n", path, strerror(errno));
+		}
+
 		chmod(path, S_IRUSR | S_IWUSR | S_IXUSR);
 	}
 	/* change slashes in device name to underscores */
-	strcpy(device_name, opts->device.name);
+	snprintf(device_name, sizeof(opts->device.name), "%s", opts->device.name);
 	while(*device_name_ptr) {
 		if('/' == *device_name_ptr) *device_name_ptr = '_';
 		device_name_ptr++;
 	}
 
-	memset(path, 0x00, PATH_MAX);
-	snprintf(path, PATH_MAX, "%s/%s/%s.pad", user_ent->pw_dir,
+	memset(path, 0x00, sizeof(path));
+	snprintf(path, sizeof(path), "%s/%s/%s.pad", user_ent->pw_dir,
 			opts->system_pad_directory, device_name);
 	f = fopen(path, mode);
 	if (!f)
@@ -193,7 +207,6 @@ static void pusb_pad_update(t_pusb_options *opts,
 	FILE	*f_device = NULL;
 	FILE	*f_system = NULL;
 	char	magic[1024];
-	int		i;
 	unsigned int seed;
 	int devrandom;
 
@@ -227,19 +240,34 @@ static void pusb_pad_update(t_pusb_options *opts,
 	}
 	if (devrandom > 0)
 		close(devrandom);
-	srand(seed);
-	for (i = 0; i < sizeof(magic); ++i)
-		magic[i] = (char)rand();
+
+	generateRandom(magic, sizeof(magic));
+
 	log_debug("Writing pad to the device...\n");
 	fwrite(magic, sizeof(char), sizeof(magic), f_system);
 	log_debug("Writing pad to the system...\n");
 	fwrite(magic, sizeof(char), sizeof(magic), f_device);
 	log_debug("Synchronizing filesystems...\n");
-	fsync(f_system);
-	fsync(f_device);
+	fsync(fileno(f_system));
+	fsync(fileno(f_device));
 	fclose(f_system);
 	fclose(f_device);
 	log_debug("One time pads updated.\n");
+}
+
+void generateRandom(char* output, int sizeBytes)
+{
+	// Based on https://www.cyrill-gremaud.ch/howto-generate-secure-random-number-on-nix/
+	int fd, bytes_read;
+
+	if((fd = open("/dev/random", O_RDONLY)) == -1)
+		log_error("impossible to read randomness source\n");
+
+	bytes_read = read(fd, output, sizeBytes);
+	if (bytes_read != sizeBytes)
+		log_debug("read() failed (%d bytes read)\n", bytes_read);
+
+	close(fd);
 }
 
 static int pusb_pad_compare(t_pusb_options *opts, const char *volume,
@@ -250,6 +278,7 @@ static int pusb_pad_compare(t_pusb_options *opts, const char *volume,
 	char	magic_device[1024];
 	char	magic_system[1024];
 	int		retval;
+	size_t  bytes_read;
 
 	if (!(f_system = pusb_pad_open_system(opts, user, "r")))
 		return (1);
@@ -259,12 +288,27 @@ static int pusb_pad_compare(t_pusb_options *opts, const char *volume,
 		return (0);
 	}
 	log_debug("Loading device pad...\n");
-	fread(magic_device, sizeof(char), sizeof(magic_device), f_device);
+	bytes_read = fread(magic_device, sizeof(char), sizeof(magic_device), f_device);
+	if (!bytes_read) {
+		log_error("Can't read device pad!\n");
+		fclose(f_system);
+		fclose(f_device);
+		return (0);
+	}
+
 	log_debug("Loading system pad...\n");
-	fread(magic_system, sizeof(char), sizeof(magic_system), f_system);
+	bytes_read = fread(magic_system, sizeof(char), sizeof(magic_system), f_system);
+	if (!bytes_read) {
+		log_error("Can't read system pad!\n");
+		fclose(f_system);
+		fclose(f_device);
+		return (0);
+	}
+
 	retval = memcmp(magic_system, magic_device, sizeof(magic_system));
 	fclose(f_system);
 	fclose(f_device);
+
 	if (!retval)
 		log_debug("Pad match.\n");
 	return (retval == 0);
