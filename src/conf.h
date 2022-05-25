@@ -11,13 +11,13 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA  02111-1307  USA
+ * this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
+ * Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef PUSB_CONF_H_
 # define PUSB_CONF_H_
-# define PUSB_CONF_FILE "/etc/pamusb.conf"
+# define PUSB_CONF_FILE "/etc/security/pam_usb.conf"
 # define CONF_DEVICE_XPATH "//configuration/devices/device[@id='%s']/%s"
 # define CONF_USER_XPATH "//configuration/users/user[@id='%s']/%s"
 # define CONF_SERVICE_XPATH "//configuration/services/service[@id='%s']/%s"

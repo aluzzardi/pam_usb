@@ -11,15 +11,23 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA  02111-1307  USA
+ * this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
+ * Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef VOLUME_H_
 # define VOLUME_H_
-# include "hal.h"
+# include <udisks/udisks.h>
 
-char *pusb_volume_get(t_pusb_options *opts, DBusConnection *dbus);
-void pusb_volume_destroy(char *mntpoint);
+typedef struct pusb_volume
+{
+	UDisksFilesystem *filesystem;
+	int unmount;
+	char *device;
+	char *mount_point;
+} t_pusb_volume;
+
+t_pusb_volume *pusb_volume_get(t_pusb_options *opts, UDisksClient *udisks);
+void pusb_volume_destroy(t_pusb_volume *volume);
 
 #endif /* !VOLUME_H_ */

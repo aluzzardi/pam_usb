@@ -11,13 +11,14 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA  02111-1307  USA
+ * this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
+ * Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #ifndef PUSB_OTP_H_
 # define PUSB_OTP_H_
+# include <udisks/udisks.h>
 
-int pusb_pad_check(t_pusb_options *opts, DBusConnection *dbus, const char *user);
+int pusb_pad_check(t_pusb_options *opts, UDisksClient *udisks, const char *user);
 
 #endif /* !PUSB_OTP_H_ */

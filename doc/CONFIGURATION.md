@@ -299,7 +299,7 @@ Example:
 Location of the configuration file
 ----------------------------------
 
-By default, pam_usb.so and its tools will look for the configuration file at `/etc/pamusb.conf`. 
+By default, pam_usb.so and its tools will look for the configuration file at `/etc/security/pam_usb.conf`. 
 
 If you want to use a different location, you will have to use the `-c` flag.
 

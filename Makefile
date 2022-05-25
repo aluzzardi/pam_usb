@@ -2,21 +2,25 @@
 DEBUG		:= no
 
 PREFIX		?= /usr
-LIBDIR		?= lib
+ARCH := $(shell getconf LONG_BIT)
+ifeq ($(ARCH),64)
+	LIBDIR		:= lib64
+else
+	LIBDIR          := lib
+endif
 
 # compiler/linker options
 CC		:= gcc
 CFLAGS		:= $(CFLAGS) -Wall -fPIC `pkg-config --cflags libxml-2.0` \
-	`pkg-config --cflags dbus-1`
+	`pkg-config --cflags udisks2`
 LIBS		:= `pkg-config --libs libxml-2.0` \
-	`pkg-config --libs dbus-1`
+	`pkg-config --libs udisks2`
 
 # common source files
 SRCS		:= src/conf.c \
 		   src/mem.c \
 		   src/log.c \
 		   src/xpath.c \
-		   src/hal.c \
 		   src/pad.c \
 		   src/volume.c \
 		   src/local.c \
@@ -37,17 +41,17 @@ PAMUSB_CHECK		:= pamusb-check
 
 # Tools
 PAMUSB_CONF		:= pamusb-conf
-PAMUSB_AGENT	:= pamusb-agent
+PAMUSB_AGENT		:= pamusb-agent
 TOOLS_DEST		:= $(DESTDIR)$(PREFIX)/bin
 TOOLS_SRC		:= tools
 
 # Conf
-CONFS			:= doc/pamusb.conf
-CONFS_DEST		:= $(DESTDIR)/etc
+CONFS			:= doc/pam_usb.conf
+CONFS_DEST		:= $(DESTDIR)/etc/security
 
 # Doc
 DOCS		:= doc/CONFIGURATION.md
-DOCS_DEST	:= $(DESTDIR)$(PREFIX)/share/doc/pamusb
+DOCS_DEST	:= $(DESTDIR)$(PREFIX)/share/doc/pam_usb
 
 # Man
 MANS		:= doc/pamusb-conf.1.gz doc/pamusb-agent.1.gz doc/pamusb-check.1.gz
@@ -88,4 +92,4 @@ deinstall	:
 		$(RM) -f $(PAM_USB_DEST)/$(PAM_USB)
 		$(RM) -f $(TOOLS_DEST)/$(PAMUSB_CHECK) $(TOOLS_DEST)/$(PAMUSB_CONF) $(TOOLS_DEST)/$(PAMUSB_AGENT)
 		$(RM) -rf $(DOCS_DEST)
-		$(RM) -f $(MANS_DEST)/pusb_*
+		$(RM) -f $(MANS_DEST)/pamusb-*\.1\.gz
