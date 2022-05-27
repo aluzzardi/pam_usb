@@ -80,6 +80,7 @@ INSTALL		:= install
 MKDIR		:= mkdir
 DEBUILD := debuild -b -uc -us --lintian-opts --profile debian
 RPMBUILD := rpmbuild -v -bb --clean fedora/SPECS/pam_usb.spec
+ZSTBUILD := cd arch_linux && makepkg && cd ..
 MANCOMPILE := gzip -kf
 DOCKER := docker
 
@@ -126,14 +127,18 @@ changelog :
 debchangelog : 
 		git log --pretty=format:"  * %s (%an <%ae>)" --date=short 40b17fa..HEAD > changelog-for-deb
 
-deb : clean
+builddir :
+	mkdir -p .build > /dev/null 2>&1 || echo 0
+
+deb : clean builddir
 	$(DEBUILD)
 
 deb-sign : build-debian
 	debsign -S -k$(APT_SIGNING_KEY) `ls -t .build/*.changes | head -1`
 
-rpm : clean
+rpm : clean builddir
 	$(RPMBUILD)
+	yes | cp -rf fedora/RPMS/$(ARCH)/*.rpm .build
 
 rpm-sign: build-fedora
 	rpm --addsign `ls -t .build/*.rpm | head -1`
@@ -141,25 +146,41 @@ rpm-sign: build-fedora
 rpm-lint: build-fedora
 	rpmlint `ls -t .build/*.rpm | head -1`
 
+zst: clean builddir
+	rm -f arch_linux/*.zst ../pamusb.tar.gz
+	tar --exclude="arch_linux" --exclude=".build" --exclude=".idea" --exclude=".vscode" --exclude="fedora" --exclude="tests" --exclude=".github" -zcvf ../pamusb.tar.gz . 
+	mv ../pamusb.tar.gz arch_linux/pamusb.tar.gz
+	$(ZSTBUILD)
+	yes | cp -rf arch_linux/*.zst .build
+	rm -rf arch_linux/src arch_linux/pkg arch_linux/pamusb.tar.gz arch_linux/*.zst
+
 buildenv-debian :
 	$(DOCKER) build -f Dockerfile.debian -t mcdope/pam_usb-ubuntu-build .
 
 buildenv-fedora :
 	$(DOCKER) build -f Dockerfile.fedora -t mcdope/pam_usb-fedora-build .
 
+buildenv-arch :
+	$(DOCKER) build -f Dockerfile.arch -t mcdope/pam_usb-arch-build .
+
 build-debian : buildenv-debian
-	mkdir -p .build
 	$(DOCKER) run -i \
 		-v`pwd`/.build:/usr/local/src \
 		-v`pwd`:/usr/local/src/pam_usb \
 		--rm mcdope/pam_usb-ubuntu-build \
-		sh -c "make deb && chown -R $(UID):$(GID) .build/libpam-usb* debian"
+		sh -c "make deb && chown -R $(UID):$(GID) .build debian"
 
 build-fedora : buildenv-fedora
-	mkdir -p .build
 	$(DOCKER) run -i \
 		-v`pwd`/.build:/usr/local/src \
 		-v`pwd`:/usr/local/src/pam_usb \
 		--rm mcdope/pam_usb-fedora-build \
-		sh -c "make rpm && chown $(UID):$(GID) ./.build/pam_usb* && chown -R $(UID):$(GID) .build/pam_usb* fedora"
-	yes | cp -rf fedora/RPMS/$(ARCH)/*.rpm .build
+		sh -c "make rpm && chown -R $(UID):$(GID) .build fedora"
+
+build-arch : buildenv-arch
+	$(DOCKER) run -i \
+		-v`pwd`/.build:/usr/local/src \
+		-v`pwd`:/usr/local/src/pam_usb \
+		--rm mcdope/pam_usb-arch-build \
+		sh -c "chown -R builduser:builduser . && sudo -u builduser make zst && chown -R $(UID):$(GID) ."
+	
