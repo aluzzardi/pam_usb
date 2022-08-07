@@ -6,6 +6,7 @@ ARCH := $(shell uname -m)
 UID := $(shell id -u)
 GID := $(shell id -g)
 USE_FEDORA_LIBDIR := $(shell test -d /lib64/security && echo 1 || echo 0)
+VERSION := $(shell git for-each-ref --sort=creatordate --format '%(tag)' refs/tags | tail -n 1).$(shell git rev-list --count $(shell git for-each-ref --sort=creatordate --format '%(tag)' refs/tags | tail -n 1)..HEAD)
 
 ifeq ($(ARCH), x86_64)
 	ifeq ($(USE_FEDORA_LIBDIR), 1)
@@ -146,13 +147,32 @@ rpm-sign: build-fedora
 rpm-lint: build-fedora
 	rpmlint `ls -t .build/*.rpm | head -1`
 
-zst: clean builddir
+zst: clean builddir sourcegz
 	rm -f arch_linux/*.zst ../pamusb.tar.gz
-	tar --exclude="arch_linux" --exclude=".build" --exclude=".idea" --exclude=".vscode" --exclude="fedora" --exclude="tests" --exclude=".github" -zcvf ../pamusb.tar.gz . 
-	mv ../pamusb.tar.gz arch_linux/pamusb.tar.gz
+	mv .build/pam_usb-$(VERSION).tar.gz arch_linux/pamusb.tar.gz
 	$(ZSTBUILD)
 	yes | cp -rf arch_linux/*.zst .build
 	rm -rf arch_linux/src arch_linux/pkg arch_linux/pamusb.tar.gz arch_linux/*.zst
+
+sourcegz: clean builddir
+	tar --exclude="debian/.debhelper" \
+		--exclude="debian/files" \
+		--exclude="debian/libpam-usb/*" \
+		--exclude="debian/libpam-usb.debhelper.log" \
+		--exclude="debian/libpam-usb.substvars" \
+		--exclude="debian/debhelper-build-stamp" \
+		--exclude="debian/libpam-usb.postinst.debhelper" \
+		--exclude="debian/libpam-usb.postrm.debhelper" \
+		--exclude="debian/libpam-usb.prerm.debhelper" \
+		--exclude="fedora/RPMS/x86_64" \
+		--exclude="fedora/BUILD/*" \
+		--exclude="tests" \
+		--exclude=".build" \
+		--exclude=".idea" \
+		--exclude=".vscode" \
+		--exclude=".github" \
+		--exclude=".git" \
+		-zcvf .build/pam_usb-$(VERSION).tar.gz .
 
 buildenv-debian :
 	$(DOCKER) build -f Dockerfile.debian -t mcdope/pam_usb-ubuntu-build .
