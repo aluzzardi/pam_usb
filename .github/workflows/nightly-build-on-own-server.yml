@@ -1,4 +1,4 @@
-name: Nightly packaging (tar.gz, deb, rpm, zst)
+name: Nightly builds (tar.gz, deb, rpm, zst)
 
 on:
   schedule:
