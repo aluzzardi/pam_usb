@@ -99,8 +99,7 @@ def shouldSave(options, items):
 	if options['yes'] is False:
 		print("\n".join(["%s\t\t: %s" % item for item in items]))
 		print()
-		print('Save to %s ?' % options['configFile'])
-		sys.stdout.write('[Y/n] ')
+		print('Save to %s? [Y/n]' % options['configFile'])
 		response = sys.stdin.readline().strip()
 		if len(response) > 0 and response.lower() != 'y':
 			sys.exit(1)
