@@ -28,15 +28,14 @@
 
 static int pusb_device_connected(t_pusb_options *opts, UDisksClient *udisks)
 {
-	GDBusObjectManager	*manager = udisks_client_get_object_manager(udisks);
-	GList			*objects = g_dbus_object_manager_get_objects(manager);
-	int			retval = 0;
-	int			i;
-	UDisksObject		*object = NULL;
-	UDisksDrive		*drive = NULL;
+	GDBusObjectManager *manager = udisks_client_get_object_manager(udisks);
+	GList *objects = g_dbus_object_manager_get_objects(manager);
+	int retval = 0;
+	int	i;
+	UDisksObject *object = NULL;
+	UDisksDrive *drive = NULL;
 
-	log_debug("Searching for \"%s\" in the hardware database...\n",
-			opts->device.name);
+	log_debug("Searching for \"%s\" in the hardware database...\n", opts->device.name);
 
 	for (i = 0; i < g_list_length(objects); ++i)
 	{
@@ -46,26 +45,31 @@ static int pusb_device_connected(t_pusb_options *opts, UDisksClient *udisks)
 			drive = udisks_object_get_drive(object);
 			retval = strcmp(udisks_drive_get_serial(drive), opts->device.serial) == 0;
 			
-			if (strcmp(opts->device.vendor, "Generic") != 0) {
+			if (strcmp(opts->device.vendor, "Generic") != 0) 
+			{
 				retval = retval && strcmp(udisks_drive_get_vendor(drive), opts->device.vendor) == 0;
 			}
 
-			if (strcmp(opts->device.model, "Generic") != 0) {
+			if (strcmp(opts->device.model, "Generic") != 0) 
+			{
 				retval = retval && strcmp(udisks_drive_get_model(drive), opts->device.model) == 0;
 			}
 			
 			g_object_unref(drive);
-			if (retval)
+			if (retval) {
 				break;
+			}
 		}
 	}
 
-	if (retval)
-		log_info("Authentication device \"%s\" is connected.\n",
-				opts->device.name);
-	else
-		log_error("Authentication device \"%s\" is not connected.\n",
-				opts->device.name);
+	if (retval) 
+	{
+		log_info("Authentication device \"%s\" is connected.\n", opts->device.name);
+	}
+	else 
+	{
+		log_error("Authentication device \"%s\" is not connected.\n", opts->device.name);
+	}
 
 	g_list_foreach(objects, (GFunc) g_object_unref, NULL);
 	g_list_free(objects);
@@ -75,8 +79,8 @@ static int pusb_device_connected(t_pusb_options *opts, UDisksClient *udisks)
 
 int pusb_device_check(t_pusb_options *opts, const char *user)
 {
-	UDisksClient	*udisks = NULL;
-	int		retval = 0;
+	UDisksClient *udisks = NULL;
+	int retval = 0;
 
 	udisks = udisks_client_new_sync(NULL, NULL);
 

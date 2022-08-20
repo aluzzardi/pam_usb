@@ -26,20 +26,23 @@
 #include "device.h"
 
 PAM_EXTERN
-int pam_sm_authenticate(pam_handle_t *pamh, int flags,
-		int argc, const char **argv)
+int pam_sm_authenticate(
+	pam_handle_t *pamh,
+	int flags,
+	int argc,
+	const char **argv
+)
 {
-	t_pusb_options	opts;
-	const char		*service;
-	const char		*user;
-	const char		*rhost;
-	char			*conf_file = PUSB_CONF_FILE;
-	int				retval;
+	t_pusb_options opts;
+	const char *service;
+	const char *user;
+	const char *rhost;
+	char *conf_file = PUSB_CONF_FILE;
+	int retval;
 
 	pusb_log_init(&opts);
 
-	retval = pam_get_item(pamh, PAM_SERVICE,
-			(const void **)(const void *)&service);
+	retval = pam_get_item(pamh, PAM_SERVICE, (const void **)(const void *)&service);
 	if (retval != PAM_SUCCESS)
 	{
 		log_error("Unable to retrieve the PAM service name.\n");
@@ -52,13 +55,20 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 		return (PAM_AUTH_ERR);
 	}
 
-	if (argc > 1)
-		if (!strcmp(argv[0], "-c"))
-			conf_file = (char *)argv[1];
+	if (argc > 1 && !strcmp(argv[0], "-c"))
+	{
+		conf_file = (char *)argv[1];
+	}
+
 	if (!pusb_conf_init(&opts))
+	{
 		return (PAM_AUTH_ERR);
+	}
+
 	if (!pusb_conf_parse(conf_file, &opts, user, service))
+	{
 		return (PAM_AUTH_ERR);
+	}
 
 	if (!opts.enable)
 	{
@@ -66,20 +76,22 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 		return (PAM_IGNORE);
 	}
 
-	if (opts.deny_remote) {
+	if (opts.deny_remote) 
+	{
 		retval = pam_get_item(pamh, PAM_RHOST, (const void **)(const void *)&rhost);
 		if (retval != PAM_SUCCESS)
 		{
 			log_error("Unable to retrieve PAM_RHOST.\n");
 			return (PAM_AUTH_ERR);
-		} else if (rhost != NULL && strcmp(rhost, "") != 0) {
+		} 
+		else if (rhost != NULL && strcmp(rhost, "") != 0) 
+		{
 			log_debug("RHOST is set (%s), must be a remote request - disabling myself for this request!\n", rhost);
 			return (PAM_IGNORE);
 		}
 	}
 
-	log_info("Authentication request for user \"%s\" (%s)\n",
-			user, service);
+	log_info("Authentication request for user \"%s\" (%s)\n", user, service);
 
 	if (pusb_local_login(&opts, user, service) != 1)
 	{
@@ -96,27 +108,34 @@ int pam_sm_authenticate(pam_handle_t *pamh, int flags,
 }
 
 PAM_EXTERN
-int pam_sm_setcred(pam_handle_t *pamh,int flags,int argc,
-		const char **argv)
+int pam_sm_setcred(
+	pam_handle_t *pamh,
+	int flags,
+	int argc,
+	const char **argv
+)
 {
 	return (PAM_SUCCESS);
 }
 
 PAM_EXTERN
-int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags,
-		int argc, const char **argv)
+int pam_sm_acct_mgmt(
+	pam_handle_t *pamh,
+	int flags,
+	int argc,
+	const char **argv
+)
 {
-	t_pusb_options	opts;
-	const char		*service;
-	const char		*user;
-	const char		*rhost;
-	char			*conf_file = PUSB_CONF_FILE;
-	int				retval;
+	t_pusb_options opts;
+	const char *service;
+	const char *user;
+	const char *rhost;
+	char *conf_file = PUSB_CONF_FILE;
+	int retval;
 
 	pusb_log_init(&opts);
 
-	retval = pam_get_item(pamh, PAM_SERVICE,
-			(const void **)(const void *)&service);
+	retval = pam_get_item(pamh, PAM_SERVICE, (const void **)(const void *)&service);
 	if (retval != PAM_SUCCESS)
 	{
 		log_error("Unable to retrieve the PAM service name.\n");
@@ -129,13 +148,20 @@ int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags,
 		return (PAM_AUTH_ERR);
 	}
 
-	if (argc > 1)
-		if (!strcmp(argv[0], "-c"))
-			conf_file = (char *)argv[1];
+	if (argc > 1 && !strcmp(argv[0], "-c"))
+	{
+		conf_file = (char *)argv[1];
+	}
+
 	if (!pusb_conf_init(&opts))
+	{
 		return (PAM_AUTH_ERR);
+	}
+
 	if (!pusb_conf_parse(conf_file, &opts, user, service))
+	{
 		return (PAM_AUTH_ERR);
+	}
 
 	if (!opts.enable)
 	{
@@ -143,21 +169,23 @@ int pam_sm_acct_mgmt(pam_handle_t *pamh, int flags,
 		return (PAM_IGNORE);
 	}
 
-	if (opts.deny_remote) {
+	if (opts.deny_remote) 
+	{
 		retval = pam_get_item(pamh, PAM_RHOST, (const void **)(const void *)&rhost);
 		if (retval != PAM_SUCCESS)
 		{
 			log_error("Unable to retrieve PAM_RHOST.\n");
 			return (PAM_AUTH_ERR);
-		} else if (rhost != NULL) {
+		} 
+		else if (rhost != NULL) 
+		{
 			log_debug("RHOST is set (%s), must be a remote request - disabling myself for this request!\n", rhost);
 			return (PAM_IGNORE);
 		}
 	}
 
 	log_info("pam_usb v%s\n", PUSB_VERSION);
-	log_info("Account request for user \"%s\" (%s)\n",
-			user, service);
+	log_info("Account request for user \"%s\" (%s)\n", user, service);
 
 	if (pusb_local_login(&opts, user, service) != 1)
 	{

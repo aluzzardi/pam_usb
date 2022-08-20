@@ -24,8 +24,8 @@
 
 static xmlXPathObject *pusb_xpath_match(xmlDocPtr doc, const char *path)
 {
-	xmlXPathContext	*context = NULL;
-	xmlXPathObject	*result = NULL;
+	xmlXPathContext *context = NULL;
+	xmlXPathObject *result = NULL;
 
 	context = xmlXPathNewContext(doc);
 	if (context == NULL)
@@ -48,25 +48,31 @@ static xmlXPathObject *pusb_xpath_match(xmlDocPtr doc, const char *path)
 	return (result);
 }
 
-static int pusb_xpath_strip_string(char *dest, const char *src,
-		size_t size)
+static int pusb_xpath_strip_string(char *dest, const char *src, size_t size)
 {
-	int		first_char = -1;
-	int		last_char = -1;
-	int		i;
+	int first_char = -1;
+	int last_char = -1;
+	int i;
 
 	for (i = 0; src[i]; ++i)
 	{
 		if (isspace(src[i]))
-			continue ;
+		{
+			continue;
+		}
 
 		if (first_char == -1)
+		{
 			first_char = i;
+		}
+
 		last_char = i;
 	}
 
 	if (first_char == -1 || last_char == -1)
+	{
 		return (0);
+	}
 
 	if ((last_char - first_char) > (size - 1))
 	{
@@ -79,15 +85,21 @@ static int pusb_xpath_strip_string(char *dest, const char *src,
 	return (1);
 }
 
-int pusb_xpath_get_string(xmlDocPtr doc, const char *path,
-		char *value, size_t size)
+int pusb_xpath_get_string(
+	xmlDocPtr doc, 
+	const char *path,
+	char *value, 
+	size_t size
+)
 {
-	xmlXPathObject	*result = NULL;
-	xmlNode			*node = NULL;
-	xmlChar			*result_string = NULL;
+	xmlXPathObject *result = NULL;
+	xmlNode *node = NULL;
+	xmlChar *result_string = NULL;
 
 	if (!(result = pusb_xpath_match(doc, path)))
+	{
 		return (0);
+	}
 
 	if (result->nodesetval->nodeNr > 1)
 	{
@@ -108,8 +120,7 @@ int pusb_xpath_get_string(xmlDocPtr doc, const char *path,
 	{
 		xmlFree(result_string);
 		xmlXPathFreeObject(result);
-		log_debug("Result for %s (%s) is too long (max: %d)\n",
-				path, (const char *)result_string, size);
+		log_debug("Result for %s (%s) is too long (max: %d)\n", path, (const char *)result_string, size);
 		return (0);
 	}
 	xmlFree(result_string);
@@ -117,14 +128,17 @@ int pusb_xpath_get_string(xmlDocPtr doc, const char *path,
 	return (1);
 }
 
-int pusb_xpath_get_string_from(xmlDocPtr doc,
-		const char *base,
-		const char *path,
-		char *value, size_t size)
+int pusb_xpath_get_string_from(
+	xmlDocPtr doc,
+	const char *base,
+	const char *path,
+	char *value, 
+	size_t size
+)
 {
-	char	*xpath = NULL;
-	size_t	xpath_size;
-	int		retval;
+	char *xpath = NULL;
+	size_t xpath_size;
+	int retval;
 
 	xpath_size = strlen(base) + strlen(path) + 1;
 	xpath = xmalloc(xpath_size);
@@ -132,17 +146,22 @@ int pusb_xpath_get_string_from(xmlDocPtr doc,
 	snprintf(xpath, xpath_size, "%s%s", base, path);
 	retval = pusb_xpath_get_string(doc, xpath, value, size);
 	if (retval)
+	{
 		log_debug("%s%s -> %s\n", base, path, value);
+	}
+
 	xfree(xpath);
 	return (retval);
 }
 
 int pusb_xpath_get_bool(xmlDocPtr doc, const char *path, int *value)
 {
-	char	ret[6]; /* strlen("false") + 1 */
+	char ret[6]; /* strlen("false") + 1 */
 
 	if (!pusb_xpath_get_string(doc, path, ret, sizeof(ret)))
+	{
 		return (0);
+	}
 
 	if (!strcmp(ret, "true"))
 	{
@@ -160,14 +179,16 @@ int pusb_xpath_get_bool(xmlDocPtr doc, const char *path, int *value)
 	return (0);
 }
 
-int pusb_xpath_get_bool_from(xmlDocPtr doc,
-		const char *base,
-		const char *path,
-		int *value)
+int pusb_xpath_get_bool_from(
+	xmlDocPtr doc,
+	const char *base,
+	const char *path,
+	int *value
+)
 {
-	char	*xpath = NULL;
-	size_t	xpath_size;
-	int		retval;
+	char *xpath = NULL;
+	size_t xpath_size;
+	int retval;
 
 	xpath_size = strlen(base) + strlen(path) + 1;
 	xpath = xmalloc(xpath_size);
@@ -180,44 +201,58 @@ int pusb_xpath_get_bool_from(xmlDocPtr doc,
 
 int pusb_xpath_get_time(xmlDocPtr doc, const char *path, time_t *value)
 {
-	char	ret[64];
-	char	*last;
-	int		coef;
+	char ret[64];
+	char *last;
+	int coef;
 
 	if (!pusb_xpath_get_string(doc, path, ret, sizeof(ret)))
+	{
 		return (0);
+	}
 
 	last = &(ret[strlen(ret) - 1]);
 	coef = 1;
 	if (*last == 's')
+	{
 		coef = 1;
+	}
 	else if (*last == 'm')
+	{
 		coef = 60;
+	}
 	else if (*last == 'h')
+	{
 		coef = 3600;
+	}
 	else if (*last == 'd')
+	{
 		coef = 3600 * 24;
-	else
-		if (!isdigit(*last))
-		{
-			log_debug("Expecting a time modifier, got %c\n", *last);
-			return (0);
-		}
+	}
+	else if (!isdigit(*last))
+	{
+		log_debug("Expecting a time modifier, got %c\n", *last);
+		return (0);
+	}
 	if (!isdigit(*last))
+	{
 		*last = '\0';
+	}
+
 	*value = (time_t) atoi(ret) * coef;
 
 	return (0);
 }
 
-int pusb_xpath_get_time_from(xmlDocPtr doc,
-		const char *base,
-		const char *path,
-		time_t *value)
+int pusb_xpath_get_time_from(
+	xmlDocPtr doc,
+	const char *base,
+	const char *path,
+	time_t *value
+)
 {
-	char	*xpath = NULL;
-	size_t	xpath_size;
-	int		retval;
+	char *xpath = NULL;
+	size_t xpath_size;
+	int retval;
 
 	xpath_size = strlen(base) + strlen(path) + 1;
 	xpath = xmalloc(xpath_size);
@@ -230,22 +265,27 @@ int pusb_xpath_get_time_from(xmlDocPtr doc,
 
 int pusb_xpath_get_int(xmlDocPtr doc, const char *path, int *value)
 {
-	char	ret[64];
+	char ret[64];
 
 	if (!pusb_xpath_get_string(doc, path, ret, sizeof(ret)))
+	{
 		return (0);
+	}
+
 	*value = atoi(ret);
 	return (1);
 }
 
-int pusb_xpath_get_int_from(xmlDocPtr doc,
-		const char *base,
-		const char *path,
-		int *value)
+int pusb_xpath_get_int_from(
+	xmlDocPtr doc,
+	const char *base,
+	const char *path,
+	int *value
+)
 {
-	char	*xpath = NULL;
-	size_t	xpath_size;
-	int		retval;
+	char *xpath = NULL;
+	size_t xpath_size;
+	int retval;
 
 	xpath_size = strlen(base) + strlen(path) + 1;
 	xpath = xmalloc(xpath_size);

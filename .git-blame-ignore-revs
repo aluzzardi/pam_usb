@@ -1,0 +1,39 @@
+# [Packaging] [Fedora] Spec formatting
+b7c9590337fa564bc86707ae876262c4dcb9e219
+
+# [pamusb-conf] Reformat
+49f301c03a8144016826ed85ba6326c077d5edd8
+
+# [pamusb-agent] Reformat
+4dd7a9726333c8b4105e09ca4cabc24ed1825dea
+
+# [xpath.c] Reformat
+9217c3ed6ae3bb22505dc1a2f563c81fb6183937
+
+# [volume.c] Reformat
+9ad9e51d20af564b247d53f8efd0cc84943ee684
+
+# [pamusb-check.c] Reformat
+c1c2be62c14dfed2f5a3e11049a57b95f35eb53b
+
+# [pam.c] Reformat
+dec02ce5c6cd73c68ceba681bbd9a352a533873b
+
+# [pad.c] Reformat
+47d17757d7a0b69366a26ba1de940936f026600b
+
+# [log.c] Reformat
+3fa77662c8dac5be33a72c8a83a2f8dcaf613404
+
+# [local.c] Reformat
+d4a98c46edc2287da71cadfe6b02ff8a8173f9ad
+
+# [device.c] Reformat
+1e81d9b47bc27deb6dc4fb07c50de6a6f67be459
+
+# [conf.c] Reformat
+90b83c09b1c75e427d0442a500ca07b5086297be
+
+# Makefile reformatting
+4446deb2f7fc84549bf65a1898791e2b2b0a26fb
+39afc22be4744f84d2107d6351270b089db68585

@@ -32,29 +32,30 @@
 
 static int pusb_volume_mount(t_pusb_volume *volume)
 {
-	GError			*error = NULL;
-	GVariant		*options = NULL;
-	GVariantBuilder		builder;
-	int			retval = 0;
-	const gchar *const	*mount_points = NULL;
+	GError *error = NULL;
+	GVariant *options = NULL;
+	GVariantBuilder builder;
+	int retval = 0;
+	const gchar *const *mount_points = NULL;
 
 	g_variant_builder_init(&builder, G_VARIANT_TYPE_VARDICT);
 	options = g_variant_builder_end(&builder);
 
 	log_debug("Attempting to mount device %s.\n", volume->device);
 
-	udisks_filesystem_call_mount_sync(volume->filesystem,
-			options,
-			&volume->mount_point,
-			NULL,
-			&error);
+	udisks_filesystem_call_mount_sync(
+		volume->filesystem,
+		options,
+		&volume->mount_point,
+		NULL,
+		&error
+	);
 
 	if (!error)
 	{
 		volume->unmount = 1;
 		retval = 1;
-		log_debug("Mounted device %s to %s.\n",
-				volume->device, volume->mount_point);
+		log_debug("Mounted device %s to %s.\n", volume->device, volume->mount_point);
 	}
 	else if (error->code == UDISKS_ERROR_ALREADY_MOUNTED)
 	{
@@ -62,8 +63,7 @@ static int pusb_volume_mount(t_pusb_volume *volume)
 		mount_points = udisks_filesystem_get_mount_points(volume->filesystem);
 		volume->mount_point = xstrdup(*mount_points);
 		retval = 1;
-		log_debug("Device %s mounted in between our probe and mount.\n",
-				volume->device);
+		log_debug("Device %s mounted in between our probe and mount.\n", volume->device);
 	}
 	else
 	{
@@ -71,22 +71,23 @@ static int pusb_volume_mount(t_pusb_volume *volume)
 	}
 
 	if (error)
+	{
 		g_error_free(error);
+	}
 
 	return (retval);
 }
 
-static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts,
-		UDisksClient *udisks)
+static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts, UDisksClient *udisks)
 {
-	t_pusb_volume		*volume = NULL;
-	int			maxtries = (opts->probe_timeout * 1000000) / 100000;
-	int			i;
-	int			j;
-	GList			*blocks = NULL;
-	UDisksBlock		*block = NULL;
-	UDisksObject		*object = NULL;
-	const gchar *const	*mount_points = NULL;
+	t_pusb_volume *volume = NULL;
+	int maxtries = (opts->probe_timeout * 1000000) / 100000;
+	int i;
+	int j;
+	GList *blocks = NULL;
+	UDisksBlock *block = NULL;
+	UDisksObject *object = NULL;
+	const gchar *const *mount_points = NULL;
 
 	if (!*(opts->device.volume_uuid))
 	{
@@ -94,15 +95,16 @@ static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts,
 		return (NULL);
 	}
 
-	log_debug("Searching for volume with uuid %s.\n",
-			opts->device.volume_uuid);
+	log_debug("Searching for volume with uuid %s.\n", opts->device.volume_uuid);
 
 	for (i = 0; i < maxtries; ++i)
 	{
 		blocks = udisks_client_get_block_for_uuid(udisks, opts->device.volume_uuid);
 
 		if (i == 1)
+		{
 			log_info("Probing volume (this could take a while)...\n");
+		}
 
 		for (j = 0; j < g_list_length(blocks); ++j)
 		{
@@ -120,7 +122,9 @@ static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts,
 				mount_points = udisks_filesystem_get_mount_points(volume->filesystem);
 				log_debug("Found mount points: %s\n", *mount_points);
 				if (mount_points && *mount_points)
+				{
 					volume->mount_point = xstrdup(*mount_points);
+				}
 
 				break;
 			}
@@ -140,8 +144,9 @@ static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts,
 	}
 
 	if (!volume)
-		log_debug("Could not find volume %s.\n",
-				opts->device.volume_uuid);
+	{
+		log_debug("Could not find volume %s.\n", opts->device.volume_uuid);
+	}
 
 	return (volume);
 }
@@ -151,12 +156,13 @@ t_pusb_volume *pusb_volume_get(t_pusb_options *opts, UDisksClient *udisks)
 	t_pusb_volume *volume = pusb_volume_probe(opts, udisks);
 
 	if (!volume)
+	{
 		return (NULL);
+	}
 
 	if (volume->mount_point)
 	{
-		log_debug("Volume %s is already mounted.\n",
-				opts->device.volume_uuid);
+		log_debug("Volume %s is already mounted.\n", opts->device.volume_uuid);
 		return (volume);
 	}
 
@@ -172,24 +178,26 @@ t_pusb_volume *pusb_volume_get(t_pusb_options *opts, UDisksClient *udisks)
 void pusb_volume_destroy(t_pusb_volume *volume)
 {
 	GVariantBuilder	builder;
-	GVariant	*options;
-	int		ret;
+	GVariant *options;
+	int ret;
 
 	if (volume->unmount)
 	{
 		g_variant_builder_init(&builder, G_VARIANT_TYPE_VARDICT);
 		options = g_variant_builder_end(&builder);
 
-		log_debug("Attempting to unmount %s from %s.\n",
-				volume->device, volume->mount_point);
+		log_debug("Attempting to unmount %s from %s.\n", volume->device, volume->mount_point);
 
-		ret = udisks_filesystem_call_unmount_sync(volume->filesystem,
-				options,
-				NULL,
-				NULL);
+		ret = udisks_filesystem_call_unmount_sync(
+			volume->filesystem,
+			options,
+			NULL,
+			NULL
+		);
 		if (!ret)
-			log_error("Unable to unmount %s from %s\n",
-				volume->device, volume->mount_point);
+		{
+			log_error("Unable to unmount %s from %s\n", volume->device, volume->mount_point);
+		}
 
 		log_debug("Unmount succeeded.\n");
 	}
