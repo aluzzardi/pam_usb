@@ -7,16 +7,22 @@ body:
         Thanks for taking the time to fill out this bug report!
   - type: input
     id: version
+    validations:
+      required: true
     attributes:
       label: Which version of pam_usb are you running?
       description: Please provide the version number, or commit hash for manual builds, you are currently running.
   - type: input
     id: distribution
+    validations:
+      required: true
     attributes:
       label: Which distribution are you using?
       description: Please provide the name (and for non-rolling release ones also the version) of your distribution.
   - type: input
     id: desktop
+    validations:
+      required: true
     attributes:
       label: Which login manager and desktop environment are you using?
       description: Please provide the name and version of your desktop environment, as well as the login manager.
@@ -30,18 +36,24 @@ body:
       required: true
   - type: textarea
     id: output_check
+    validations:
+      required: true
     attributes:
       label: Output of "pamusb-check --debug `whoami`"
       description: Please run "pamusb-check --debug `whoami`" in a terminal and provide the output. Will be auto-formatted by Github, no need for Backticks.
       render: shell
   - type: textarea
     id: output_w
+    validations:
+      required: true
     attributes:
       label: Output of "w"
       description: Please run "w" in a terminal and provide the output. Will be auto-formatted by Github, no need for Backticks.
       render: shell
   - type: textarea
     id: output_loginctl
+    validations:
+      required: true
     attributes:
       label: Output of "loginctl"
       description: Please run "loginctl" in a terminal and provide the output. Will be auto-formatted by Github, no need for Backticks.
