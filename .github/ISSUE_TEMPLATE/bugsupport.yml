@@ -1,7 +1,5 @@
 name: Bug Report / Support request
 description: File a bug report or request support
-title: ""
-labels: []
 body:
   - type: markdown
     attributes:
