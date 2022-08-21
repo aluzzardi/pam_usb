@@ -40,7 +40,7 @@ body:
       required: true
     attributes:
       label: Output of "pamusb-check --debug `whoami`"
-      description: Please run "pamusb-check --debug `whoami`" in a terminal and provide the output. Will be auto-formatted by Github, no need for Backticks.
+      description: Please run "pamusb-check --debug \`whoami\`" in a terminal and provide the output. Will be auto-formatted by Github, no need for Backticks.
       render: shell
   - type: textarea
     id: output_w
