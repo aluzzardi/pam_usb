@@ -1,7 +1,7 @@
 %define _topdir         /usr/local/src/pam_usb/fedora
 %define name            pam_usb 
 %define release         1
-%define version         0.8.2
+%define version         0.8.3
 %define buildroot       %{_topdir}/%{name}‑%{version}‑root
 
 BuildRoot: %{buildroot}
@@ -56,7 +56,16 @@ rm -rf %{buildroot}/usr/share/pam-configs
 %doc %attr(0644,root,root) /usr/share/doc/pam_usb/TROUBLESHOOTING
 
 %changelog
-* Sun May 22 2022 McDope <tobiasbaeumer@gmail.com> - 0.8.2-1
+* Tue Aug 30 2022 Tobias Bäumer <tobiasbaeumer@gmail.com> - 0.8.3-1
+- [Enhancement] Install pam-auth-update config only on systems having it
+- [Feature] pamusb-conf now has a --reset-pads=username option
+- [Bugfix] Fix RHOST check triggering on empty value
+- [Bugfix] Whitelist pamusb-agent for remoteness-check
+- [Bugfix] Fix "tty from displayserver" remoteness-check method
+- [Docs] Update manpages and text files
+- [Bugfix] Fix some usages of tmux being able to circumvent localcheck
+
+* Sun May 22 2022 Tobias Bäumer <tobiasbaeumer@gmail.com> - 0.8.2-1
 - First version being packaged for RPM
 - [Tools/Docs] Add pamusb-keyring-unlock-gnome, to allow unlocking the GNOME keyring (#11)
 - [Bugfix] Whitelist "login" service name to prevent insta-logout on TTY shells (#115)

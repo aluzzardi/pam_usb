@@ -1,3 +1,14 @@
+libpam-usb (0.8.3) unstable; urgency=medium
+  * [Feature] pamusb-conf now has a --reset-pads=username option
+  * [Bugfix] Fix debconf issues with devices having no revision set
+  * [Bugfix] Fix RHOST check triggering on empty value
+  * [Bugfix] Whitelist pamusb-agent for remoteness-check
+  * [Bugfix] Fix "tty from displayserver" remoteness-check method
+  * [Docs] Update manpages and text files
+  * [Bugfix] Fix some usages of tmux being able to circumvent localcheck
+
+ -- Tobias Bäumer <tobiasbaeumer@gmail.com>  Tue, 30 Aug 2022 21:00:00 +0200
+
 libpam-usb (0.8.2) unstable; urgency=medium
   * [Tools/Docs] Add pamusb-keyring-unlock-gnome, to allow unlocking the
   GNOME keyring (#11)
