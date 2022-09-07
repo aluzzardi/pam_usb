@@ -211,7 +211,7 @@ char *pusb_get_tty_by_loginctl()
     } 
 	else 
 	{
-        log_debug("		'loginctl' returned nothing.'\n");
+        log_debug("		'loginctl' returned nothing.\n");
         return (0);
     }
 }
@@ -352,7 +352,7 @@ int pusb_local_login(t_pusb_options *opts, const char *user, const char *service
 		} 
 		else 
 		{
-			log_debug("		Failed, no result while searching utmp for tty %s\n", loginctl_tty);
+			log_debug("		Failed, could not obtain tty from loginctl - see line before this for reason.\n", loginctl_tty);
 		}
 	}
 
