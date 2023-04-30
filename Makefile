@@ -27,7 +27,7 @@ OBJS		:= $(SRCS:.c=.o)
 PAM_USB_SRCS	:= src/pam.c
 PAM_USB_OBJS	:= $(PAM_USB_SRCS:.c=.o)
 PAM_USB			:= pam_usb.so
-PAM_USB_LDFLAGS	:= -shared
+PAM_USB_LDFLAGS	:= -shared -lpam
 PAM_USB_DEST	:= $(DESTDIR)/$(LIBDIR)/security
 
 # pamusb-check
