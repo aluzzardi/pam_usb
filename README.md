@@ -5,6 +5,16 @@ pam\_usb provides hardware authentication for Linux using ordinary USB Flash Dri
 
 It works with any application supporting PAM, such as _su_ and login managers (_GDM_, _KDM_).
 
+Important
+--------
+
+This repository is *UNMAINTAINED* for almost ten years by now. 
+
+You can find an up-to-date fork with many community improvements at https://github.com/mcdope/pam_usb, which also provides packages in `.deb`, `.rpm` and `.zst` format.
+
+Thanks to the whole community for keeping pam_usb alive.
+
+
 Features
 --------
 
