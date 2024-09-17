@@ -17,9 +17,18 @@
 
 #ifndef VOLUME_H_
 # define VOLUME_H_
-# include "hal.h"
+# include <udisks/udisks.h>
+# include "conf.h"
 
-char *pusb_volume_get(t_pusb_options *opts, DBusConnection *dbus);
-void pusb_volume_destroy(char *mntpoint);
+typedef struct pusb_volume
+{
+	UDisksFilesystem *filesystem;
+	int unmount;
+	char *device;
+	char *mount_point;
+} t_pusb_volume;
+
+t_pusb_volume *pusb_volume_get(t_pusb_options *opts, UDisksClient *udisks);
+void pusb_volume_destroy(t_pusb_volume *volume);
 
 #endif /* !VOLUME_H_ */
