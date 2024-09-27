@@ -11,8 +11,8 @@
  * details.
  *
  * You should have received a copy of the GNU General Public License along with
- * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA  02111-1307  USA
+ * this program; if not, write to the Free Software Foundation, Inc., 51 Franklin
+ * Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
 #include <stdio.h>
@@ -24,145 +24,177 @@
 #ifndef __GNU__
 #include <sys/mount.h>
 #endif
+
 #include "mem.h"
 #include "conf.h"
 #include "log.h"
-#include "hal.h"
 #include "volume.h"
 
-static int pusb_volume_mount(t_pusb_options *opts, char *udi,
-		DBusConnection *dbus)
+static int pusb_volume_mount(t_pusb_volume *volume)
 {
-	char		command[1024];
-	char		tempname[32];
-	const char	*devname;
+	GError			*error = NULL;
+	GVariant		*options = NULL;
+	GVariantBuilder		builder;
+	int			retval = 0;
+	const gchar *const	*mount_points = NULL;
 
-	snprintf(tempname, sizeof(tempname), "pam_usb%d", getpid());
-	if (!(devname = pusb_hal_get_string_property(dbus, udi, "DeviceFile")))
+	g_variant_builder_init(&builder, G_VARIANT_TYPE_VARDICT);
+	options = g_variant_builder_end(&builder);
+
+	log_debug("Attempting to mount device %s.\n", volume->device);
+
+	udisks_filesystem_call_mount_sync(volume->filesystem,
+			options,
+			&volume->mount_point,
+			NULL,
+			&error);
+
+	if (!error)
 	{
-		log_error("Unable to retrieve device filename\n");
-		return (0);
+		volume->unmount = 1;
+		retval = 1;
+		log_debug("Mounted device %s to %s.\n",
+				volume->device, volume->mount_point);
 	}
-	log_debug("Attempting to mount device %s with label %s\n",
-			devname, tempname);
-	snprintf(command, sizeof(command), "pmount -A -s %s %s",
-			 devname, tempname);
-	log_debug("Executing \"%s\"\n", command);
-	if (system(command) != 0)
+	else if (error->code == UDISKS_ERROR_ALREADY_MOUNTED)
 	{
-		log_error("Mount failed\n");
-		return (0);
+		g_main_context_iteration(NULL, FALSE);
+		mount_points = udisks_filesystem_get_mount_points(volume->filesystem);
+		volume->mount_point = xstrdup(*mount_points);
+		retval = 1;
+		log_debug("Device %s mounted in between our probe and mount.\n",
+				volume->device);
+	}
+	else
+	{
+		log_error("Failed to mount device %s.\n", volume->device);
 	}
 
-	log_debug("Mount succeeded.\n");
-	return (1);
+	if (error)
+		g_error_free(error);
+
+	return (retval);
 }
 
-static char *pusb_volume_mount_path(t_pusb_options *opts, char *udi, DBusConnection* dbus)
+static t_pusb_volume *pusb_volume_probe(t_pusb_options *opts,
+		UDisksClient *udisks)
 {
-	dbus_bool_t is_mounted;
-	if (!pusb_hal_get_bool_property(dbus, udi, "DeviceIsMounted", &is_mounted))
-	{
-		return (NULL);
-	}
-	if (is_mounted != TRUE)
-	{
-		log_debug("Device %s is not mounted\n", udi);
-		return (NULL);
-	}
-
-	int n_mount;
-	char **mount_pathes = pusb_hal_get_string_array_property(dbus, udi, "DeviceMountPaths", &n_mount);
-	if (!mount_pathes)
-	{
-		log_debug("Failed to retrieve device %s mount path\n", udi);
-		return (NULL);
-	}
-	if (n_mount > 1)
-	{
-		log_debug("Device %s is mounted more than once\n", udi);
-	}
-	char *mount_path = xstrdup(mount_pathes[0]);
-	pusb_hal_free_string_array(mount_pathes, n_mount);
-	log_debug("Device %s is mounted on %s\n", udi, mount_path);
-	return (mount_path);
-}
-
-static char	*pusb_volume_probe(t_pusb_options *opts,
-		DBusConnection *dbus)
-{
-	int				maxtries = 0;
-	int				i;
+	t_pusb_volume		*volume = NULL;
+	int			maxtries = (opts->probe_timeout * 1000000) / 100000;
+	int			i;
+	int			j;
+	GList			*blocks = NULL;
+	UDisksBlock		*block = NULL;
+	UDisksObject		*object = NULL;
+	const gchar *const	*mount_points = NULL;
 
 	if (!*(opts->device.volume_uuid))
 	{
-		log_debug("No UUID configured for device\n");
+		log_debug("No UUID configured for device.\n");
 		return (NULL);
 	}
-	log_debug("Searching for volume with uuid %s\n", opts->device.volume_uuid);
-	maxtries = ((opts->probe_timeout * 1000000) / 250000);
+
+	log_debug("Searching for volume with uuid %s.\n",
+			opts->device.volume_uuid);
+
 	for (i = 0; i < maxtries; ++i)
 	{
-		char	*udi = NULL;
+		blocks = udisks_client_get_block_for_uuid(udisks, opts->device.volume_uuid);
 
 		if (i == 1)
 			log_info("Probing volume (this could take a while)...\n");
-		udi = pusb_hal_find_item(dbus,
-				"IdUuid", opts->device.volume_uuid,
-				NULL);
-		if (!udi)
+
+		for (j = 0; j < g_list_length(blocks); ++j)
 		{
-			usleep(250000);
-			continue;
+			block = UDISKS_BLOCK(g_list_nth(blocks, j)->data);
+			object = UDISKS_OBJECT(g_dbus_interface_get_object(G_DBUS_INTERFACE(block)));
+
+			if (udisks_object_peek_filesystem(object))
+			{
+				volume = xmalloc(sizeof(t_pusb_volume));
+				volume->filesystem = udisks_object_get_filesystem(object);
+				volume->unmount = 0;
+				volume->device = xstrdup(udisks_block_get_device(block));
+				volume->mount_point = NULL;
+
+				mount_points = udisks_filesystem_get_mount_points(volume->filesystem);
+				if (mount_points && *mount_points)
+					volume->mount_point = xstrdup(*mount_points);
+
+				break;
+			}
 		}
-		return (udi);
+
+		g_list_foreach(blocks, (GFunc) g_object_unref, NULL);
+		g_list_free(blocks);
+
+		if (volume)
+		{
+			log_debug("Found volume %s.\n", opts->device.volume_uuid);
+			break;
+		}
+
+		usleep(100000);
+		g_main_context_iteration(NULL, FALSE);
 	}
-	return (NULL);
+
+	if (!volume)
+		log_debug("Could not find volume %s.\n",
+				opts->device.volume_uuid);
+
+	return (volume);
 }
 
-char *pusb_volume_get(t_pusb_options *opts, DBusConnection *dbus)
+t_pusb_volume *pusb_volume_get(t_pusb_options *opts, UDisksClient *udisks)
 {
-	char	*volume_udi;
-	char	*mount_point;
+	t_pusb_volume *volume = pusb_volume_probe(opts, udisks);
 
-	if (!(volume_udi = pusb_volume_probe(opts, dbus)))
+	if (!volume)
 		return (NULL);
-	log_debug("Found volume %s\n", opts->device.volume_uuid);
-	mount_point = pusb_volume_mount_path(opts, volume_udi, dbus);
-	if (mount_point)
+
+	if (volume->mount_point)
 	{
-		log_debug("Volume is already mounted.\n");
-		return (mount_point);
+		log_debug("Volume %s is already mounted.\n",
+				opts->device.volume_uuid);
+		return (volume);
 	}
-	if (!pusb_volume_mount(opts, volume_udi, dbus))
+
+	if(!pusb_volume_mount(volume))
 	{
-		xfree(volume_udi);
-		return (NULL);
-	}
-	mount_point = pusb_volume_mount_path(opts, volume_udi, dbus);
-	if (!mount_point)
-	{
-		log_error("Unable to retrieve %s mount point\n", volume_udi);
-		pusb_volume_destroy(mount_point);
+		pusb_volume_destroy(volume);
 		return (NULL);
 	}
-	return (mount_point);
+
+	return (volume);
 }
 
-void pusb_volume_destroy(char *mntpoint)
+void pusb_volume_destroy(t_pusb_volume *volume)
 {
-	if (mntpoint && strstr(mntpoint, "pam_usb"))
-	{
-		char	command[1024];
+	GVariantBuilder	builder;
+	GVariant	*options;
+	int		ret;
 
-		log_debug("Attempting to umount %s\n",
-				mntpoint);
-		snprintf(command, sizeof(command), "pumount %s", mntpoint);
-		log_debug("Executing \"%s\"\n", command);
-		if (!system(command))
-			log_debug("Umount succeeded.\n");
-		else
-			log_error("Unable to umount %s\n", mntpoint);
+	if (volume->unmount)
+	{
+		g_variant_builder_init(&builder, G_VARIANT_TYPE_VARDICT);
+		options = g_variant_builder_end(&builder);
+
+		log_debug("Attempting to unmount %s from %s.\n",
+				volume->device, volume->mount_point);
+
+		ret = udisks_filesystem_call_unmount_sync(volume->filesystem,
+				options,
+				NULL,
+				NULL);
+		if (!ret)
+			log_error("Unable to unmount %s from %s\n",
+				volume->device, volume->mount_point);
+
+		log_debug("Unmount succeeded.\n");
 	}
-	xfree(mntpoint);
+
+	g_object_unref(volume->filesystem);
+	xfree(volume->device);
+	xfree(volume->mount_point);
+	xfree(volume);
 }
