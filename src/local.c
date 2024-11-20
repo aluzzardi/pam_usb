@@ -18,14 +18,20 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-#include <utmp.h>
+#ifndef __APPLE__
+#  include <utmp.h>
+#  define UT_STRUCT struct utmp
+#else
+#  include <utmpx.h>
+#  define UT_STRUCT struct utmpx
+#endif
 #include "log.h"
 #include "conf.h"
 
 int pusb_local_login(t_pusb_options *opts, const char *user)
 {
-	struct utmp	utsearch;
-	struct utmp	*utent;
+	UT_STRUCT	utsearch;
+	UT_STRUCT	*utent;
 	const char	*from;
 	int			i;
 
@@ -45,15 +51,16 @@ int pusb_local_login(t_pusb_options *opts, const char *user)
 		from += strlen("/dev/");
 	log_debug("Authentication request from tty %s\n", from);
 	strncpy(utsearch.ut_line, from, sizeof(utsearch.ut_line) - 1);
-	setutent();
-	utent = getutline(&utsearch);
-	endutent();
+	setutxent();
+	utent = getutxline(&utsearch);
+	endutxent();
 	if (!utent)
 	{
 		log_debug("No utmp entry found for tty \"%s\"\n",
 				from);
 		return (1);
 	}
+#ifndef __APPLE__
 	for (i = 0; i < 4; ++i)
 	{
 		if (utent->ut_addr_v6[i] != 0)
@@ -62,6 +69,9 @@ int pusb_local_login(t_pusb_options *opts, const char *user)
 			return (0);
 		}
 	}
+#else
+  log_debug("Host: %s\n", utent->ut_host);
+#endif
 	log_debug("Caller is local (good)\n");
 	return (1);
 }
